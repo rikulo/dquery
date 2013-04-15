@@ -1,0 +1,9 @@
+name: dquery
+version: 0.5.0
+description: > 
+  DQuery
+authors:
+- Simon Pai <simonpai@rikulo.org>
+homepage: http://rikulo.org/
+dependencies:
+  browser: any
