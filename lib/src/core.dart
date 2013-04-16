@@ -73,39 +73,117 @@ completed = function() {
 */
 
 // TODO: use direct implemetation, not proxy list, for reducing overhead
-abstract class DQueryBase extends ProxyReadOnlyList<Element> {
+abstract class DQueryBase {
   
-  // TODO: resume when the stupid Dart mixin bug is fixed
-  //_DQueryBase._(List<Element> elements) : super(elements);
+  // need to be a factory
+  static DQuery _query(String selector, context) {
+    
+    if (selector == null || selector.isEmpty) {
+      return new DQuery.elems([]);
+    }
+    
+    if (context == null) {
+      return _rootDQuery.find(selector); // TODO: make external
+      
+    } else if (context is DQuery) {
+      return (context as DQuery).find(selector);
+      
+    } else if (context is Document) {
+      return new DQuery.doc(context as Document);
+      
+    } else if (context is Element) {
+      return new DQuery.elem(context as Element);
+      
+    }
+    
+    throw new ArgumentError("context type should be Document, Element, or DQuery: $context");
+    
+  }
+  
+  // TODO: Use constructors when 9339 is fixed.
+  //       Blocked by http://www.dartbug.com/9339
+  void _doc(Document doc) {
+    _document = _context = doc;
+  }
+  
+  void _elem(Element element) {
+    _elems([element]);
+    _context = element;
+  }
+  
+  void _elems(List<Element> elements, [bool clone = false]) {
+    _elements = clone ? new List.from(elements, true) : elements;
+    // TODO: doesn't seem to stack from rootDQuery in jQuery?
+  }
+  
+  // skipped unless necessary
+  // void _dquery(DQuery dquery) {}
+  // void _function() {}
+  // void _object() {}
+  // void _html() {}
   
   // a hook for mixin
   DQuery get _this => this; // TODO: need to be public for 3rd party plugin?
+  
+  // only applies to $(document)
+  Document _document;
+  
+  // TODO: DQueryBase extends from List when List implementation is offered. 
+  //       Blocked by http://www.dartbug.com/2600
+  
+  /// The elements selected by this dquery.
+  List<Element> get elements => _elements;
+  List<Element> _elements;
   
   //String get selector => _selector; // TODO: check: not in API!
   String _selector;
   
   // http://api.jquery.com/context/
-  /** The DOM node context originally passed to jQuery(); if none was passed 
+  /** The DOM node context originally passed to DQuery; if none was passed 
    * then context will likely be the document.
    */
   get context => _context;
   var _context;
   
   // http://api.jquery.com/jquery-2/
-  /** A string containing the jQuery version number.
-   */
-  get dquery => _CORE_VERSION;
+  // A string containing the DQuery version number.
+  //get dquery => _CORE_VERSION;
   
   //DQuery get prevObject => _prevObject; // TODO: not in API?
   DQuery _prevObject;
+  
+  // brought from traversing to eliminate cyclic dependency
+  // http://api.jquery.com/find/
+  /**
+   * 
+   */
+  DQuery find(String selector) { // TODO: check
+    
+    final List<Element> matched = new List<Element>();
+    
+    if (_document != null)
+      matched.addAll(_document.queryAll(selector));
+    
+    if (_elements != null)
+      for (Element elem in _elements)
+        matched.addAll(elem.queryAll(selector));
+    
+    // jQuery: Needed because $( selector, context ) becomes $( context ).find( selector )
+    return _this.pushStack(_this.length > 1 ? unique(matched) : matched)
+        .._selector = _this._selector != null ? "${_this._selector} $selector" : selector;
+  }
+  
+  // skipped unless necessary
+  //DQuery find(DQuery dquery) {} // requires filter()
+  //DQuery find(Element element) {}
   
   // http://api.jquery.com/pushStack/
   /** Add a collection of DOM elements onto the DQuery stack.
    */
   DQuery pushStack(List<Element> elems) => 
-      new DQuery._([], context)
-      .._inner.addAll(elems)
-      .._prevObject = this;
+      new DQuery.elems(new List<Element>.from(elems))
+      .._prevObject = this
+      .._context = _context;
   
   /*
   first: function() {
@@ -614,4 +692,4 @@ function isArraylike( obj ) {
 */
 
 // All jQuery objects should point back to these
-DQuery _rootDQuery = new DQuery(null, document);
+DQuery _rootDQuery = new DQuery.doc(document);

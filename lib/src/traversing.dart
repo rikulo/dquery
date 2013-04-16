@@ -22,20 +22,6 @@ abstract class TraversingMixin {
   /**
    * 
    */
-  DQuery find(String selector) { // TODO: check
-    
-    final List<Element> matched = new List<Element>();
-    
-    _this.forEach((Element elem) => matched.addAll(elem.queryAll(selector)));
-    
-    // jQuery: Needed because $( selector, context ) becomes $( context ).find( selector )
-    return _this.pushStack(_this.length > 1 ? unique(matched) : matched)
-        .._selector = _this._selector != null ? "${_this._selector} $selector" : selector;
-  }
-  
-  /**
-   * 
-   */
   bool has(String target) {
     // TODO
     /* src:
