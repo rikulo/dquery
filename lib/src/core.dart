@@ -74,7 +74,7 @@ completed = function() {
 */
 
 // TODO: use direct implemetation, not proxy list, for reducing overhead
-abstract class DQueryBase extends ListBase<Node> {
+abstract class DQueryBase extends ListMixin<Node> {
   
   // need to be a factory
   static DQuery _query(String selector, context) {

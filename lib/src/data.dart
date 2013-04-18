@@ -60,19 +60,34 @@ abstract class DataMixin {
   
   DQuery get _this;
   
-  // TODO: maybe data.get/data.set?
-  data([String key, value]) {
-    
-  }
-  
-  /*
-  Map getDataSpace() {
-    
-  }
-  */
+  // TODO: should this just be a Map?
+  Data get data => _fallback(_data, () => (_data = new Data._(_this)));
+  Data _data;
   
   removeData(String key) {
     _this._forEachNode((Node n) => _dataUser.remove(n, key: key));
+  }
+  
+}
+
+class Data {
+  
+  final DQuery _dq;
+  
+  Data._(this._dq);
+  
+  Node get _first => _dq.isEmpty ? null : _dq.first;
+  
+  Map space() => _first == null ? null : _dataUser.getSpace(_first);
+  
+  get(String key) => _dq.isEmpty ? null : space()[key];
+  
+  void set(String key, value) {
+    _dq.forEach((Node n) => _dataUser.set(n, key, value));
+  }
+  
+  void setAll(Map<String, dynamic> props) {
+    _dq.forEach((Node n) => _dataUser.setAll(n, props));
   }
   
 }
