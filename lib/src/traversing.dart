@@ -42,20 +42,24 @@ abstract class TraversingMixin {
   /**
    * 
    */
+  /*
   DQuery not({String selector, bool test(Element elem, int index), 
     Element element, DQuery dquery}) {
     
     return _this.pushStack(_winnow(_this, selector, test, element, dquery, true));
   }
+  */
   
   /**
    * 
    */
+  /*
   DQuery filter({String selector, bool test(Element elem, int index), 
     Element element, DQuery dquery}) {
     
     return _this.pushStack(_winnow(_this, selector, test, element, dquery, false));
   }
+  */
   
   /*
   is: function( selector ) {

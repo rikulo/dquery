@@ -1,6 +1,7 @@
 part of dquery;
 
-part of dquery;
+// TODO list
+// 1. deal with Elements/Document issue
 
 /*
 // The deferred used on DOM ready
@@ -73,7 +74,7 @@ completed = function() {
 */
 
 // TODO: use direct implemetation, not proxy list, for reducing overhead
-abstract class DQueryBase {
+abstract class DQueryBase extends ListBase<Node> {
   
   // need to be a factory
   static DQuery _query(String selector, context) {
@@ -104,6 +105,7 @@ abstract class DQueryBase {
   //       Blocked by http://www.dartbug.com/9339
   void _doc(Document doc) {
     _document = _context = doc;
+    _elements = [];
   }
   
   void _elem(Element element) {
@@ -112,8 +114,7 @@ abstract class DQueryBase {
   }
   
   void _elems(List<Element> elements, [bool clone = false]) {
-    _elements = clone ? new List.from(elements, true) : elements;
-    // TODO: doesn't seem to stack from rootDQuery in jQuery?
+    _elements = clone ? new List.from(elements, growable: true) : elements;
   }
   
   // skipped unless necessary
@@ -152,7 +153,32 @@ abstract class DQueryBase {
   //DQuery get prevObject => _prevObject; // TODO: not in API?
   DQuery _prevObject;
   
-  // brought from traversing to eliminate cyclic dependency
+  
+  
+  // List implementation //
+  Node operator [](int index) {
+    if (_document != null) {
+      if (index == 0)
+        return _document;
+      else
+        throw new RangeError("Index out of range: $index (list length $length)");
+    } else
+      return _elements[index];
+  }  
+  
+  int get length => _document != null ? 1 : _elements.length;
+  
+  void operator []=(int index, Node value) {
+    throw new UnsupportedError("Read only.");
+  }
+  
+  void set length(int newLength) {
+    throw new UnsupportedError("Read only.");
+  }
+  
+  
+  
+  // moved from traversing to eliminate cyclic dependency
   // http://api.jquery.com/find/
   /**
    * 
@@ -164,9 +190,8 @@ abstract class DQueryBase {
     if (_document != null)
       matched.addAll(_document.queryAll(selector));
     
-    if (_elements != null)
-      for (Element elem in _elements)
-        matched.addAll(elem.queryAll(selector));
+    for (Element elem in _elements)
+      matched.addAll(elem.queryAll(selector));
     
     // jQuery: Needed because $( selector, context ) becomes $( context ).find( selector )
     return _this.pushStack(_this.length > 1 ? unique(matched) : matched)
@@ -184,6 +209,17 @@ abstract class DQueryBase {
       new DQuery.elems(new List<Element>.from(elems))
       .._prevObject = this
       .._context = _context;
+  
+  void _forEachNode(void f(Node n)) {
+    if (_document != null)
+      f(_document);
+    else
+      for (Element elem in _elements)
+        f(elem);
+  }
+  
+  Node get _firstNode => 
+      _document != null ? _document : !_elements.isEmpty ? _elements.first : null;
   
   /*
   first: function() {
@@ -211,11 +247,8 @@ abstract class DQueryBase {
 
 /// A unique string for each copy of dquery // TODO: we probably don't need this? + not API
 String get expando => 
-    _expando != null ? _expando : (_expando = "dquery-${CORE_VERSION}-${u.randInt()}");
+    _expando != null ? _expando : (_expando = "dquery-${_CORE_VERSION}-${_randInt()}");
 String _expando;
-
-// SKIPPED: no noConflict
-// src: noConflict: function( deep ) {
 
 /*
 // Is the DOM ready to be used? Set to true once it occurs.

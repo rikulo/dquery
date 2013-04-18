@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>test</title>
+  </head>
+ 
+  <body>
+    <style>
+      .button {
+        text-align: center;
+        border: 1px solid #999;
+        border-radius: 5px;
+        width: 60px;
+        padding: 5px;
+      }
+    </style>
+    <h1 id="text"">Text</h1>
+    <div id="main">
+      <ul>
+        <li>
+          <div class="button">Button 1</div>
+        </li>
+        <li>
+          <div class="button">Button 2</div>
+        </li>
+      </ul>
+    </div>
+    <script type="application/dart" src="test.dart"></script>
+    <!-- for this next line to work, your pubspec.yaml file must have a dependency on 'browser' -->
+    <script src="packages/browser/dart.js"></script>
+  </body>
+</html>

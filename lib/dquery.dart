@@ -1,9 +1,11 @@
 library dquery;
 
+import 'dart:math';
 import 'dart:html';
 import 'dart:async';
 import 'dart:collection';
 
+part 'src/util/util.dart';
 part 'src/core.dart';
 part 'src/selector.dart';
 part 'src/traversing.dart';
@@ -13,7 +15,7 @@ part 'src/event.dart';
 /**
  * 
  */
-$(selector, [context]) {
+DQuery $(selector, [context]) {
   
   if (selector == null || selector is String)
     return new DQuery(selector, context);
@@ -33,7 +35,7 @@ $(selector, [context]) {
 /**
  * 
  */
-class DQuery extends DQueryBase with TraversingMixin, DataMixin {
+class DQuery extends DQueryBase with TraversingMixin, DataMixin, EventMixin {
   
   /** 
    * 
