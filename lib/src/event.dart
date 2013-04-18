@@ -3,7 +3,7 @@ part of dquery;
 // things to fix:
 // 1. namespace, multiple types
 // 2. focus/blur special handling
-// 3. trigger elem should accept Window?
+// 3. add/remove/trigger elem should accept Window?
 // 4. guid removal problem
 // 5. off()
 
@@ -23,7 +23,6 @@ class _EventUtil {
       _handleGuid[handler1] = _handleGuid[handler2];
   }
   
-  // TODO: need to be Node or even EventTarget
   static void add(Node elem, String types, DQueryEventListener handler, String selector, data) {
     
     final Map elemData = _dataPriv.getSpace(elem);
@@ -41,7 +40,7 @@ class _EventUtil {
     // the joint proxy handler
     final EventListener eventHandle = elemData.putIfAbsent('handle', () => (Event e) {
       if (e == null || _EventUtil._triggered != e.type)
-        dispatch(elem, e);
+        dispatch(elem, _EventUtil.fix(e));
       // jQuery: Discard the second event of a jQuery.event.trigger() and
       //         when an event is called after a page has unloaded
       /* src:
@@ -171,11 +170,13 @@ class _EventUtil {
   }
   
   static void trigger(String type, data, Node elem, [bool onlyHandlers = false]) {
-    _EventUtil.trigger0(new DQueryEvent(type), data, elem, onlyHandlers);
+    _EventUtil.trigger0(new DQueryEvent(type, elem), data, onlyHandlers); // TODO: shall DQueryEvent eats data?
   }
   
   // TODO: elem need to be EventTarget, so it can accept Window?
-  static void trigger0(DQueryEvent event, data, Node elem, [bool onlyHandlers = false]) {
+  static void trigger0(DQueryEvent event, data, [bool onlyHandlers = false]) {
+    
+    Node elem = event.target;
     
     String type = event.type;
     List<String> namespaces;
@@ -210,12 +211,12 @@ class _EventUtil {
     event = event[ jQuery.expando ] ?
         event : new jQuery.Event( type, typeof event === "object" && event );
     */
-    DQueryEvent dqevent = _fallback(event, () => new DQueryEvent(type)); // TODO
+    //DQueryEvent dqevent = _fallback(event, () => new DQueryEvent(type)); // TODO
     
     // jQuery: Trigger bitmask: & 1 for native handlers; & 2 for jQuery (always true)
-    dqevent._isTrigger = onlyHandlers ? 2 : 3;
+    event._isTrigger = onlyHandlers ? 2 : 3;
     if (namespaces != null)
-      dqevent._namespace = namespaces.join('.');
+      event._namespace = namespaces.join('.');
     // TODO
     /* src:
     event.namespace_re = event.namespace ?
@@ -224,18 +225,15 @@ class _EventUtil {
     
     // jQuery: Clean up the event in case it is being reused
     //dqevent.result = null;
-    if (dqevent._target == null)
-      dqevent._target = elem;
+    /*
+    if (event._target == null)
+      event._target = elem;
+    */
     
     // TODO: how to combine data
     // jQuery: Clone any incoming data and prepend the event, creating the handler arg list
     // SKIPPED: javascript-specific
     // src:data = data == null ? [ event ] : jQuery.makeArray( data, [ event ] );
-    
-    // jQuery: Allow special events to draw outside the lines
-    //SpecialEventHandling special = _getSpecial(type);
-    if (!onlyHandlers /*&& special.trigger != null && special.trigger(elem, data) == false*/)
-      return;
     
     // jQuery: Determine event propagation path in advance, per W3C events spec (#9951)
     //         Bubble up to document, then to window; watch for a global ownerDocument var (#9724)
@@ -264,30 +262,29 @@ class _EventUtil {
     }
     
     // jQuery: Fire handlers on the event path
-    bool first = true;
+    //bool first = true;
     for (Node n in eventPath) {
-      if (dqevent.isPropagationStopped)
+      if (event.isPropagationStopped)
         break;
       //dqevent._type = !first ? bubbleType : type; //_fallback(special.bindType, () => type);
       
       // jQuery: jQuery handler
-      if (_getEvents(n).containsKey(dqevent.type)) {
-        final EventListener handle = _dataPriv.get(n, 'handle');
-        if (handle != null)
-          handle(dqevent.originalEvent);
+      if (_getEvents(n).containsKey(event.type)) {
+        // here we've refactored the implementation apart from jQuery
+        _EventUtil.dispatch(n, event); 
       }
       
-      first = false;
+      //first = false;
     }
     /*
     if (eventPathWindow != null) {
       // TODO: how to get window data space from _dataPriv
     }
     */
-    dqevent._type = type;
+    //event._type = type;
     
     // jQuery: If nobody prevented the default action, do it now
-    if (!onlyHandlers && !dqevent.isDefaultPrevented) {
+    if (!onlyHandlers && !event.isDefaultPrevented) {
       if (!(type == "click" && _nodeName(elem, "a"))) {
         // jQuery: Call a native DOM method on the target with the same name name as the event.
         // jQuery: Don't do default actions on window, that's where global variables be (#6170)
@@ -304,10 +301,7 @@ class _EventUtil {
   
   static String _triggered;
   
-  static void dispatch(Node elem, Event event) {
-    
-    // jQuery: Make a writable jQuery.Event from the native event object
-    final DQueryEvent dqevent = _EventUtil.fix(event);
+  static void dispatch(Node elem, DQueryEvent dqevent) {
     
     final Map<String, HandleObjectContext> events = _getEvents(elem);
     final HandleObjectContext handleObjCtx = _getHandleObjCtx(elem, dqevent.type);
@@ -336,7 +330,7 @@ class _EventUtil {
     
   }
   
-  // TODO: shall we just separate delegate handlers and normal handlers in return value
+  // TODO: check elem/dqevent.target variable DRY
   static List<_HandlerQueueEntry> handlers(Node elem, DQueryEvent dqevent, 
       HandleObjectContext handleObjCtx) {
     
@@ -530,15 +524,13 @@ class HandleObject {
   
   final int guid;
   
-  final String selector;
+  final String selector, type, origType, namespace;
   
   final bool needsContext;
   
   final DQueryEventListener handler;
   
   var data;
-  
-  final String type, origType, namespace;
   
 }
 
@@ -581,24 +573,24 @@ class DQueryEvent {
   String get namespace => _namespace;
   String _namespace;
   
-  HandleObject _handleObj; // TODO: check if this is in API
+  HandleObject _handleObj; // TODO: check usage
+  final Event _simulatedEvent;
   
-  int _isTrigger; // TODO: check if this is in API
+  int _isTrigger; // TODO: check usage
   
   /// 
   final Map attributes = new HashMap();
   
-  DQueryEvent.from(Event original, [Map properties]) : 
-  this._(original, original.type, original.timeStamp, properties);
+  DQueryEvent.from(Event event, [Map properties]) : 
+  this._(event, null, event.type, event.target, event.timeStamp, properties);
   
-  DQueryEvent(String type, [Map properties]) : 
-  this._(new Event(type), type, _now(), properties);
+  DQueryEvent(String type, Node target, [Map properties]) : 
+  this._(null, new Event(type), type, target, _now(), properties);
   
-  DQueryEvent._(this.originalEvent, this._type, this.timeStamp, Map properties) {
-    //u.mapCopy(attributes, properties);
+  DQueryEvent._(this.originalEvent, this._simulatedEvent, this._type, 
+      this._target, this.timeStamp, Map properties) {
+    _mapMerge(attributes, properties);
     //attributes[expando] = true; // TODO: may not need this
-    //_target = originalEvent == null ? null : originalEvent.target;
-    _target = originalEvent.target;
   }
   
   /// The target of this event.
@@ -644,9 +636,6 @@ class DQueryEvent {
 abstract class EventMixin {
   
   DQuery get _this;
-  
-  // TODO: 
-  // cover dynamic event
   
   /**
    * 
@@ -698,6 +687,8 @@ abstract class EventMixin {
    */
   void trigger(String type, [data]) =>
     _this._forEachNode((Node n) => _EventUtil.trigger(type, data, n));
+  
+  // TODO: [data] should be {data: data} for API consistency?
   
   /**
    * 

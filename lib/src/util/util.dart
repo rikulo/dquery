@@ -4,6 +4,11 @@ part of dquery;
 
 _fallback(a, b()) => a != null ? a : b();
 
+void _mapMerge(Map a, Map b) {
+  if (a != null && b != null)
+    b.forEach((k, v) => a[k] = v);
+}
+
 int _now() => new DateTime.now().millisecondsSinceEpoch;
 
 int _randInt() => _rand.nextInt(_RAND_INT_MAX);
