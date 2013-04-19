@@ -48,18 +48,6 @@ class _Storage {
 final _Storage _dataUser = new _Storage('dquery-data-user');
 final _Storage _dataPriv = new _Storage('dquery-data-priv');
 
-
-
-abstract class DataMixin {
-  
-  DQuery get _this;
-  
-  // TODO: should this just be a Map?
-  Data get data => _fallback(_data, () => (_data = new Data._(_this)));
-  Data _data;
-  
-}
-
 class Data {
   
   final DQuery _dq;

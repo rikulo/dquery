@@ -149,7 +149,79 @@ class ElementQuery extends DQuery with ListMixin<Element> {
 /**
  * 
  */
-typedef DQuery = DQueryCore with TraversingMixin, DataMixin, EventMixin;
+class DQuery extends DQueryCore {
+  
+  // data //
+  /**
+   * 
+   */
+  Data get data => _fallback(_data, () => (_data = new Data._(_this)));
+  Data _data;
+  
+  // event //
+  /**
+   * 
+   */
+  void on(String types, DQueryEventListener handler, {String selector, data}) {
+    _on(types, handler, selector, data, false);
+  }
+  
+  /**
+   * 
+   */
+  void one(String types, DQueryEventListener handler, {String selector, data}) {
+    _on(types, handler, selector, data, true);
+  }
+  
+  /**
+   * 
+   */
+  void _on(String types, DQueryEventListener handler, String selector, data, bool one) {
+    if (handler == null)
+      return;
+    
+    // TODO: handle guid for removal
+    DQueryEventListener h = !one ? handler : (DQueryEvent dqevent) {
+      // jQuery: Can use an empty set, since event contains the info
+      _offEvent(dqevent);
+      handler(dqevent);
+    };
+    
+    _this._forEachEventTarget((EventTarget t) => _EventUtil.add(t, types, h, selector, data));
+  }
+  
+  /**
+   * 
+   */
+  void off(String types, DQueryEventListener handler, {String selector}) =>
+    _this._forEachEventTarget((EventTarget t) => _EventUtil.remove(t, types, handler, selector));
+  
+  // utility refactored from off() to make type clearer
+  static void _offEvent(DQueryEvent dqevent) {
+    final HandleObject handleObj = dqevent._handleObj;
+    final String type = handleObj.namespace != null ? 
+        "${handleObj.origType}.${handleObj.namespace}" : handleObj.origType;
+    new ElementQuery([dqevent.delegateTarget]).off(type, handleObj.handler, selector: handleObj.selector);
+  }
+  
+  /**
+   * 
+   */
+  void trigger(String type, [data]) =>
+    _this._forEachEventTarget((Node t) => _EventUtil.trigger(type, data, t));
+  
+  // TODO: [data] should be {data: data} for API consistency?
+  
+  /**
+   * 
+   */
+  void triggerHandler(String type, [data]) {
+    final EventTarget t = _this._first;
+    if (t != null)
+      _EventUtil.trigger(type, data, t, true);
+  }
+  
+}
 
 // All DQuery objects should point back to these
 DocumentQuery _rootDQuery = new DocumentQuery();
