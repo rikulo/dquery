@@ -58,10 +58,6 @@ abstract class DataMixin {
   Data get data => _fallback(_data, () => (_data = new Data._(_this)));
   Data _data;
   
-  removeData(String key) {
-    _this._forEachEventTarget((EventTarget t) => _dataUser.remove(t, key: key));
-  }
-  
 }
 
 class Data {
@@ -93,6 +89,12 @@ class Data {
    */
   void setAll(Map<String, dynamic> props) => 
       _dq._forEachEventTarget((EventTarget t) => _dataUser.setAll(t, props));
+  
+  /**
+   * 
+   */
+  void remove(String key) =>
+      _dq._forEachEventTarget((EventTarget t) => _dataUser.remove(t, key: key));
   
 }
 
