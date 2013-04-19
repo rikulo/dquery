@@ -429,7 +429,7 @@ merge: function( first, second ) {
 /**
  * 
  */
-List grep(List list, bool test(obj, index), [bool invert = false]) {
+List _grep(List list, bool test(obj, index), [bool invert = false]) {
   // USE Dart's implementation
   int i = 0;
   return new List.from(list.where((obj) => invert != test(obj, i++)));

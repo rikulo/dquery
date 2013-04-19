@@ -1,10 +1,10 @@
 part of dquery;
 
 // things to fix:
-// 1. namespace, multiple types
-// 2. focus/blur special handling
-// 3. add/remove/trigger elem should accept Window?
-// 4. guid removal problem
+// 1. perform default action
+// 2. namespace, multiple types
+// 3. focus/blur special handling
+// 4. replace guid with Expando
 // 5. off()
 
 // static helper class
@@ -13,6 +13,7 @@ class _EventUtil {
   static Set<String> _global = new HashSet<String>();
   
   // guid management
+  // TODO: use expando
   static Map _handleGuid = new HashMap();
   static int _getGuid(handler) =>
       _handleGuid.putIfAbsent(handler, () => _guid++); // TODO: need a way to clean up
@@ -23,7 +24,7 @@ class _EventUtil {
       _handleGuid[handler1] = _handleGuid[handler2];
   }
   
-  static void add(Node elem, String types, DQueryEventListener handler, String selector, data) {
+  static void add(EventTarget elem, String types, DQueryEventListener handler, String selector, data) {
     
     final Map elemData = _dataPriv.getSpace(elem);
     // jQuery: Don't attach events to noData or text/comment nodes (but allow plain objects)
@@ -103,7 +104,7 @@ class _EventUtil {
   static final RegExp _NEEDS_CONTEXT = new RegExp(r'^[\x20\t\r\n\f]*[>+~]');
   
   // jQuery: Detach an event or set of events from an element
-  static void remove(Node elem, String types, DQueryEventListener handler, 
+  static void remove(EventTarget elem, String types, DQueryEventListener handler, 
                      String selector, [bool mappedTypes = false]) {
     
     final Map elemData = _dataPriv.getSpace(elem);
@@ -169,14 +170,14 @@ class _EventUtil {
     return [types]; // TODO: fix
   }
   
-  static void trigger(String type, data, Node elem, [bool onlyHandlers = false]) {
+  static void trigger(String type, data, EventTarget elem, [bool onlyHandlers = false]) {
     _EventUtil.trigger0(new DQueryEvent(type, elem), data, onlyHandlers); // TODO: shall DQueryEvent eats data?
   }
   
   // TODO: elem need to be EventTarget, so it can accept Window?
   static void trigger0(DQueryEvent event, data, [bool onlyHandlers = false]) {
     
-    Node elem = event.target;
+    EventTarget elem = event.target;
     
     String type = event.type;
     List<String> namespaces;
@@ -195,7 +196,7 @@ class _EventUtil {
     Window eventPathWindow = null;
     
     // jQuery: Don't do events on text and comment nodes
-    if (elem.nodeType == 3 || elem.nodeType == 8)
+    if (elem is CharacterData)
       return;
     
     // jQuery: focus/blur morphs to focusin/out; ensure we're not firing them right now
@@ -301,7 +302,7 @@ class _EventUtil {
   
   static String _triggered;
   
-  static void dispatch(Node elem, DQueryEvent dqevent) {
+  static void dispatch(EventTarget elem, DQueryEvent dqevent) {
     
     final Map<String, HandleObjectContext> events = _getEvents(elem);
     final HandleObjectContext handleObjCtx = _getHandleObjCtx(elem, dqevent.type);
@@ -330,22 +331,21 @@ class _EventUtil {
     
   }
   
-  // TODO: check elem/dqevent.target variable DRY
-  static List<_HandlerQueueEntry> handlers(Node elem, DQueryEvent dqevent, 
+  static List<_HandlerQueueEntry> handlers(EventTarget elem, DQueryEvent dqevent, 
       HandleObjectContext handleObjCtx) {
     
     final List<_HandlerQueueEntry> handlerQueue = new List<_HandlerQueueEntry>();
     final List<HandleObject> delegates = handleObjCtx.delegates;
     final List<HandleObject> handlers = handleObjCtx.handlers;
-    Node cur = dqevent.target;
+    EventTarget cur = dqevent.target;
     
     // jQuery: Find delegate handlers
     //         Black-hole SVG <use> instance trees (#13180)
     //         Avoid non-left-click bubbling in Firefox (#3861)
     // src: if ( delegateCount && cur.nodeType && (!event.button || event.type !== "click") ) {
-    if (!delegates.isEmpty) { // TODO: fix
+    if (!delegates.isEmpty && cur is Node) { // TODO: fix
       
-      for (; cur != elem; cur = _fallback(cur.parentNode, () => elem)) {
+      for (; cur != elem; cur = _fallback(parentNode(cur), () => elem)) {
         
         // jQuery: Don't process clicks on disabled elements (#6911, #8165, #11382, #11764)
         // TODO: uncomment later
@@ -357,11 +357,10 @@ class _EventUtil {
         final Map<String, bool> matches = new HashMap<String, bool>();
         final List<HandleObject> matched = new List<HandleObject>();
         for (HandleObject handleObj in delegates) {
-          // jQuery: Don't conflict with Object.prototype properties (#13203)
           final String sel = "${trim(handleObj.selector)} ";
-          if (matches.putIfAbsent(sel, () => handleObj.needsContext ? 
-              $(sel, elem).contains(cur) : 
-              ((cur is Element) && (cur as Element).matches(sel)))) { // TODO: need util to cover Document/Element?
+          if (matches.putIfAbsent(sel, () => (cur is Element) &&
+              (handleObj.needsContext ? $(sel, elem).contains(cur) : 
+              (cur as Element).matches(sel)))) {
             matched.add(handleObj);
           }
         }
@@ -379,8 +378,10 @@ class _EventUtil {
     }
     
     return handlerQueue;
-    
   }
+  
+  static EventTarget parentNode(EventTarget target) =>
+      target is Node ? (target as Node).parentNode : null;
   
   static DQueryEvent fix(Event event) {
     // TODO: find properties to copy from fix hook
@@ -395,10 +396,10 @@ class _EventUtil {
     return dqevent;
   }
   
-  static Map<String, HandleObjectContext> _getEvents(Node elem) =>
+  static Map<String, HandleObjectContext> _getEvents(EventTarget elem) =>
       _fallback(_dataPriv.get(elem, 'events'), () => {});
   
-  static HandleObjectContext _getHandleObjCtx(Node elem, String type) =>
+  static HandleObjectContext _getHandleObjCtx(EventTarget elem, String type) =>
       _fallback(_getEvents(elem)[type], () => HandleObjectContext.EMPTY);
   
   /* TODO: see what'd happen if we ignore special alltogether
@@ -476,12 +477,7 @@ class _EventUtil {
   
 }
 
-/* due to the design of Dart, we can't easily extend List to attach an extra 
- * field on it, so we have to offer another layer to hold the List and the field.
- */
 class HandleObjectContext {
-  
-  // TODO: just separate delegated handler objects
   
   List<HandleObject> delegates = new List<HandleObject>();
   
@@ -559,9 +555,6 @@ class DQueryEvent {
   /// Custom event data.
   var data;
   
-  /// 
-  //bool result;
-  
   /// The delegate target of this event.
   Node get delegateTarget => _delegateTarget;
   Node _delegateTarget;
@@ -569,6 +562,10 @@ class DQueryEvent {
   /// 
   Node get currentTarget => _currentTarget;
   Node _currentTarget;
+  
+  /// The target of this event.
+  EventTarget get target => _target;
+  EventTarget _target;
   
   String get namespace => _namespace;
   String _namespace;
@@ -584,7 +581,7 @@ class DQueryEvent {
   DQueryEvent.from(Event event, [Map properties]) : 
   this._(event, null, event.type, event.target, event.timeStamp, properties);
   
-  DQueryEvent(String type, Node target, [Map properties]) : 
+  DQueryEvent(String type, EventTarget target, [Map properties]) : 
   this._(null, new Event(type), type, target, _now(), properties);
   
   DQueryEvent._(this.originalEvent, this._simulatedEvent, this._type, 
@@ -592,10 +589,6 @@ class DQueryEvent {
     _mapMerge(attributes, properties);
     //attributes[expando] = true; // TODO: may not need this
   }
-  
-  /// The target of this event.
-  Node get target => _target;
-  Node _target;
   
   ///
   bool get isDefaultPrevented => _isDefaultPrevented;

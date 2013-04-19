@@ -136,7 +136,7 @@ class ElementQuery extends DQuery with ListMixin<Element> {
         final List<Element> matched = new List<Element>();
         for (Element elem in _elements)
           matched.addAll(elem.queryAll(selector));
-        return unique(matched);
+        return DQuery.unique(matched);
     }
   }
   
@@ -150,6 +150,11 @@ class ElementQuery extends DQuery with ListMixin<Element> {
  * 
  */
 class DQuery extends DQueryCore {
+  
+  /**
+   * 
+   */
+  static List<Element> unique(List<Element> elements) => _unique(elements);
   
   // data //
   /**
@@ -220,6 +225,8 @@ class DQuery extends DQueryCore {
     if (t != null)
       _EventUtil.trigger(type, data, t, true);
   }
+  
+  // traversing //
   
 }
 

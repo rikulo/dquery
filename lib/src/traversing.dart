@@ -22,7 +22,7 @@ abstract class TraversingMixin {
   /**
    * 
    */
-  bool has(String target) {
+  //bool has(String target) {
     // TODO
     /* src:
     var targets = jQuery( target, this ),
@@ -37,7 +37,7 @@ abstract class TraversingMixin {
       }
     });
     */
-  }
+  //}
   
   /**
    * 
@@ -282,7 +282,7 @@ List<Element> _winnow(List<Element> elements, String selector,
     });
     */
   } else if (element != null) {
-    return grep(elements, (elem, index) => (elem == element) != not);
+    return _grep(elements, (elem, index) => (elem == element) != not);
     
   } else if (selector != null) {
     if (_isSimple.hasMatch(selector))
@@ -291,5 +291,5 @@ List<Element> _winnow(List<Element> elements, String selector,
   }
   
   // TODO: may simplify
-  return grep(elements, (elem, index) => elements.contains(elem) != not);
+  return _grep(elements, (elem, index) => elements.contains(elem) != not);
 }
