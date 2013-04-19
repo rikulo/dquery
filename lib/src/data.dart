@@ -2,57 +2,51 @@ part of dquery;
 
 class _Storage {
   
-  static int uid = 1;
+  final String _name;
+  final Expando<Map> _cache;
   
-  final Map<String, Map> _cache = new HashMap<String, Map>();
-  final String dataExpando;
+  _Storage(String name) :
+  _name = name,
+  _cache = new Expando<Map>(name);
   
-  _Storage() : dataExpando = "dquery-data-expando-${_randInt()}";
-  Map<Document, String> _docUnlock = new HashMap<Document, String>();
-  
-  // TODO: shall it be created on demand? keep this way for now to avoid side effect
-  String _key(Node owner) {
-    String unlock = null;
-    if (owner is Element)
-      unlock = (owner as Element).attributes.putIfAbsent(dataExpando, () => "${uid++}");
-    else if (owner is Document)
-      unlock = _docUnlock.putIfAbsent(owner as Document, () => "${uid++}");
-    else
-      throw new ArgumentError("Data owner must be Element of Document: $owner");
-    _cache.putIfAbsent(unlock, () => new HashMap());
-    return unlock;
-  }
-  
-  void set(Node owner, String key, value) {
-    // does not accept (owner, props) format!
-    _cache[_key(owner)][key] = value;
+  void set(owner, String key, value) {
+    getSpace(owner)[key] = value;
   }
   
   void setAll(Node owner, Map<String, dynamic> props) {
-    final Map space = _cache[_key(owner)];
+    final Map space = getSpace(owner);
     props.forEach((String key, value) => space[key] = value);
   }
   
-  get(Node owner, String key) => _cache[_key(owner)][key];
+  get(owner, String key) {
+    Map space = _cache[owner];
+    return space == null ? null : space[key];
+  }
   
-  Map getSpace(Node owner) => _cache[_key(owner)];
-  
-  // do not provide access(owner, key, value) to keep type strong!
+  Map getSpace(owner, [bool autoCreate = true]) {
+    Map space = _cache[owner];
+    if (autoCreate && space == null)
+      space = _cache[owner] = new HashMap();
+    return space;
+  }
   
   void remove(Node owner, {key, List keys}) {
     // TODO: check what jquery really does here
   }
   
-  bool hasData(Node owner) => !_cache[_key(owner)].isEmpty;
+  bool hasData(owner) {
+    Map space = _cache[owner];
+    return space != null && !space.isEmpty;
+  }
   
-  void discard(Node owner) {
-    _cache.remove(_key(owner));
+  void discard(owner) {
+    _cache[owner] = null;
   }
   
 }
 
-final _Storage _dataUser = new _Storage();
-final _Storage _dataPriv = new _Storage();
+final _Storage _dataUser = new _Storage('dquery-data-user');
+final _Storage _dataPriv = new _Storage('dquery-data-priv');
 
 
 
@@ -65,7 +59,7 @@ abstract class DataMixin {
   Data _data;
   
   removeData(String key) {
-    _this._forEachNode((Node n) => _dataUser.remove(n, key: key));
+    _this._forEachEventTarget((EventTarget t) => _dataUser.remove(t, key: key));
   }
   
 }
@@ -76,40 +70,37 @@ class Data {
   
   Data._(this._dq);
   
-  Node get _first => _dq.isEmpty ? null : _dq.first;
+  EventTarget get _first => _dq._first;
   
+  /**
+   * 
+   */
   Map space() => _first == null ? null : _dataUser.getSpace(_first);
   
+  /**
+   * 
+   */
   get(String key) => _dq.isEmpty ? null : space()[key];
   
-  void set(String key, value) {
-    _dq.forEach((Node n) => _dataUser.set(n, key, value));
-  }
+  /**
+   * 
+   */
+  void set(String key, value) => 
+      _dq._forEachEventTarget((EventTarget t) => _dataUser.set(t, key, value));
   
-  void setAll(Map<String, dynamic> props) {
-    _dq.forEach((Node n) => _dataUser.setAll(n, props));
-  }
+  /**
+   * 
+   */
+  void setAll(Map<String, dynamic> props) => 
+      _dq._forEachEventTarget((EventTarget t) => _dataUser.setAll(t, props));
   
 }
 
 /*
-bool hasData(Element elem) => _dataUser.hasData(elem) || _dataPriv.hasData(elem);
-
-getData(Element elem, String name) => _dataUser.get(elem, name);
-
-getDataSpace(Element elem) => _dataUser.getSpace(elem);
-
-setData(Element elem, String name, value) => _dataUser.set(elem, name, value);
-
-removeData(Element elem, String name) => _dataUser.remove(elem, key: name);
-*/
-
 _dataAttr(Element elem, String key, data) {
-  
   // TODO: it's a function that offers some fix to the key and data to leverege HTML 5 
   // data- attributes, should be important to plug-in environment
   
   return data;
-  
 }
-
+*/

@@ -8,25 +8,12 @@ part of dquery;
 readyList,
 */
 
-// jQuery: Support: IE9
-//         For `typeof xmlNode.method` instead of `xmlNode.method !== undefined`
-// SKIPPED: js only
-// src: core_strundefined = typeof undefined,
-
 /*
 // Use the correct document accordingly with window argument (sandbox)
 location = window.location,
 document = window.document,
 docElem = document.documentElement,
 */
-
-// jQuery: Map over jQuery in case of overwrite
-// SKIPPED: no noConflict
-// src: _jQuery = window.jQuery,
-
-// jQuery: Map over the $ in case of overwrite
-// SKIPPED: no noConflict
-// src: _$ = window.$,
 
 /*
 // List of deleted data cache ids, so we can reuse them
@@ -73,49 +60,7 @@ completed = function() {
 };
 */
 
-// TODO: use direct implemetation, not proxy list, for reducing overhead
-abstract class DQueryBase extends ListMixin<Node> {
-  
-  // need to be a factory
-  static DQuery _query(String selector, context) {
-    
-    if (selector == null || selector.isEmpty) {
-      return new DQuery.elems([]);
-    }
-    
-    if (context == null) {
-      return _rootDQuery.find(selector); // TODO: make external
-      
-    } else if (context is DQuery) {
-      return (context as DQuery).find(selector);
-      
-    } else if (context is Document) {
-      return new DQuery.doc(context as Document);
-      
-    } else if (context is Element) {
-      return new DQuery.elem(context as Element);
-      
-    }
-    
-    throw new ArgumentError("context type should be Document, Element, or DQuery: $context");
-    
-  }
-  
-  // TODO: Use constructors when 9339 is fixed.
-  //       Blocked by http://www.dartbug.com/9339
-  void _doc(Document doc) {
-    _document = _context = doc;
-    _elements = [];
-  }
-  
-  void _elem(Element element) {
-    _elems([element]);
-    _context = element;
-  }
-  
-  void _elems(List<Element> elements, [bool clone = false]) {
-    _elements = clone ? new List.from(elements, growable: true) : elements;
-  }
+abstract class DQueryCore {
   
   // skipped unless necessary
   // void _dquery(DQuery dquery) {}
@@ -125,19 +70,6 @@ abstract class DQueryBase extends ListMixin<Node> {
   
   // a hook for mixin
   DQuery get _this => this; // TODO: need to be public for 3rd party plugin?
-  
-  // only applies to $(document)
-  Document _document;
-  
-  // TODO: DQueryBase extends from List when List implementation is offered. 
-  //       Blocked by http://www.dartbug.com/2600
-  
-  /// The elements selected by this dquery.
-  List<Element> get elements => _elements;
-  List<Element> _elements;
-  
-  //String get selector => _selector; // TODO: check: not in API!
-  String _selector;
   
   // http://api.jquery.com/context/
   /** The DOM node context originally passed to DQuery; if none was passed 
@@ -150,31 +82,24 @@ abstract class DQueryBase extends ListMixin<Node> {
   // A string containing the DQuery version number.
   //get dquery => _CORE_VERSION;
   
-  //DQuery get prevObject => _prevObject; // TODO: not in API?
   DQuery _prevObject;
   
   
   
-  // List implementation //
-  Node operator [](int index) {
-    if (_document != null) {
-      if (index == 0)
-        return _document;
-      else
-        throw new RangeError("Index out of range: $index (list length $length)");
-    } else
-      return _elements[index];
-  }  
+  // implementation requirement //
+  List<Element> _queryAll(String selector);
   
-  int get length => _document != null ? 1 : _elements.length;
+  void _forEachEventTarget(void f(EventTarget target));
   
-  void operator []=(int index, Node value) {
-    throw new UnsupportedError("Read only.");
-  }
+  EventTarget get _first;
   
-  void set length(int newLength) {
-    throw new UnsupportedError("Read only.");
-  }
+  String get selector => null;
+  
+  /// The number of selected element.
+  int get length;
+  
+  bool get isEmpty => length == 0;
+  
   
   
   
@@ -183,19 +108,10 @@ abstract class DQueryBase extends ListMixin<Node> {
   /**
    * 
    */
-  DQuery find(String selector) { // TODO: check
-    
-    final List<Element> matched = new List<Element>();
-    
-    if (_document != null)
-      matched.addAll(_document.queryAll(selector));
-    
-    for (Element elem in _elements)
-      matched.addAll(elem.queryAll(selector));
-    
+  ElementQuery find(String selector) {
+    final String s = this.selector != null ? "${this.selector} $selector" : selector;
     // jQuery: Needed because $( selector, context ) becomes $( context ).find( selector )
-    return _this.pushStack(_this.length > 1 ? unique(matched) : matched)
-        .._selector = _this._selector != null ? "${_this._selector} $selector" : selector;
+    return pushStack(_queryAll(selector)).._selector = s;
   }
   
   // skipped unless necessary
@@ -205,29 +121,12 @@ abstract class DQueryBase extends ListMixin<Node> {
   // http://api.jquery.com/pushStack/
   /** Add a collection of DOM elements onto the DQuery stack.
    */
-  DQuery pushStack(List<Element> elems) => 
-      new DQuery.elems(new List<Element>.from(elems))
+  ElementQuery pushStack(List<Element> elems) => 
+      new ElementQuery(elems) // TODO: copy? no copy?
       .._prevObject = this
       .._context = _context;
   
-  void _forEachNode(void f(Node n)) {
-    if (_document != null)
-      f(_document);
-    else
-      for (Element elem in _elements)
-        f(elem);
-  }
-  
-  Node get _firstNode => 
-      _document != null ? _document : !_elements.isEmpty ? _elements.first : null;
-  
   /*
-  first: function() {
-    return this.eq( 0 );
-  },
-  last: function() {
-    return this.eq( -1 );
-  },
   eq: function( i ) {
     var len = this.length,
     j = +i + ( i < 0 ? len : 0 );
@@ -237,18 +136,12 @@ abstract class DQueryBase extends ListMixin<Node> {
     return this.pushStack( jQuery.map(this, function( elem, i ) {
       return callback.call( elem, i, elem );
     }));
-  },  
-  end: function() {
-    return this.prevObject || this.constructor(null);
   },
   */
   
+  DQuery end() => _fallback(_prevObject, () => new ElementQuery([]));
+  
 }
-
-/// A unique string for each copy of dquery // TODO: we probably don't need this? + not API
-String get expando => 
-    _expando != null ? _expando : (_expando = "dquery-${_CORE_VERSION}-${_randInt()}");
-String _expando;
 
 /*
 // Is the DOM ready to be used? Set to true once it occurs.
@@ -302,7 +195,7 @@ ready: function( wait ) {
 // SKIPPED: js only
 // src: isArray: Array.isArray,
 
-bool _isWindow(obj) => obj != null && obj is Window;
+//bool _isWindow(obj) => obj != null && obj is Window;
 
 /*
 isNumeric: function( obj ) {
@@ -347,13 +240,7 @@ isPlainObject: function( obj ) {
 },
 */
 
-// SKIPPED: js only
-// src: isEmptyObject: function( obj ) {
-
 /*
-error: function( msg ) {
-  throw new Error( msg );
-},
 
 // data: string of html
 // context (optional): If specified, the fragment will be created in this context, defaults to document
@@ -408,7 +295,7 @@ parseXML: function( data ) {
   return xml;
 },
 */
-void _noop() {}
+//void _noop() {}
 /*
 // Evaluates a script in a global context
 globalEval: function( code ) {
@@ -723,6 +610,3 @@ function isArraylike( obj ) {
       typeof length === "number" && length > 0 && ( length - 1 ) in obj );
 }
 */
-
-// All jQuery objects should point back to these
-DQuery _rootDQuery = new DQuery.doc(document);

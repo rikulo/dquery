@@ -360,7 +360,7 @@ class _EventUtil {
           // jQuery: Don't conflict with Object.prototype properties (#13203)
           final String sel = "${trim(handleObj.selector)} ";
           if (matches.putIfAbsent(sel, () => handleObj.needsContext ? 
-              new DQuery(sel, elem).contains(cur) : 
+              $(sel, elem).contains(cur) : 
               ((cur is Element) && (cur as Element).matches(sel)))) { // TODO: need util to cover Document/Element?
             matched.add(handleObj);
           }
@@ -665,14 +665,14 @@ abstract class EventMixin {
       handler(dqevent);
     };
     
-    _this._forEachNode((Node n) => _EventUtil.add(n, types, h, selector, data));
+    _this._forEachEventTarget((EventTarget t) => _EventUtil.add(t, types, h, selector, data));
   }
   
   /**
    * 
    */
   void off(String types, DQueryEventListener handler, {String selector}) =>
-    _this._forEachNode((Node n) => _EventUtil.remove(n, types, handler, selector));
+    _this._forEachEventTarget((EventTarget t) => _EventUtil.remove(t, types, handler, selector));
   
   // utility refactored from off() to make type clearer
   static void _offEvent(DQueryEvent dqevent) {
@@ -686,7 +686,7 @@ abstract class EventMixin {
    * 
    */
   void trigger(String type, [data]) =>
-    _this._forEachNode((Node n) => _EventUtil.trigger(type, data, n));
+    _this._forEachEventTarget((Node t) => _EventUtil.trigger(type, data, t));
   
   // TODO: [data] should be {data: data} for API consistency?
   
@@ -694,9 +694,9 @@ abstract class EventMixin {
    * 
    */
   void triggerHandler(String type, [data]) {
-    final Node n = _this._firstNode;
-    if (n != null)
-      _EventUtil.trigger(type, data, n, true);
+    final EventTarget t = _this._first;
+    if (t != null)
+      _EventUtil.trigger(type, data, t, true);
   }
   
 }

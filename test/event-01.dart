@@ -1,12 +1,11 @@
 import 'dart:html';
 import 'dart:collection';
 
-import 'package:dquery/dquery.dart' as dq hide $, DQueryEvent;
-import 'package:dquery/dquery.dart' show $, DQueryEvent;
+import 'package:dquery/dquery.dart';
 
 void main() {
   
-  $(document).on('click', (DQueryEvent event) {
+  $d(document).on('click', (DQueryEvent event) {
     print("${event.target}, data:${event.data}");
     
   }, selector: 'div.button', data: 99);
