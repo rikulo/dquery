@@ -50,7 +50,7 @@ final _Storage _dataPriv = new _Storage('dquery-data-priv');
 
 class Data {
   
-  final DQuery _dq;
+  final _DQuery _dq;
   
   Data._(this._dq);
   

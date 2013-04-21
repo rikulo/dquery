@@ -15,9 +15,9 @@ guaranteedUnique = {
 /**
  * 
  */
-abstract class TraversingMixin {
+//abstract class TraversingMixin {
   
-  DQuery get _this;
+//  DQuery get _this;
   
   /**
    * 
@@ -138,7 +138,7 @@ abstract class TraversingMixin {
     );
   }
   */
-}
+//}
 
 /*
 function sibling( cur, dir ) {

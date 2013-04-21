@@ -35,8 +35,8 @@ class _EventUtil {
     final int g = _getGuid(handler); // TODO: need better management
     
     // jQuery: Init the element's event structure and main handler, if this is the first
-    final Map<String, HandleObjectContext> events = 
-        elemData.putIfAbsent('events', () => new HashMap<String, HandleObjectContext>());
+    final Map<String, _HandleObjectContext> events = 
+        elemData.putIfAbsent('events', () => new HashMap<String, _HandleObjectContext>());
     
     // the joint proxy handler
     final EventListener eventHandle = elemData.putIfAbsent('handle', () => (Event e) {
@@ -67,7 +67,7 @@ class _EventUtil {
       
       /*
       // jQuery: If event changes its type, use the special event handlers for the changed type
-      SpecialEventHandling special = _getSpecial(type);
+      _SpecialEventHandling special = _getSpecial(type);
       // jQuery: If selector defined, determine special event api type, otherwise given type
       type = _fallback(selector != null ? special.delegateType : special.bindType, () => type);
       // jQuery: Update special based on newly reset type
@@ -76,14 +76,14 @@ class _EventUtil {
       
       // jQuery: handleObj is passed to all event handlers
       final bool needsContext = selector != null && _EventUtil._NEEDS_CONTEXT.hasMatch(selector);
-      HandleObject handleObj = 
-          new HandleObject(g, selector, type, origType, namespaces.join('.'), needsContext, handler)
+      _HandleObject handleObj = 
+          new _HandleObject(g, selector, type, origType, namespaces.join('.'), needsContext, handler)
           ..data = data;
       
       // jQuery: Init the event handler queue if we're the first
-      HandleObjectContext handleObjCtx = events.putIfAbsent(type, () {
+      _HandleObjectContext handleObjCtx = events.putIfAbsent(type, () {
         elem.$dom_addEventListener(type, eventHandle, false);
-        return new HandleObjectContext();
+        return new _HandleObjectContext();
       });
       
       // jQuery: Add to the element's handler list, delegates in front
@@ -111,7 +111,7 @@ class _EventUtil {
     if (elemData == null)
       return;
     
-    final Map<String, HandleObjectContext> events = elemData['events'];
+    final Map<String, _HandleObjectContext> events = elemData['events'];
     if (events == null)
       return;
     
@@ -132,18 +132,18 @@ class _EventUtil {
         continue;
       }
       
-      //SpecialEventHandling special = _getSpecial(type);
+      //_SpecialEventHandling special = _getSpecial(type);
       //type = _fallback(selector != null ? special.delegateType : special.bindType, () => type);
-      HandleObjectContext handleObjCtx = _fallback(events[type], () => HandleObjectContext.EMPTY);
-      List<HandleObject> delegates = handleObjCtx.delegates;
-      List<HandleObject> handlers = handleObjCtx.handlers;
+      _HandleObjectContext handleObjCtx = _fallback(events[type], () => _HandleObjectContext.EMPTY);
+      List<_HandleObject> delegates = handleObjCtx.delegates;
+      List<_HandleObject> handlers = handleObjCtx.handlers;
       // TODO
       // src:tmp = tmp[2] && new RegExp( "(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|$)" );
       var tmp2;
       
       final int origCount = handlers.length;
       for (int j = origCount - 1; j >= 0; j--) {
-        HandleObject handleObj = handlers[j];
+        _HandleObject handleObj = handlers[j];
         if ((mappedTypes || origType == handleObj.origType) &&
             (handler == null || (_hasGuid(handler) && _getGuid(handler) == handleObj.guid)) &&
             (tmp2 == null || tmp2.test(handleObj.namespace)) &&
@@ -304,8 +304,8 @@ class _EventUtil {
   
   static void dispatch(EventTarget elem, DQueryEvent dqevent) {
     
-    final Map<String, HandleObjectContext> events = _getEvents(elem);
-    final HandleObjectContext handleObjCtx = _getHandleObjCtx(elem, dqevent.type);
+    final Map<String, _HandleObjectContext> events = _getEvents(elem);
+    final _HandleObjectContext handleObjCtx = _getHandleObjCtx(elem, dqevent.type);
     
     dqevent._delegateTarget = elem;
     
@@ -316,7 +316,7 @@ class _EventUtil {
     for (_HandlerQueueEntry matched in handlerQueue) {
       if (dqevent.isPropagationStopped) break;
       dqevent._currentTarget = matched.elem;
-      for (HandleObject handleObj in matched.handlers) {
+      for (_HandleObject handleObj in matched.handlers) {
         if (dqevent.isImmediatePropagationStopped) break;
         // jQuery: Triggered event must either 1) have no namespace, or
         //         2) have namespace(s) a subset or equal to those in the bound event (both can have no namespace).
@@ -332,11 +332,11 @@ class _EventUtil {
   }
   
   static List<_HandlerQueueEntry> handlers(EventTarget elem, DQueryEvent dqevent, 
-      HandleObjectContext handleObjCtx) {
+      _HandleObjectContext handleObjCtx) {
     
     final List<_HandlerQueueEntry> handlerQueue = new List<_HandlerQueueEntry>();
-    final List<HandleObject> delegates = handleObjCtx.delegates;
-    final List<HandleObject> handlers = handleObjCtx.handlers;
+    final List<_HandleObject> delegates = handleObjCtx.delegates;
+    final List<_HandleObject> handlers = handleObjCtx.handlers;
     EventTarget cur = dqevent.target;
     
     // jQuery: Find delegate handlers
@@ -355,8 +355,8 @@ class _EventUtil {
         */
         
         final Map<String, bool> matches = new HashMap<String, bool>();
-        final List<HandleObject> matched = new List<HandleObject>();
-        for (HandleObject handleObj in delegates) {
+        final List<_HandleObject> matched = new List<_HandleObject>();
+        for (_HandleObject handleObj in delegates) {
           final String sel = "${trim(handleObj.selector)} ";
           if (matches.putIfAbsent(sel, () => (cur is Element) &&
               (handleObj.needsContext ? $(sel, elem).contains(cur) : 
@@ -396,20 +396,20 @@ class _EventUtil {
     return dqevent;
   }
   
-  static Map<String, HandleObjectContext> _getEvents(EventTarget elem) =>
+  static Map<String, _HandleObjectContext> _getEvents(EventTarget elem) =>
       _fallback(_dataPriv.get(elem, 'events'), () => {});
   
-  static HandleObjectContext _getHandleObjCtx(EventTarget elem, String type) =>
-      _fallback(_getEvents(elem)[type], () => HandleObjectContext.EMPTY);
+  static _HandleObjectContext _getHandleObjCtx(EventTarget elem, String type) =>
+      _fallback(_getEvents(elem)[type], () => _HandleObjectContext.EMPTY);
   
   /* TODO: see what'd happen if we ignore special alltogether
-  static SpecialEventHandling _getSpecial(String type) =>
-      _fallback(_special[type], () => SpecialEventHandling.EMPTY);
+  static _SpecialEventHandling _getSpecial(String type) =>
+      _fallback(_special[type], () => _SpecialEventHandling.EMPTY);
   
-  static Map<String, SpecialEventHandling> _special = new HashMap<String, SpecialEventHandling>.from({
+  static Map<String, _SpecialEventHandling> _special = new HashMap<String, _SpecialEventHandling>.from({
     // jQuery: Prevent triggered image.load events from bubbling to window.load
-    'load': new SpecialEventHandling()..noBubble = true,
-    'click': new SpecialEventHandling()..trigger = (EventTarget elem, data) {
+    'load': new _SpecialEventHandling()..noBubble = true,
+    'click': new _SpecialEventHandling()..trigger = (EventTarget elem, data) {
       // jQuery: For checkbox, fire native event so checked state will be right
       if (elem is Checkbox) {
         (elem as Checkbox).click();
@@ -418,7 +418,7 @@ class _EventUtil {
       return true;
       
     },
-    'focus': new SpecialEventHandling()..trigger = (EventTarget elem, data) {
+    'focus': new _SpecialEventHandling()..trigger = (EventTarget elem, data) {
       // jQuery: Fire native event if possible so blur/focus sequence is correct
       if (elem != document.activeElement) {
         (elem as Element).focus();
@@ -427,7 +427,7 @@ class _EventUtil {
       return true;
       
     }..delegateType = 'focusin',
-    'blur': new SpecialEventHandling()..trigger = (Element elem, data) {
+    'blur': new _SpecialEventHandling()..trigger = (Element elem, data) {
       if (elem == document.activeElement) {
         (elem as Element).blur();
         return false;
@@ -435,7 +435,7 @@ class _EventUtil {
       return true;
       
     }..delegateType = 'focusout',
-    'beforeunload': new SpecialEventHandling()..postDispatch = (DQueryEvent dqevent) {
+    'beforeunload': new _SpecialEventHandling()..postDispatch = (DQueryEvent dqevent) {
       // jQuery: Support: Firefox 10+
       // TODO: problematic! as dqevent.originalEvent.returnValue is bool in Dart
       if (dqevent.result != null && dqevent.result is bool) // TODO: check design
@@ -477,29 +477,29 @@ class _EventUtil {
   
 }
 
-class HandleObjectContext {
+class _HandleObjectContext {
   
-  List<HandleObject> delegates = new List<HandleObject>();
+  List<_HandleObject> delegates = new List<_HandleObject>();
   
-  List<HandleObject> handlers = new List<HandleObject>();
+  List<_HandleObject> handlers = new List<_HandleObject>();
   
   int delegateCount = 0;
   
-  static final HandleObjectContext EMPTY = new HandleObjectContext();
+  static final _HandleObjectContext EMPTY = new _HandleObjectContext();
   
 }
 
 /*
-class SpecialEventHandling {
+class _SpecialEventHandling {
   
   bool noBubble = false;
-  Function setup, add, remove, teardown; // void f(Element elem, HandleObject handleObj) 
+  Function setup, add, remove, teardown; // void f(Element elem, _HandleObject handleObj) 
   Function trigger; // bool f(Element elem, data)
   Function _default; // bool f(Document document, data)
   String delegateType, bindType;
   DQueryEventListener postDispatch, handle;
   
-  static final SpecialEventHandling EMPTY = new SpecialEventHandling();
+  static final _SpecialEventHandling EMPTY = new _SpecialEventHandling();
   
 }
 */
@@ -507,15 +507,15 @@ class SpecialEventHandling {
 class _HandlerQueueEntry {
   
   final Element elem;
-  final List<HandleObject> handlers;
+  final List<_HandleObject> handlers;
   
   _HandlerQueueEntry(this.elem, this.handlers);
   
 }
 
-class HandleObject {
+class _HandleObject {
   
-  HandleObject(this.guid, this.selector, this.type, this.origType, this.namespace,
+  _HandleObject(this.guid, this.selector, this.type, this.origType, this.namespace,
       this.needsContext, this.handler);
   
   final int guid;
@@ -570,7 +570,7 @@ class DQueryEvent {
   String get namespace => _namespace;
   String _namespace;
   
-  HandleObject _handleObj; // TODO: check usage
+  _HandleObject _handleObj; // TODO: check usage
   final Event _simulatedEvent;
   
   int _isTrigger; // TODO: check usage
