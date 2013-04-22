@@ -19,16 +19,20 @@ class _EventUtil {
       _handleGuid.putIfAbsent(handler, () => _guid++); // TODO: need a way to clean up
   static bool _hasGuid(handler) =>
       _handleGuid.containsKey(handler);
+  /*
   static void _copyGuid(handler1, handler2) {
     if (!_hasGuid(handler1) && _hasGuid(handler2))
       _handleGuid[handler1] = _handleGuid[handler2];
   }
+  */
   
   static void add(EventTarget elem, String types, DQueryEventListener handler, String selector, data) {
     
-    final Map elemData = _dataPriv.getSpace(elem);
     // jQuery: Don't attach events to noData or text/comment nodes (but allow plain objects)
-    // SKIPPED: will not happen as elem is guaranteed to be an Element
+    if (elem is CharacterData)
+      return;
+    
+    final Map elemData = _dataPriv.getSpace(elem);
     // if (elemData == null) return;
     
     // jQuery: Make sure that the handler has a unique ID, used to find/remove it later
@@ -55,7 +59,7 @@ class _EventUtil {
     for (String t in _splitTypes(types)) {
       
       // TODO: we should use the same code
-      // caculate namespaces
+      // calculate namespaces
       final int k = t.indexOf('.');
       String type = k < 0 ? t : t.substring(0, k);
       final String origType = type;
@@ -137,21 +141,7 @@ class _EventUtil {
       HandleObjectContext handleObjCtx = _fallback(events[type], () => HandleObjectContext.EMPTY);
       List<HandleObject> delegates = handleObjCtx.delegates;
       List<HandleObject> handlers = handleObjCtx.handlers;
-      // TODO
-      // src:tmp = tmp[2] && new RegExp( "(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|$)" );
-      var tmp2;
-      
       final int origCount = handlers.length;
-      for (int j = origCount - 1; j >= 0; j--) {
-        HandleObject handleObj = handlers[j];
-        if ((mappedTypes || origType == handleObj.origType) &&
-            (handler == null || (_hasGuid(handler) && _getGuid(handler) == handleObj.guid)) &&
-            (tmp2 == null || tmp2.test(handleObj.namespace)) &&
-            (selector == null || selector == handleObj.selector || selector == "**" && handleObj.selector != null)) {
-          if (handleObj.selector != null)
-            handleObjCtx.delegateCount--;
-        }
-      }
       
       // jQuery: Remove generic event handler if we removed something and no more handlers exist
       //         (avoids potential for endless recursion during removal of special event handlers)
