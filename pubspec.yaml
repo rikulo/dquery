@@ -4,6 +4,8 @@ description: >
   DQuery
 authors:
 - Simon Pai <simonpai@rikulo.org>
+- Tom Yeh <tomyeh@rikulo.org>
 homepage: http://rikulo.org/
 dependencies:
   browser: any
+  meta: any

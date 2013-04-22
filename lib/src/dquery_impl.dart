@@ -1,3 +1,4 @@
+//Copyright (C) 2013 Potix Corporation. All Rights Reserved.
 part of dquery;
 
 // TODO list
@@ -19,7 +20,6 @@ docElem = document.documentElement,
 // List of deleted data cache ids, so we can reuse them
 core_deletedIds = [],
 */
-const String _CORE_VERSION = 'dquery-0.1.0';
 /*
 // Save a reference to some core methods
 core_concat = core_deletedIds.concat,
@@ -60,7 +60,7 @@ completed = function() {
 };
 */
 
-abstract class DQueryCore {
+abstract class _DQuery<T> implements DQuery<T> {
   
   // skipped unless necessary
   // void _dquery(DQuery dquery) {}
@@ -69,22 +69,13 @@ abstract class DQueryCore {
   // void _html() {}
   
   // a hook for mixin
-  DQuery get _this => this; // TODO: need to be public for 3rd party plugin?
-  
-  // http://api.jquery.com/context/
-  /** The DOM node context originally passed to DQuery; if none was passed 
-   * then context will likely be the document.
-   */
+  _DQuery get _this => this; // TODO: need to be public for 3rd party plugin?
+
+  @override
   get context => _context;
   var _context;
-  
-  // http://api.jquery.com/jquery-2/
-  // A string containing the DQuery version number.
-  //get dquery => _CORE_VERSION;
-  
-  DQuery _prevObject;
-  
-  
+
+  _DQuery _prevObject;
   
   // implementation requirement //
   List<Element> _queryAll(String selector);
@@ -92,37 +83,24 @@ abstract class DQueryCore {
   void _forEachEventTarget(void f(EventTarget target));
   
   EventTarget get _first;
-  
+
+  @override
   String get selector => null;
-  
-  /// The number of selected element.
+  @override
   int get length;
-  
+  @override
   bool get isEmpty => length == 0;
   
-  
-  
-  
-  // moved from traversing to eliminate cyclic dependency
-  // http://api.jquery.com/find/
-  /**
-   * 
-   */
+  @override
   ElementQuery find(String selector) {
     final String s = this.selector != null ? "${this.selector} $selector" : selector;
     // jQuery: Needed because $( selector, context ) becomes $( context ).find( selector )
-    return pushStack(_queryAll(selector)).._selector = s;
+    return (pushStack(_queryAll(selector)) as _ElementQuery).._selector = s;
   }
   
-  // skipped unless necessary
-  //DQuery find(DQuery dquery) {} // requires filter()
-  //DQuery find(Element element) {}
-  
-  // http://api.jquery.com/pushStack/
-  /** Add a collection of DOM elements onto the DQuery stack.
-   */
+  @override
   ElementQuery pushStack(List<Element> elems) => 
-      new ElementQuery(elems) // TODO: copy? no copy?
+      new _ElementQuery(elems) // TODO: copy? no copy?
       .._prevObject = this
       .._context = _context;
   
@@ -138,10 +116,205 @@ abstract class DQueryCore {
     }));
   },
   */
-  
+
+  @override
   DQuery end() => _fallback(_prevObject, () => new ElementQuery([]));
   
+  
+  // data //
+  @override
+  Data get data => _fallback(_data, () => (_data = new Data._(_this)));
+  Data _data;
+  
+  // event //
+  @override
+  void on(String types, DQueryEventListener handler, {String selector, data}) {
+    _on(types, handler, selector, data, false);
+  }
+  
+  @override
+  void one(String types, DQueryEventListener handler, {String selector, data}) {
+    _on(types, handler, selector, data, true);
+  }
+  
+  /**
+   * 
+   */
+  void _on(String types, DQueryEventListener handler, String selector, data, bool one) {
+    if (handler == null)
+      return;
+    
+    // TODO: handle guid for removal
+    DQueryEventListener h = !one ? handler : (DQueryEvent dqevent) {
+      // jQuery: Can use an empty set, since event contains the info
+      _offEvent(dqevent);
+      handler(dqevent);
+    };
+    
+    _this._forEachEventTarget((EventTarget t) => _EventUtil.add(t, types, h, selector, data));
+  }
+  
+  @override
+  void off(String types, DQueryEventListener handler, {String selector}) =>
+    _this._forEachEventTarget((EventTarget t) => _EventUtil.remove(t, types, handler, selector));
+  
+  // utility refactored from off() to make type clearer
+  static void _offEvent(DQueryEvent dqevent) {
+    final _HandleObject handleObj = dqevent._handleObj;
+    final String type = handleObj.namespace != null ? 
+        "${handleObj.origType}.${handleObj.namespace}" : handleObj.origType;
+    new ElementQuery([dqevent.delegateTarget]).off(type, handleObj.handler, selector: handleObj.selector);
+  }
+  
+  @override
+  void trigger(String type, [data]) =>
+    _this._forEachEventTarget((Node t) => _EventUtil.trigger(type, data, t));
+  
+  // TODO: [data] should be {data: data} for API consistency?
+  
+  @override
+  void triggerHandler(String type, [data]) {
+    final EventTarget t = _this._first;
+    if (t != null)
+      _EventUtil.trigger(type, data, t, true);
+  }
+  
+  // traversing //
 }
+
+/**
+ * 
+ */
+class _DocQuery extends _DQuery<Document> with ListMixin<Document> implements DocumentQuery {
+  
+  Document _document;
+  
+  _DocQuery([Document doc]) : this._document = _fallback(doc, () => document);
+  
+  // DQuery //
+  @override
+  Document operator [](int index) => _document;
+  @override
+  void operator []=(int index, Document value) {
+    if (index != 0 || value == null)
+      throw new ArgumentError("$index: $value");
+    _document = value;
+  }
+  @override
+  int get length => 1;
+  @override
+  void set length(int length) {
+    if (length != 1)
+      throw new UnsupportedError("fixed length");
+  }
+
+  @override
+  List<Element> _queryAll(String selector) => _document.queryAll(selector);
+  
+  @override
+  void _forEachEventTarget(void f(EventTarget target)) => f(_document);
+  
+  @override
+  EventTarget get _first => _document;
+
+}
+
+/**
+ * 
+ */
+class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements WindowQuery {
+  
+  Window _window;
+  
+  _WinQuery([Window win]) : this._window = _fallback(win, () => window);
+  
+  // DQuery //
+  @override
+  Window operator [](int index) => _window;
+  @override
+  void operator []=(int index, Window value) {
+    if (index != 0 || value == null)
+      throw new ArgumentError("$index: $value");
+    _window = value;
+  }
+  @override
+  int get length => 1;
+  @override
+  void set length(int length) {
+    if (length != 1)
+      throw new UnsupportedError("fixed length");
+  }
+
+  @override
+  List<Element> _queryAll(String selector) => [];
+  
+  @override
+  void _forEachEventTarget(void f(EventTarget target)) => f(_window);
+  
+  @override
+  EventTarget get _first => _window;
+  
+}
+
+/**
+ * 
+ */
+class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements ElementQuery {
+  
+  final List<Element> _elements;
+  
+  _ElementQuery(this._elements);
+  
+  @override
+  String get selector => _selector;
+  String _selector;
+  
+  // List //
+  @override
+  Element operator [](int index) {
+      return _elements[index];
+  }
+  
+  @override
+  int get length => _elements.length;
+  
+  @override
+  void operator []=(int index, Element value) {
+    _elements[index] = value;
+  }
+  
+  @override
+  void set length(int length) {
+    _elements.length = length;
+  }
+  
+  // DQuery //
+  @override
+  List<Element> _queryAll(String selector) {
+    switch (length) {
+      case 0:
+        return [];
+      case 1:
+        return first.queryAll(selector);
+      default:
+        final List<Element> matched = new List<Element>();
+        for (Element elem in _elements)
+          matched.addAll(elem.queryAll(selector));
+        return DQuery.unique(matched);
+    }
+  }
+  
+  @override
+  void _forEachEventTarget(void f(EventTarget target)) => forEach(f);
+  
+  @override
+  EventTarget get _first => isEmpty ? null : first;
+  
+}
+
+
+// All DQuery objects should point back to these
+DocumentQuery _rootDQuery = new DocumentQuery();
 
 /*
 // Is the DOM ready to be used? Set to true once it occurs.
