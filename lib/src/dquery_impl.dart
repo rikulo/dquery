@@ -60,7 +60,7 @@ completed = function() {
 };
 */
 
-abstract class _DQuery implements DQuery {
+abstract class _DQuery<T> implements DQuery<T> {
   
   // skipped unless necessary
   // void _dquery(DQuery dquery) {}
@@ -185,16 +185,31 @@ abstract class _DQuery implements DQuery {
 /**
  * 
  */
-class _DocQuery extends _DQuery implements DocumentQuery {
+class _DocQuery extends _DQuery<Document> with ListMixin<Document> implements DocumentQuery {
   
-  final Document _document;
+  Document _document;
   
   _DocQuery([Document doc]) : this._document = _fallback(doc, () => document);
   
   // DQuery //
   @override
-  List<Element> _queryAll(String selector) => 
-      _document.queryAll(selector);
+  Document operator [](int index) => _document;
+  @override
+  void operator []=(int index, Document value) {
+    if (index != 0 || value == null)
+      throw new ArgumentError("$index: $value");
+    _document = value;
+  }
+  @override
+  int get length => 1;
+  @override
+  void set length(int length) {
+    if (length != 1)
+      throw new UnsupportedError("fixed length");
+  }
+
+  @override
+  List<Element> _queryAll(String selector) => _document.queryAll(selector);
   
   @override
   void _forEachEventTarget(void f(EventTarget target)) => f(_document);
@@ -202,21 +217,34 @@ class _DocQuery extends _DQuery implements DocumentQuery {
   @override
   EventTarget get _first => _document;
 
-  @override
-  int get length => 1;
-  
 }
 
 /**
  * 
  */
-class _WinQuery extends _DQuery implements WindowQuery {
+class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements WindowQuery {
   
-  final Window _window;
+  Window _window;
   
   _WinQuery([Window win]) : this._window = _fallback(win, () => window);
   
   // DQuery //
+  @override
+  Window operator [](int index) => _window;
+  @override
+  void operator []=(int index, Window value) {
+    if (index != 0 || value == null)
+      throw new ArgumentError("$index: $value");
+    _window = value;
+  }
+  @override
+  int get length => 1;
+  @override
+  void set length(int length) {
+    if (length != 1)
+      throw new UnsupportedError("fixed length");
+  }
+
   @override
   List<Element> _queryAll(String selector) => [];
   
@@ -226,15 +254,12 @@ class _WinQuery extends _DQuery implements WindowQuery {
   @override
   EventTarget get _first => _window;
   
-  @override
-  int get length => 1;
-  
 }
 
 /**
  * 
  */
-class _ElementQuery extends _DQuery with ListMixin<Element> implements ElementQuery {
+class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements ElementQuery {
   
   final List<Element> _elements;
   
@@ -259,8 +284,8 @@ class _ElementQuery extends _DQuery with ListMixin<Element> implements ElementQu
   }
   
   @override
-  void set length(int newLength) {
-    _elements.length = newLength;
+  void set length(int length) {
+    _elements.length = length;
   }
   
   // DQuery //

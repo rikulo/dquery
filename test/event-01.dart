@@ -5,7 +5,7 @@ import 'package:dquery/dquery.dart';
 
 void main() {
   
-  $d(document).on('click', (DQueryEvent event) {
+  $document().on('click', (DQueryEvent event) {
     print("${event.target}, data:${event.data}");
     
   }, selector: 'div.button', data: 99);

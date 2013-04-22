@@ -4,7 +4,7 @@ part of dquery;
 /**
  * 
  */
-abstract class DQuery {
+abstract class DQuery<T> implements List<T> {
   /**
    * 
    */
@@ -82,20 +82,20 @@ abstract class DQuery {
 /**
  * 
  */
-abstract class DocumentQuery extends DQuery {
+abstract class DocumentQuery extends DQuery<Document> {
   factory DocumentQuery([Document document]) => new _DocQuery(document);
 }
 
 /**
  * 
  */
-abstract class WindowQuery extends DQuery {
+abstract class WindowQuery extends DQuery<Window> {
   factory WindowQuery([Window window]) => new _WinQuery(window);
 }
 
 /**
  * 
  */
-abstract class ElementQuery extends DQuery implements List {
+abstract class ElementQuery extends DQuery<Element> {
   factory ElementQuery(List<Element> elements) => new _ElementQuery(elements);
 }

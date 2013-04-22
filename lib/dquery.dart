@@ -52,10 +52,10 @@ ElementQuery $(selector, [context]) {
 /**
  * 
  */
-DocumentQuery $d([Document doc]) => new DocumentQuery(doc);
+DocumentQuery $document([Document document]) => new DocumentQuery(document);
 
 /**
  * 
  */
-WindowQuery $w([Window win]) => new WindowQuery(win);
+WindowQuery $window([Window window]) => new WindowQuery(window);
 
