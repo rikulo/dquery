@@ -3,7 +3,6 @@ part of dquery;
 // things to fix:
 // 1. perform default action
 // 2. namespace, multiple types
-// 3. focus/blur special handling
 // 4. replace guid with Expando
 // 5. off()
 
@@ -69,14 +68,12 @@ class _EventUtil {
       if (type.isEmpty)
         continue;
       
-      /*
       // jQuery: If event changes its type, use the special event handlers for the changed type
       _SpecialEventHandling special = _getSpecial(type);
       // jQuery: If selector defined, determine special event api type, otherwise given type
       type = _fallback(selector != null ? special.delegateType : special.bindType, () => type);
       // jQuery: Update special based on newly reset type
       special = _getSpecial(type);
-      */
       
       // jQuery: handleObj is passed to all event handlers
       final bool needsContext = selector != null && _EventUtil._NEEDS_CONTEXT.hasMatch(selector);
@@ -86,9 +83,14 @@ class _EventUtil {
       
       // jQuery: Init the event handler queue if we're the first
       _HandleObjectContext handleObjCtx = events.putIfAbsent(type, () {
+        
+        // special setup: skipped for now
+        
         elem.$dom_addEventListener(type, eventHandle, false);
         return new _HandleObjectContext();
       });
+      
+      // special add: skipped for now
       
       // jQuery: Add to the element's handler list, delegates in front
       if (selector != null && !selector.isEmpty) {
@@ -136,16 +138,43 @@ class _EventUtil {
         continue;
       }
       
-      //_SpecialEventHandling special = _getSpecial(type);
-      //type = _fallback(selector != null ? special.delegateType : special.bindType, () => type);
+      _SpecialEventHandling special = _getSpecial(type);
+      type = _fallback(selector != null ? special.delegateType : special.bindType, () => type);
+      
       _HandleObjectContext handleObjCtx = _fallback(events[type], () => _HandleObjectContext.EMPTY);
       List<_HandleObject> delegates = handleObjCtx.delegates;
       List<_HandleObject> handlers = handleObjCtx.handlers;
+      
+      // jQuery: Remove matching events
       final int origCount = handlers.length;
+      
+      // TODO
+      /*
+      while ( j-- ) {
+        handleObj = handlers[ j ];
+
+        if ( ( mappedTypes || origType === handleObj.origType ) &&
+            ( !handler || handler.guid === handleObj.guid ) &&
+            ( !tmp || tmp.test( handleObj.namespace ) ) &&
+            ( !selector || selector === handleObj.selector || selector === "**" && handleObj.selector ) ) {
+          handlers.splice( j, 1 );
+
+          if ( handleObj.selector ) {
+            handlers.delegateCount--;
+          }
+          if ( special.remove ) {
+            special.remove.call( elem, handleObj );
+          }
+        }
+      }
+      */
       
       // jQuery: Remove generic event handler if we removed something and no more handlers exist
       //         (avoids potential for endless recursion during removal of special event handlers)
       if (origCount > 0 && handlers.isEmpty) {
+        
+        // special teardown: skipped for now
+        
         events.remove(type);
       }
       
@@ -160,11 +189,15 @@ class _EventUtil {
     return [types]; // TODO: fix
   }
   
+  static bool _focusMorphMatch(String type1, String type2) =>
+      (type1 == 'focusin' && type2 == 'focus') || (type1 == 'focusout' && type2 == 'blur');
+  
+  static String _triggered;
+  
   static void trigger(String type, data, EventTarget elem, [bool onlyHandlers = false]) {
     _EventUtil.trigger0(new DQueryEvent(type, elem), data, onlyHandlers); // TODO: shall DQueryEvent eats data?
   }
   
-  // TODO: elem need to be EventTarget, so it can accept Window?
   static void trigger0(DQueryEvent event, data, [bool onlyHandlers = false]) {
     
     EventTarget elem = event.target;
@@ -178,7 +211,7 @@ class _EventUtil {
       namespaces.sort();
     }
     
-    //final String ontype = type.indexOf(':') < 0 ? "on$type" : null;
+    final String ontype = type.indexOf(':') < 0 ? "on$type" : null; // TODO: check use
     
     if (elem == null) 
       elem = document;
@@ -190,19 +223,8 @@ class _EventUtil {
       return;
     
     // jQuery: focus/blur morphs to focusin/out; ensure we're not firing them right now
-    // TODO
-    /* src:
-    if ( rfocusMorph.test( type + jQuery.event.triggered ) ) {
+    if (_focusMorphMatch(type, _EventUtil._triggered))
       return;
-    }
-    */
-    
-    // jQuery: Caller can pass in a jQuery.Event object, Object, or just an event type string
-    /* src:
-    event = event[ jQuery.expando ] ?
-        event : new jQuery.Event( type, typeof event === "object" && event );
-    */
-    //DQueryEvent dqevent = _fallback(event, () => new DQueryEvent(type)); // TODO
     
     // jQuery: Trigger bitmask: & 1 for native handlers; & 2 for jQuery (always true)
     event._isTrigger = onlyHandlers ? 2 : 3;
@@ -214,13 +236,6 @@ class _EventUtil {
         new RegExp( "(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|$)" ) : null;
     */
     
-    // jQuery: Clean up the event in case it is being reused
-    //dqevent.result = null;
-    /*
-    if (event._target == null)
-      event._target = elem;
-    */
-    
     // TODO: how to combine data
     // jQuery: Clone any incoming data and prepend the event, creating the handler arg list
     // SKIPPED: javascript-specific
@@ -228,23 +243,21 @@ class _EventUtil {
     
     // jQuery: Determine event propagation path in advance, per W3C events spec (#9951)
     //         Bubble up to document, then to window; watch for a global ownerDocument var (#9724)
-    //String bubbleType = null;
-    if (!onlyHandlers /*&& !special.noBubble && !_isWindow(elem)*/) {
-      //bubbleType = type; //_fallback(special.delegateType, () => type);
-      // TODO
-      /* src:
-      if ( !rfocusMorph.test( bubbleType + type ) ) {
-        cur = cur.parentNode;
-      }
-      */
+    String bubbleType = null;
+    _SpecialEventHandling special = _getSpecial(type);
+    if (!onlyHandlers && !special.noBubble && elem is Node) {
+      Node n = elem as Node;
+      bubbleType = _fallback(special.delegateType, () => type);
+      final bool focusMorph = _focusMorphMatch(bubbleType, type);
       
       Node tmp = elem;
-      for (Node cur = elem; cur != null; cur = cur.parentNode) {
+      for (Node cur = focusMorph ? n : n.parentNode; cur != null; cur = cur.parentNode) {
         eventPath.add(cur);
         tmp = cur;
       }
       
       // jQuery: Only add window if we got to document (e.g., not plain obj or detached DOM)
+      // TODO
       /*
       if (tmp == _fallback(elem.ownerDocument, () => document))
         eventPathWindow = _fallback((tmp as Document).window, () => window);
@@ -253,11 +266,11 @@ class _EventUtil {
     }
     
     // jQuery: Fire handlers on the event path
-    //bool first = true;
+    bool first = true;
     for (Node n in eventPath) {
       if (event.isPropagationStopped)
         break;
-      //dqevent._type = !first ? bubbleType : type; //_fallback(special.bindType, () => type);
+      event._type = !first ? bubbleType : _fallback(special.bindType, () => type);
       
       // jQuery: jQuery handler
       if (_getEvents(n).containsKey(event.type)) {
@@ -265,14 +278,16 @@ class _EventUtil {
         _EventUtil.dispatch(n, event); 
       }
       
-      //first = false;
+      // native handler is skipped, no way to do it in Dart
+      
+      first = false;
     }
     /*
     if (eventPathWindow != null) {
-      // TODO: how to get window data space from _dataPriv
+      // TODO
     }
     */
-    //event._type = type;
+    event._type = type;
     
     // jQuery: If nobody prevented the default action, do it now
     if (!onlyHandlers && !event.isDefaultPrevented) {
@@ -280,7 +295,7 @@ class _EventUtil {
         // jQuery: Call a native DOM method on the target with the same name name as the event.
         // jQuery: Don't do default actions on window, that's where global variables be (#6170)
         
-        if (/*ontype != null &&*/ _hasAction(elem, type)) {
+        if (ontype != null && _hasAction(elem, type)) {
           // jQuery: Prevent re-triggering of the same event, since we already bubbled it above
           _EventUtil._triggered = type;
           _performAction(elem, type);
@@ -289,8 +304,6 @@ class _EventUtil {
       }
     }
   }
-  
-  static String _triggered;
   
   static void dispatch(EventTarget elem, DQueryEvent dqevent) {
     
@@ -392,48 +405,6 @@ class _EventUtil {
   static _HandleObjectContext _getHandleObjCtx(EventTarget elem, String type) =>
       _fallback(_getEvents(elem)[type], () => _HandleObjectContext.EMPTY);
   
-  /* TODO: see what'd happen if we ignore special alltogether
-  static _SpecialEventHandling _getSpecial(String type) =>
-      _fallback(_special[type], () => _SpecialEventHandling.EMPTY);
-  
-  static Map<String, _SpecialEventHandling> _special = new HashMap<String, _SpecialEventHandling>.from({
-    // jQuery: Prevent triggered image.load events from bubbling to window.load
-    'load': new _SpecialEventHandling()..noBubble = true,
-    'click': new _SpecialEventHandling()..trigger = (EventTarget elem, data) {
-      // jQuery: For checkbox, fire native event so checked state will be right
-      if (elem is Checkbox) {
-        (elem as Checkbox).click();
-        return false;
-      }
-      return true;
-      
-    },
-    'focus': new _SpecialEventHandling()..trigger = (EventTarget elem, data) {
-      // jQuery: Fire native event if possible so blur/focus sequence is correct
-      if (elem != document.activeElement) {
-        (elem as Element).focus();
-        return false;
-      }
-      return true;
-      
-    }..delegateType = 'focusin',
-    'blur': new _SpecialEventHandling()..trigger = (Element elem, data) {
-      if (elem == document.activeElement) {
-        (elem as Element).blur();
-        return false;
-      }
-      return true;
-      
-    }..delegateType = 'focusout',
-    'beforeunload': new _SpecialEventHandling()..postDispatch = (DQueryEvent dqevent) {
-      // jQuery: Support: Firefox 10+
-      // TODO: problematic! as dqevent.originalEvent.returnValue is bool in Dart
-      if (dqevent.result != null && dqevent.result is bool) // TODO: check design
-        dqevent.originalEvent.returnValue = dqevent.result as bool;
-    }
-  });
-  */
-  
   // TODO: later
   /*
   static void simulate(String type, EventTarget elem, event, bool bubble) {
@@ -469,30 +440,12 @@ class _EventUtil {
 
 class _HandleObjectContext {
   
-  List<_HandleObject> delegates = new List<_HandleObject>();
-  
-  List<_HandleObject> handlers = new List<_HandleObject>();
-  
-  int delegateCount = 0;
+  final List<_HandleObject> delegates = new List<_HandleObject>();
+  final List<_HandleObject> handlers = new List<_HandleObject>();
   
   static final _HandleObjectContext EMPTY = new _HandleObjectContext();
   
 }
-
-/*
-class _SpecialEventHandling {
-  
-  bool noBubble = false;
-  Function setup, add, remove, teardown; // void f(Element elem, _HandleObject handleObj) 
-  Function trigger; // bool f(Element elem, data)
-  Function _default; // bool f(Document document, data)
-  String delegateType, bindType;
-  DQueryEventListener postDispatch, handle;
-  
-  static final _SpecialEventHandling EMPTY = new _SpecialEventHandling();
-  
-}
-*/
 
 class _HandlerQueueEntry {
   
@@ -509,16 +462,72 @@ class _HandleObject {
       this.needsContext, this.handler);
   
   final int guid;
-  
   final String selector, type, origType, namespace;
-  
   final bool needsContext;
-  
   final DQueryEventListener handler;
-  
   var data;
   
 }
+
+class _SpecialEventHandling {
+  
+  _SpecialEventHandling({bool noBubble: false, String delegateType, 
+    String bindType, bool trigger(EventTarget t, data)}) :
+  this.noBubble = noBubble,
+  this.delegateType = delegateType,
+  this.bindType = bindType,
+  this.trigger = trigger;
+  
+  final bool noBubble;
+  //Function setup, add, remove, teardown; // void f(Element elem, _HandleObject handleObj) 
+  final Function trigger; // bool f(Element elem, data)
+  //Function _default; // bool f(Document document, data)
+  final String delegateType, bindType;
+  //DQueryEventListener postDispatch, handle;
+  
+  static final _SpecialEventHandling EMPTY = new _SpecialEventHandling();
+  
+}
+
+Element _activeElement() {
+  try {
+    return document.activeElement;
+  } catch (err) {}
+}
+
+_SpecialEventHandling _getSpecial(String type) =>
+  _fallback(_SPECIAL_HANDLINGS[type], () => _SpecialEventHandling.EMPTY);
+
+final Map<String, _SpecialEventHandling> _SPECIAL_HANDLINGS = new HashMap<String, _SpecialEventHandling>.from({
+  // jQuery: Prevent triggered image.load events from bubbling to window.load
+  'load': new _SpecialEventHandling(noBubble: true),
+  
+  'click': new _SpecialEventHandling(trigger: (EventTarget elem, data) {
+    // jQuery: For checkbox, fire native event so checked state will be right
+    if (elem is CheckboxInputElement) {
+      (elem as CheckboxInputElement).click();
+      return false;
+    }
+    return true;
+  }),
+  
+  'focus': new _SpecialEventHandling(delegateType: 'focusin', trigger: (EventTarget elem, data) {
+    // jQuery: Fire native event if possible so blur/focus sequence is correct
+    if (elem != _activeElement() && elem is Element) {
+      (elem as Element).focus();
+      return false;
+    }
+    return true;
+  }),
+  
+  'blur': new _SpecialEventHandling(delegateType: 'focusout', trigger: (EventTarget elem, data) {
+    if (elem == _activeElement()) {
+      (elem as Element).blur();
+      return false;
+    }
+    return true;
+  })
+});
 
 /// 
 typedef void DQueryEventListener(DQueryEvent event); 
