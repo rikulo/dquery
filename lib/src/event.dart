@@ -443,7 +443,7 @@ class _HandleObjectContext {
 
 class _HandlerQueueEntry {
   
-  final Element elem;
+  final EventTarget elem;
   final List<_HandleObject> handlers;
   
   _HandlerQueueEntry(this.elem, this.handlers);
