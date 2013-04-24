@@ -14,7 +14,7 @@ part 'src/traversing.dart';
 part 'src/data.dart';
 part 'src/event.dart';
 
-/**
+/** Return an [ElementQuery] based on given [selector] and [context].
  * 
  */
 ElementQuery $(selector, [context]) {
@@ -49,13 +49,13 @@ ElementQuery $(selector, [context]) {
   throw new ArgumentError("Selector type should be String, Element, or List<Element>: $selector");  
 }
 
-/**
- * 
+/** Return a [DocumentQuery] wrapping the given [document]. If [document] is 
+ * omitted, the default document instance is assumed.
  */
 DocumentQuery $document([Document document]) => new DocumentQuery(document);
 
-/**
- * 
+/** Return a [WindowQuery] wrapping the given [window]. If [window] is omitted,
+ * the default window instance is used.
  */
 WindowQuery $window([Window window]) => new WindowQuery(window);
 

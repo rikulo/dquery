@@ -12,7 +12,7 @@ void main() {
   
   $('#trigger').on('click', (DQueryEvent event) {
     print('trigger');
-    $('div.button').trigger('click', 88);
+    $('div.button').trigger('click', data: 88);
   });
   
 }

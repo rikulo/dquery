@@ -27,6 +27,8 @@ class _EventUtil {
   
   static void add(EventTarget elem, String types, DQueryEventListener handler, String selector, data) {
     
+    final bool hasSelector = selector != null && !selector.isEmpty;
+    
     // jQuery: Don't attach events to noData or text/comment nodes (but allow plain objects)
     if (elem is CharacterData)
       return;
@@ -71,12 +73,12 @@ class _EventUtil {
       // jQuery: If event changes its type, use the special event handlers for the changed type
       _SpecialEventHandling special = _getSpecial(type);
       // jQuery: If selector defined, determine special event api type, otherwise given type
-      type = _fallback(selector != null ? special.delegateType : special.bindType, () => type);
+      type = _fallback(hasSelector ? special.delegateType : special.bindType, () => type);
       // jQuery: Update special based on newly reset type
       special = _getSpecial(type);
       
       // jQuery: handleObj is passed to all event handlers
-      final bool needsContext = selector != null && _EventUtil._NEEDS_CONTEXT.hasMatch(selector);
+      final bool needsContext = hasSelector && _EventUtil._NEEDS_CONTEXT.hasMatch(selector);
       _HandleObject handleObj = 
           new _HandleObject(g, selector, type, origType, namespaces.join('.'), needsContext, handler)
           ..data = data;
@@ -92,16 +94,10 @@ class _EventUtil {
       
       // special add: skipped for now
       
-      // jQuery: Add to the element's handler list, delegates in front
-      if (selector != null && !selector.isEmpty) {
-        handleObjCtx.delegates.add(handleObj);
-        
-      } else {
-        handleObjCtx.handlers.add(handleObj);
-      }
+      (hasSelector ? handleObjCtx.delegates : handleObjCtx.handlers).add(handleObj);
       
       // jQuery: Keep track of which events have ever been used, for event optimization
-      _global.add(type);
+      _global.add(type); // TODO: check use
       
     }
     
@@ -195,12 +191,12 @@ class _EventUtil {
   static String _triggered;
   
   static void trigger(String type, data, EventTarget elem, [bool onlyHandlers = false]) {
-    _EventUtil.trigger0(new DQueryEvent(type, elem), data, onlyHandlers); // TODO: shall DQueryEvent eats data?
+    _EventUtil.triggerEvent(new DQueryEvent(type, elem), data, onlyHandlers); // TODO: shall DQueryEvent eats data?
   }
   
-  static void trigger0(DQueryEvent event, data, [bool onlyHandlers = false]) {
+  static void triggerEvent(DQueryEvent event, data, [bool onlyHandlers = false]) {
     
-    EventTarget elem = event.target;
+    EventTarget elem = _fallback(event.target, () => document);
     
     String type = event.type;
     List<String> namespaces;
@@ -213,9 +209,7 @@ class _EventUtil {
     
     final String ontype = type.indexOf(':') < 0 ? "on$type" : null; // TODO: check use
     
-    if (elem == null) 
-      elem = document;
-    List<Node> eventPath = [elem];
+    final List<Node> eventPath = [elem];
     Window eventPathWindow = null;
     
     // jQuery: Don't do events on text and comment nodes
@@ -580,7 +574,7 @@ class DQueryEvent {
   DQueryEvent.from(Event event, [Map properties]) : 
   this._(event, null, event.type, event.target, event.timeStamp, properties);
   
-  DQueryEvent(String type, EventTarget target, [Map properties]) : 
+  DQueryEvent(String type, [EventTarget target, Map properties]) : 
   this._(null, new Event(type), type, target, _now(), properties);
   
   DQueryEvent._(this.originalEvent, this._simulatedEvent, this._type, 

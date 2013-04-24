@@ -1,9 +1,6 @@
 //Copyright (C) 2013 Potix Corporation. All Rights Reserved.
 part of dquery;
 
-// TODO list
-// 1. deal with Elements/Document issue
-
 /*
 // The deferred used on DOM ready
 readyList,
@@ -68,16 +65,13 @@ abstract class _DQuery<T> implements DQuery<T> {
   // void _object() {}
   // void _html() {}
   
-  // a hook for mixin
-  _DQuery get _this => this; // TODO: need to be public for 3rd party plugin?
-
   @override
   get context => _context;
   var _context;
 
   _DQuery _prevObject;
   
-  // implementation requirement //
+  // DQuery //
   List<Element> _queryAll(String selector);
   
   void _forEachEventTarget(void f(EventTarget target));
@@ -123,7 +117,7 @@ abstract class _DQuery<T> implements DQuery<T> {
   
   // data //
   @override
-  Data get data => _fallback(_data, () => (_data = new Data._(_this)));
+  Data get data => _fallback(_data, () => (_data = new Data._(this)));
   Data _data;
   
   // event //
@@ -137,9 +131,6 @@ abstract class _DQuery<T> implements DQuery<T> {
     _on(types, handler, selector, data, true);
   }
   
-  /**
-   * 
-   */
   void _on(String types, DQueryEventListener handler, String selector, data, bool one) {
     if (handler == null)
       return;
@@ -151,12 +142,12 @@ abstract class _DQuery<T> implements DQuery<T> {
       handler(dqevent);
     };
     
-    _this._forEachEventTarget((EventTarget t) => _EventUtil.add(t, types, h, selector, data));
+    _forEachEventTarget((EventTarget t) => _EventUtil.add(t, types, h, selector, data));
   }
   
   @override
   void off(String types, DQueryEventListener handler, {String selector}) =>
-    _this._forEachEventTarget((EventTarget t) => _EventUtil.remove(t, types, handler, selector));
+    _forEachEventTarget((EventTarget t) => _EventUtil.remove(t, types, handler, selector));
   
   // utility refactored from off() to make type clearer
   static void _offEvent(DQueryEvent dqevent) {
@@ -167,14 +158,16 @@ abstract class _DQuery<T> implements DQuery<T> {
   }
   
   @override
-  void trigger(String type, [data]) =>
-    _this._forEachEventTarget((Node t) => _EventUtil.trigger(type, data, t));
-  
-  // TODO: [data] should be {data: data} for API consistency?
+  void trigger(String type, {data}) => 
+      _forEachEventTarget((EventTarget t) => _EventUtil.trigger(type, data, t));
   
   @override
-  void triggerHandler(String type, [data]) {
-    final EventTarget t = _this._first;
+  void triggerEvent(DQueryEvent event, {data}) =>
+      _forEachEventTarget((EventTarget t) => _EventUtil.triggerEvent(event.._target = t, data));
+  
+  @override
+  void triggerHandler(String type, {data}) {
+    final EventTarget t = _first;
     if (t != null)
       _EventUtil.trigger(type, data, t, true);
   }
