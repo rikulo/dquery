@@ -6,22 +6,20 @@ part of dquery;
  */
 abstract class DQuery<T> implements List<T> {
   
+  // static methods //
   /**
    * 
    */
   static List<Element> unique(List<Element> elements) => _unique(elements);
-
+  
   // http://api.jquery.com/context/
   /** The DOM node context originally passed to DQuery; if none was passed 
    * then context will likely be the document.
    */
   get context;
-
-  // http://api.jquery.com/jquery-2/
-  // A string containing the DQuery version number.
-  //get dquery => _CORE_VERSION;
-  String get selector;
-
+  
+  String get selector; // TODO: pull to ElementQuery?
+  
   /// The number of selected element.
   int get length;
   
@@ -43,7 +41,7 @@ abstract class DQuery<T> implements List<T> {
   /** Add a collection of DOM elements onto the DQuery stack.
    */
   ElementQuery pushStack(List<Element> elems);
-
+  
   DQuery end();
 
   // data //
@@ -98,8 +96,8 @@ abstract class DQuery<T> implements List<T> {
 /**
  * 
  */
-abstract class DocumentQuery extends DQuery<Document> {
-  factory DocumentQuery([Document document]) => new _DocQuery(document);
+abstract class DocumentQuery extends DQuery<HtmlDocument> {
+  factory DocumentQuery([HtmlDocument document]) => new _DocQuery(document);
 }
 
 /**
@@ -114,4 +112,20 @@ abstract class WindowQuery extends DQuery<Window> {
  */
 abstract class ElementQuery extends DQuery<Element> {
   factory ElementQuery(List<Element> elements) => new _ElementQuery(elements);
+  
+  /**
+   * 
+   */
+  void show();
+  
+  /**
+   * 
+   */
+  void hide();
+  
+  /**
+   * 
+   */
+  void toggle([bool state]);
+  
 }

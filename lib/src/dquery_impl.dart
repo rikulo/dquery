@@ -80,8 +80,10 @@ abstract class _DQuery<T> implements DQuery<T> {
 
   @override
   String get selector => null;
+  
   @override
   int get length;
+  
   @override
   bool get isEmpty => length == 0;
   
@@ -173,28 +175,32 @@ abstract class _DQuery<T> implements DQuery<T> {
   }
   
   // traversing //
+  
 }
 
 /**
  * 
  */
-class _DocQuery extends _DQuery<Document> with ListMixin<Document> implements DocumentQuery {
+class _DocQuery extends _DQuery<HtmlDocument> with ListMixin<HtmlDocument> implements DocumentQuery {
   
-  Document _document;
+  HtmlDocument _document;
   
-  _DocQuery([Document doc]) : this._document = _fallback(doc, () => document);
+  _DocQuery([HtmlDocument doc]) : this._document = _fallback(doc, () => document);
   
   // DQuery //
   @override
-  Document operator [](int index) => _document;
+  HtmlDocument operator [](int index) => _document;
+  
   @override
-  void operator []=(int index, Document value) {
+  void operator []=(int index, HtmlDocument value) {
     if (index != 0 || value == null)
       throw new ArgumentError("$index: $value");
     _document = value;
   }
+  
   @override
   int get length => 1;
+  
   @override
   void set length(int length) {
     if (length != 1)
@@ -224,14 +230,17 @@ class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements Window
   // DQuery //
   @override
   Window operator [](int index) => _window;
+  
   @override
   void operator []=(int index, Window value) {
     if (index != 0 || value == null)
       throw new ArgumentError("$index: $value");
     _window = value;
   }
+  
   @override
   int get length => 1;
+  
   @override
   void set length(int length) {
     if (length != 1)
@@ -302,6 +311,23 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   
   @override
   EventTarget get _first => isEmpty ? null : first;
+  
+  // ElementQuery //
+  @override
+  void show() => _showHide(_elements, true);
+  
+  @override
+  void hide() => _showHide(_elements, false);
+  
+  @override
+  void toggle([bool state]) {
+    for (Element elem in _elements) {
+      if (_fallback(state, () => _isHidden(elem)))
+        $(elem).show();
+      else
+        $(elem).hide();
+    }
+  }
   
 }
 
