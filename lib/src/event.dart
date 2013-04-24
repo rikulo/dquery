@@ -511,22 +511,22 @@ final Map<String, _SpecialEventHandling> _SPECIAL_HANDLINGS = new HashMap<String
     return true;
   }),
   
-  'focus': new _SpecialEventHandling(delegateType: 'focusin', trigger: (EventTarget elem, data) {
+  'focus': new _SpecialEventHandling(trigger: (EventTarget elem, data) {
     // jQuery: Fire native event if possible so blur/focus sequence is correct
     if (elem != _activeElement() && elem is Element) {
       (elem as Element).focus();
       return false;
     }
     return true;
-  }),
+  }, delegateType: 'focusin'),
   
-  'blur': new _SpecialEventHandling(delegateType: 'focusout', trigger: (EventTarget elem, data) {
+  'blur': new _SpecialEventHandling(trigger: (EventTarget elem, data) {
     if (elem == _activeElement()) {
       (elem as Element).blur();
       return false;
     }
     return true;
-  })
+  }, delegateType: 'focusout')
 });
 
 /// 
