@@ -9,21 +9,23 @@ part of dquery;
 // static helper class
 class _EventUtil {
   
-  static Set<String> _global = new HashSet<String>();
+  //static Set<String> _global = new HashSet<String>();
   
   // guid management
   // TODO: use expando
   static Map _handleGuid = new HashMap();
   static int _getGuid(handler) =>
-      _handleGuid.putIfAbsent(handler, () => _guid++); // TODO: need a way to clean up
+      _handleGuid.putIfAbsent(handler, () => _guid++);
+  /*
   static bool _hasGuid(handler) =>
       _handleGuid.containsKey(handler);
-  /*
   static void _copyGuid(handler1, handler2) {
     if (!_hasGuid(handler1) && _hasGuid(handler2))
       _handleGuid[handler1] = _handleGuid[handler2];
   }
   */
+  
+  static final Expando<String> guids = new Expando<String>();
   
   static void add(EventTarget elem, String types, DQueryEventListener handler, String selector, data) {
     
@@ -33,7 +35,7 @@ class _EventUtil {
     if (elem is CharacterData)
       return;
     
-    final Map elemData = _dataPriv.getSpace(elem);
+    final Map space = _dataPriv.getSpace(elem);
     // if (elemData == null) return;
     
     // jQuery: Make sure that the handler has a unique ID, used to find/remove it later
@@ -41,30 +43,27 @@ class _EventUtil {
     
     // jQuery: Init the element's event structure and main handler, if this is the first
     final Map<String, _HandleObjectContext> events = 
-        elemData.putIfAbsent('events', () => new HashMap<String, _HandleObjectContext>());
+        space.putIfAbsent('events', () => new HashMap<String, _HandleObjectContext>());
     
     // the joint proxy handler
-    final EventListener eventHandle = elemData.putIfAbsent('handle', () => (Event e) {
-      if (e == null || _EventUtil._triggered != e.type)
-        dispatch(elem, _EventUtil.fix(e));
+    final EventListener eventHandle = space.putIfAbsent('handle', () => (Event e) {
       // jQuery: Discard the second event of a jQuery.event.trigger() and
       //         when an event is called after a page has unloaded
-      /* src:
-        return typeof jQuery !== undefined && (!e || jQuery.event.triggered !== e.type) ?
-          jQuery.event.dispatch.apply( eventHandle.elem, arguments ) :
-          undefined;
-      */
+      if (e == null || _EventUtil._triggered != e.type)
+        dispatch(elem, _EventUtil.fix(e));
     });
     
     // jQuery: Handle multiple events separated by a space
-    for (String t in _splitTypes(types)) {
+    for (String type in _splitTypes(types)) {
       
-      // TODO: we should use the same code
       // calculate namespaces
-      final int k = t.indexOf('.');
-      String type = k < 0 ? t : t.substring(0, k);
+      List<String> namespaces = [];
+      if (type.indexOf('.') >= 0) {
+        namespaces = type.split('.');
+        type = namespaces.removeAt(0);
+        namespaces.sort();
+      }
       final String origType = type;
-      final List<String> namespaces = k < 0 ? [] : t.substring(k + 1).split('.');
       
       // jQuery: There *must* be a type, no attaching namespace-only handlers
       if (type.isEmpty)
@@ -97,40 +96,37 @@ class _EventUtil {
       (hasSelector ? handleObjCtx.delegates : handleObjCtx.handlers).add(handleObj);
       
       // jQuery: Keep track of which events have ever been used, for event optimization
-      _global.add(type); // TODO: check use
+      //_global.add(type); // TODO: check use
       
     }
     
   }
   
-  static final RegExp _NEEDS_CONTEXT = new RegExp(r'^[\x20\t\r\n\f]*[>+~]');
-  
   // jQuery: Detach an event or set of events from an element
   static void remove(EventTarget elem, String types, DQueryEventListener handler, 
                      String selector, [bool mappedTypes = false]) {
     
-    final Map elemData = _dataPriv.getSpace(elem);
-    if (elemData == null)
-      return;
-    
-    final Map<String, _HandleObjectContext> events = elemData['events'];
+    final Map<String, _HandleObjectContext> events = _dataPriv.get(elem, 'events');
     if (events == null)
       return;
     
     // jQuery: Once for each type.namespace in types; type may be omitted
-    for (String t in _splitTypes(types)) {
+    for (String type in _splitTypes(types)) {
       
       // caculate namespaces
-      final int k = t.indexOf('.');
-      String type = k < 0 ? t : t.substring(0, k);
+      List<String> namespaces = [];
+      if (type.indexOf('.') >= 0) {
+        namespaces = type.split('.');
+        type = namespaces.removeAt(0);
+        namespaces.sort();
+      }
       final String origType = type;
-      final List<String> namespaces = k < 0 ? [] : t.substring(k + 1).split('.');
       
       // jQuery: Unbind all events (on this namespace, if provided) for the element
-      if (type != null) {
-        for (String t in events.keys) {
-          remove(elem, "$type$t", handler, selector, true);
-        }
+      if (type.isEmpty) {
+        final String ns = namespaces.join('.');
+        for (String t in events.keys)
+          remove(elem, "$t.$ns", handler, selector, true);
         continue;
       }
       
@@ -142,47 +138,56 @@ class _EventUtil {
       List<_HandleObject> handlers = handleObjCtx.handlers;
       
       // jQuery: Remove matching events
-      final int origCount = handlers.length;
+      Function filter = (_HandleObject handleObj) {
+        final bool res = 
+            (mappedTypes || origType == handleObj.origType) &&
+            (handler == null || _getGuid(handler) == handleObj.guid) &&
+            _subsetOf(namespaces, handleObj.namespace.split('.')) &&
+            (selector == null || selector == handleObj.selector || (selector == '**' && handleObj.selector != null));
+        
+        // special remove: skipped for now
+        
+        return res;
+      };
       
-      // TODO
-      /*
-      while ( j-- ) {
-        handleObj = handlers[ j ];
-
-        if ( ( mappedTypes || origType === handleObj.origType ) &&
-            ( !handler || handler.guid === handleObj.guid ) &&
-            ( !tmp || tmp.test( handleObj.namespace ) ) &&
-            ( !selector || selector === handleObj.selector || selector === "**" && handleObj.selector ) ) {
-          handlers.splice( j, 1 );
-
-          if ( handleObj.selector ) {
-            handlers.delegateCount--;
-          }
-          if ( special.remove ) {
-            special.remove.call( elem, handleObj );
-          }
-        }
-      }
-      */
+      delegates.removeWhere(filter);
+      handlers.removeWhere(filter);
       
       // jQuery: Remove generic event handler if we removed something and no more handlers exist
       //         (avoids potential for endless recursion during removal of special event handlers)
-      if (origCount > 0 && handlers.isEmpty) {
+      if (delegates.isEmpty && handlers.isEmpty) {
         
         // special teardown: skipped for now
         
         events.remove(type);
       }
       
-      // TODO: should deal with guid
-      
     }
     
   }
   
+  static final RegExp _NEEDS_CONTEXT = new RegExp(r'^[\x20\t\r\n\f]*[>+~]');
+  
+  static bool _subsetOf(List<String> a, List<String> b) {
+    // assume a and b are sorted
+    Iterator<String> ia = a.iterator;
+    for (String sb in b) {
+      String sa = ia.current;
+      if (sa == null)
+        return true;
+      int c = sa.compareTo(sb);
+      if (c < 0)
+        return false;
+      if (c == 0)
+        ia.moveNext();
+    }
+    return true;
+  }
+  
+  static final RegExp _SPACES = new RegExp(r'\s+');
+  
   static List<String> _splitTypes(String types) {
-    //src:types = ( types || "" ).match( core_rnotwhite ) || [""];
-    return [types]; // TODO: fix
+    return types == null ? [] : types.split(_SPACES);
   }
   
   static bool _focusMorphMatch(String type1, String type2) =>
@@ -199,8 +204,7 @@ class _EventUtil {
     EventTarget elem = _fallback(event.target, () => document);
     
     String type = event.type;
-    List<String> namespaces;
-    
+    List<String> namespaces = [];
     if (type.indexOf('.') >= 0) {
       namespaces = type.split('.');
       type = namespaces.removeAt(0);
@@ -222,7 +226,7 @@ class _EventUtil {
     
     // jQuery: Trigger bitmask: & 1 for native handlers; & 2 for jQuery (always true)
     event._isTrigger = onlyHandlers ? 2 : 3;
-    if (namespaces != null)
+    if (!namespaces.isEmpty)
       event._namespace = namespaces.join('.');
     // TODO
     /* src:
@@ -309,16 +313,17 @@ class _EventUtil {
     // jQuery: Determine handlers
     final List<_HandlerQueueEntry> handlerQueue = _EventUtil.handlers(elem, dqevent, handleObjCtx);
     
-    // jQuery: Run delegates first; they may want to stop propagation beneath us
     for (_HandlerQueueEntry matched in handlerQueue) {
       if (dqevent.isPropagationStopped) break;
       dqevent._currentTarget = matched.elem;
-      for (_HandleObject handleObj in matched.handlers) {
+      // copy to avoid concurrent modification
+      for (_HandleObject handleObj in new List<_HandleObject>.from(matched.handlers)) {
         if (dqevent.isImmediatePropagationStopped) break;
         // jQuery: Triggered event must either 1) have no namespace, or
         //         2) have namespace(s) a subset or equal to those in the bound event (both can have no namespace).
-        // TODO: fix for namespace
-        if (true) {
+        final List<String> eventns = dqevent.namespace == null ? [] : dqevent.namespace.split('.');
+        final List<String> hobjns = handleObj.namespace == null ? [] : handleObj.namespace.split('.');
+        if (_subsetOf(eventns, hobjns)) {
           dqevent._handleObj = handleObj;
           dqevent.data = handleObj.data;
           handleObj.handler(dqevent);

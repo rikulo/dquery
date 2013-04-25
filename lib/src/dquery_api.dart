@@ -71,7 +71,7 @@ abstract class DQuery<T> implements List<T> {
   /** Unregister a [handler] for events of given types.
    * // TODO
    */
-  void off(String types, DQueryEventListener handler, {String selector}); // TODO: handler is optional
+  void off(String types, {String selector, DQueryEventListener handler}); // TODO: handler is optional
   
   // TODO: need to solve data conflict with add() at API level
   

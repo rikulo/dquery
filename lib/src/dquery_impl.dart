@@ -148,15 +148,16 @@ abstract class _DQuery<T> implements DQuery<T> {
   }
   
   @override
-  void off(String types, DQueryEventListener handler, {String selector}) =>
+  void off(String types, {String selector, DQueryEventListener handler}) =>
     _forEachEventTarget((EventTarget t) => _EventUtil.remove(t, types, handler, selector));
   
   // utility refactored from off() to make type clearer
   static void _offEvent(DQueryEvent dqevent) {
     final _HandleObject handleObj = dqevent._handleObj;
-    final String type = handleObj.namespace != null ? 
-        "${handleObj.origType}.${handleObj.namespace}" : handleObj.origType;
-    new ElementQuery([dqevent.delegateTarget]).off(type, handleObj.handler, selector: handleObj.selector);
+    final String namespace = handleObj.namespace;
+    final String type = namespace != null && !namespace.isEmpty ? 
+        "${handleObj.origType}.${namespace}" : handleObj.origType;
+    $(dqevent.delegateTarget).off(type, handler: handleObj.handler, selector: handleObj.selector);
   }
   
   @override
