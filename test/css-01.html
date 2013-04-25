@@ -6,13 +6,25 @@
   
   <body>
     <style>
-      #target {
-        width: 200px;
-        height: 200px;
-        margin: 10px;
+      .table {
+        width: 80px;
+        display: inline-block;
+        vertical-align: top;
+      }
+      .table > * {
+        display: block;
+        margin: 0 auto;
+      }
+      .target {
+        width: 50px;
+        height: 50px;
+        margin: 10px auto;
         border: 2px dashed #339;
         border-radius: 5px;
         background: #99C;
+      }
+      .hide {
+        display: none;
       }
     </style>
     
@@ -22,7 +34,15 @@
       <button id="toggle">Toggle</button>
     </div>
     
-    <div id="target"></div>
+    <div class="table">
+      <input type="checkbox" checked></input>
+      <div class="target"></div>
+    </div>
+    
+    <div class="table">
+      <input type="checkbox" checked></input>
+      <div class="target hide"></div>
+    </div>
     
     <script type="application/dart" src="css-01.dart"></script>
     <script src="packages/browser/dart.js"></script>

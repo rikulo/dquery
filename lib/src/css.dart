@@ -5,7 +5,9 @@ Map<String, String> _elemDisplay = new HashMap<String, String>.from({
 });
 
 bool _isHidden(Element elem) =>
-    elem.style.display == 'none' || !elem.document.contains(elem); // TODO: do experiment
+    elem.style.display == 'none' || 
+    elem.getComputedStyle().display == 'none' ||
+    !elem.document.contains(elem); // TODO: do experiment
 
 void _showHide(List<Element> elements, bool show) {
   
@@ -95,7 +97,7 @@ String _cssDefaultDisplay(String nodeName) {
 String _actualDisplay(String name, HtmlDocument doc) {
   Element e = new Element.tag(name);
   doc.body.append(e);
-  String display = e.style.display;
+  String display = e.getComputedStyle().display;
   e.remove();
   return display;
 }
