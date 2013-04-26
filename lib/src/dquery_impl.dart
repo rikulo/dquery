@@ -174,9 +174,6 @@ abstract class _DQuery<T/* extends EventTarget*/> implements DQuery<T> {
   
 }
 
-/**
- * 
- */
 class _DocQuery extends _DQuery<HtmlDocument> with ListMixin<HtmlDocument> implements DocumentQuery {
   
   HtmlDocument _document;
@@ -208,9 +205,6 @@ class _DocQuery extends _DQuery<HtmlDocument> with ListMixin<HtmlDocument> imple
   
 }
 
-/**
- * 
- */
 class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements WindowQuery {
   
   Window _window;
@@ -301,13 +295,23 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
     for (Element e in _elements)
       if ((c = _closest(e, test)) != null)
         results.add(c);
-    return pushStack(results.toList());
+    return pushStack(results.toList(true));
   }
   
   static Element _closest(Element elem, bool test(Element e)) {
     while (elem != null && !test(elem))
       elem = elem.parent;
     return elem;
+  }
+  
+  @override
+  ElementQuery parent([String selector]) {
+    final Set<Element> results = new LinkedHashSet<Element>();
+    Element p;
+    for (Element e in _elements)
+      if ((p = e.parent) != null && (selector == null || p.matches(selector)))
+        results.add(p);
+    return pushStack(results.toList(true));
   }
   
   @override

@@ -6,6 +6,8 @@ part of dquery;
 // TODO: need to solve data conflict with add() at API level
 // TODO: on() handler/selector argument position issue
 
+// TODO: discuss: query object has value of null-safe navigation
+
 /**
  * 
  */
@@ -25,9 +27,7 @@ abstract class DQuery<T> implements List<T> {
   
   String get selector;
   
-  /**
-   * 
-   */
+  /// Return the first matched element, or null if empty.
   T get firstIfAny;
   
   // moved from traversing to eliminate cyclic dependency
@@ -122,6 +122,11 @@ abstract class ElementQuery extends DQuery<Element> {
    * 
    */
   ElementQuery closest(String selector);
+  
+  /**
+   * 
+   */
+  ElementQuery parent([String selector]);
   
   /**
    * 
