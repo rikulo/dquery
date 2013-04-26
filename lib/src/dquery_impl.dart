@@ -1,6 +1,8 @@
 //Copyright (C) 2013 Potix Corporation. All Rights Reserved.
 part of dquery;
 
+// TODO: may simplify _first and _forEachEventTarget()
+
 /*
 // The deferred used on DOM ready
 readyList,
@@ -57,7 +59,7 @@ completed = function() {
 };
 */
 
-abstract class _DQuery<T> implements DQuery<T> {
+abstract class _DQuery<T extends EventTarget> implements DQuery<T> {
   
   // skipped unless necessary
   // void _dquery(DQuery dquery) {}
@@ -72,20 +74,14 @@ abstract class _DQuery<T> implements DQuery<T> {
   _DQuery _prevObject;
   
   // DQuery //
+  @override
   List<Element> _queryAll(String selector);
   
-  void _forEachEventTarget(void f(EventTarget target));
+  @override
+  T get firstIfAny => isEmpty ? null : first;
   
-  EventTarget get _first;
-
   @override
   String get selector => null;
-  
-  @override
-  int get length;
-  
-  @override
-  bool get isEmpty => length == 0;
   
   @override
   ElementQuery find(String selector) {
@@ -144,12 +140,12 @@ abstract class _DQuery<T> implements DQuery<T> {
       handler(dqevent);
     };
     
-    _forEachEventTarget((EventTarget t) => _EventUtil.add(t, types, h, selector, data));
+    forEach((EventTarget t) => _EventUtil.add(t, types, h, selector, data));
   }
   
   @override
   void off(String types, {String selector, DQueryEventListener handler}) =>
-    _forEachEventTarget((EventTarget t) => _EventUtil.remove(t, types, handler, selector));
+      forEach((EventTarget t) => _EventUtil.remove(t, types, handler, selector));
   
   // utility refactored from off() to make type clearer
   static void _offEvent(DQueryEvent dqevent) {
@@ -161,18 +157,17 @@ abstract class _DQuery<T> implements DQuery<T> {
   }
   
   @override
-  void trigger(String type, {data}) => 
-      _forEachEventTarget((EventTarget t) => _EventUtil.trigger(type, data, t));
+  void trigger(String type, {data}) =>
+      forEach((EventTarget t) => _EventUtil.trigger(type, data, t));
   
   @override
   void triggerEvent(DQueryEvent event, {data}) =>
-      _forEachEventTarget((EventTarget t) => _EventUtil.triggerEvent(event.._target = t, data));
+      forEach((EventTarget t) => _EventUtil.triggerEvent(event.._target = t, data));
   
   @override
   void triggerHandler(String type, {data}) {
-    final EventTarget t = _first;
-    if (t != null)
-      _EventUtil.trigger(type, data, t, true);
+    if (!isEmpty)
+      _EventUtil.trigger(type, data, first, true);
   }
   
   // traversing //
@@ -207,16 +202,10 @@ class _DocQuery extends _DQuery<HtmlDocument> with ListMixin<HtmlDocument> imple
     if (length != 1)
       throw new UnsupportedError("fixed length");
   }
-
+  
   @override
   List<Element> _queryAll(String selector) => _document.queryAll(selector);
   
-  @override
-  void _forEachEventTarget(void f(EventTarget target)) => f(_document);
-  
-  @override
-  EventTarget get _first => _document;
-
 }
 
 /**
@@ -250,12 +239,6 @@ class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements Window
 
   @override
   List<Element> _queryAll(String selector) => [];
-  
-  @override
-  void _forEachEventTarget(void f(EventTarget target)) => f(_window);
-  
-  @override
-  EventTarget get _first => _window;
   
 }
 
@@ -306,12 +289,6 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
         return DQuery.unique(matched);
     }
   }
-  
-  @override
-  void _forEachEventTarget(void f(EventTarget target)) => forEach(f);
-  
-  @override
-  EventTarget get _first => isEmpty ? null : first;
   
   // ElementQuery //
   @override

@@ -54,12 +54,10 @@ class Data {
   
   Data._(this._dq);
   
-  EventTarget get _first => _dq._first;
-  
   /**
    * 
    */
-  Map space() => _first == null ? null : _dataUser.getSpace(_first);
+  Map space() => _dq.isEmpty ? null : _dataUser.getSpace(_dq.first);
   
   /**
    * 
@@ -70,19 +68,19 @@ class Data {
    * 
    */
   void set(String key, value) => 
-      _dq._forEachEventTarget((EventTarget t) => _dataUser.set(t, key, value));
+      _dq.forEach((t) => _dataUser.set(t, key, value));
   
   /**
    * 
    */
-  void setAll(Map<String, dynamic> props) => 
-      _dq._forEachEventTarget((EventTarget t) => _dataUser.setAll(t, props));
+  void setAll(Map<String, dynamic> properties) => 
+      _dq.forEach((t) => _dataUser.setAll(t, properties));
   
   /**
    * 
    */
   void remove(String key) =>
-      _dq._forEachEventTarget((EventTarget t) => _dataUser.remove(t, key: key));
+      _dq.forEach((t) => _dataUser.remove(t, key: key));
   
 }
 

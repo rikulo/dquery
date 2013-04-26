@@ -3,6 +3,8 @@ part of dquery;
 
 // TODO: fix selector/context getter
 // TODO: check every incoming List<Element> of ElementQuery
+// TODO: need to solve data conflict with add() at API level
+// TODO: on() handler/selector argument position issue
 
 /**
  * 
@@ -23,11 +25,10 @@ abstract class DQuery<T> implements List<T> {
   
   String get selector;
   
-  /// The number of selected element.
-  int get length;
-  
-  /// Returns if there is any selected element.
-  bool get isEmpty;
+  /**
+   * 
+   */
+  T get firstIfAny;
   
   // moved from traversing to eliminate cyclic dependency
   // http://api.jquery.com/find/
@@ -77,9 +78,7 @@ abstract class DQuery<T> implements List<T> {
   /** Unregister a [handler] for events of given types.
    * // TODO
    */
-  void off(String types, {String selector, DQueryEventListener handler}); // TODO: handler is optional
-  
-  // TODO: need to solve data conflict with add() at API level
+  void off(String types, {String selector, DQueryEventListener handler});
   
   /** Trigger an event of given [type] on all matched elements, with given 
    * [data] if provided.
