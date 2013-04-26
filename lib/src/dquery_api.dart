@@ -1,6 +1,9 @@
 //Copyright (C) 2013 Potix Corporation. All Rights Reserved.
 part of dquery;
 
+// TODO: fix selector/context getter
+// TODO: check every incoming List<Element> of ElementQuery
+
 /**
  * 
  */
@@ -18,7 +21,7 @@ abstract class DQuery<T> implements List<T> {
    */
   get context;
   
-  String get selector; // TODO: pull to ElementQuery?
+  String get selector;
   
   /// The number of selected element.
   int get length;
@@ -32,7 +35,7 @@ abstract class DQuery<T> implements List<T> {
    * 
    */
   ElementQuery find(String selector);
-
+  
   // skipped unless necessary
   //DQuery find(DQuery dquery); // requires filter()
   //DQuery find(Element element);
@@ -42,8 +45,11 @@ abstract class DQuery<T> implements List<T> {
    */
   ElementQuery pushStack(List<Element> elems);
   
+  /**
+   * 
+   */
   DQuery end();
-
+  
   // data //
   /**
    * 
@@ -112,6 +118,11 @@ abstract class WindowQuery extends DQuery<Window> {
  */
 abstract class ElementQuery extends DQuery<Element> {
   factory ElementQuery(List<Element> elements) => new _ElementQuery(elements);
+  
+  /**
+   * 
+   */
+  ElementQuery closest(String selector);
   
   /**
    * 
