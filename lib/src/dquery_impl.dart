@@ -286,22 +286,13 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   
   // ElementQuery //
   @override
-  ElementQuery closest(String selector) => 
-      _closestWhere((Element e) => e.matches(selector));
-  
-  ElementQuery _closestWhere(bool test(Element element)) {
+  ElementQuery closest(String selector) {
     final Set<Element> results = new LinkedHashSet<Element>();
     Element c;
     for (Element e in _elements)
-      if ((c = _closest(e, test)) != null)
+      if ((c = _closest(e, selector)) != null)
         results.add(c);
     return pushStack(results.toList(true));
-  }
-  
-  static Element _closest(Element elem, bool test(Element e)) {
-    while (elem != null && !test(elem))
-      elem = elem.parent;
-    return elem;
   }
   
   @override

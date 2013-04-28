@@ -217,6 +217,15 @@ jQuery.each({
 });
 */
 
+Element _closest(Element elem, String selector) => 
+    _closestWhere(elem, (Element e) => e.matches(selector));
+
+Element _closestWhere(Element elem, bool test(Element e)) {
+  while (elem != null && !test(elem))
+    elem = elem.parent;
+  return elem;
+}
+
 /*
 jQuery.extend({
 */
