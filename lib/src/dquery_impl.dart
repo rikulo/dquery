@@ -321,6 +321,22 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
     }
   }
   
+  @override
+  bool hasClass(String name) =>
+      _elements.any((Element e) => e.classes.contains(name));
+  
+  @override
+  void addClass(String name) =>
+      _elements.forEach((Element e) => e.classes.add(name));
+  
+  @override
+  void removeClass(String name) =>
+      _elements.forEach((Element e) => e.classes.remove(name));
+  
+  @override
+  void toggleClass(String name) =>
+      _elements.forEach((Element e) => e.classes.toggle(name));
+  
 }
 
 

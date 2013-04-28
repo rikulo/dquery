@@ -143,4 +143,24 @@ abstract class ElementQuery extends DQuery<Element> {
    */
   void toggle([bool state]);
   
+  /**
+   * 
+   */
+  bool hasClass(String name);
+  
+  /**
+   * 
+   */
+  void addClass(String name);
+  
+  /**
+   * 
+   */
+  void removeClass(String name);
+  
+  /**
+   * 
+   */
+  void toggleClass(String name);
+  
 }
