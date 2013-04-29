@@ -306,6 +306,16 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   }
   
   @override
+  ElementQuery children([String selector]) {
+    final List<Element> results = new List<Element>();
+    for (Element e in _elements)
+      for (Element c in e.children)
+        if (selector == null || c.matches(selector))
+          results.add(c);
+    return results;
+  }
+  
+  @override
   void show() => _showHide(_elements, true);
   
   @override

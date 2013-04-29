@@ -35,7 +35,7 @@ abstract class DQuery<T> implements List<T> {
   /**
    * 
    */
-  ElementQuery find(String selector);
+  ElementQuery find(String selector); // TODO: need to fix for '> a', '+ a', '~ a'
   
   // skipped unless necessary
   //DQuery find(DQuery dquery); // requires filter()
@@ -127,6 +127,11 @@ abstract class ElementQuery extends DQuery<Element> {
    * 
    */
   ElementQuery parent([String selector]);
+  
+  /**
+   * 
+   */
+  ElementQuery children([String selector]);
   
   /**
    * 
