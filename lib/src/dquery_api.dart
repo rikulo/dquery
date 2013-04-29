@@ -64,7 +64,7 @@ abstract class DQuery<T> implements List<T> {
    * be triggered.
    * + If [data] is provided, you can retrieve it in [event.data] in the handler.
    */
-  void on(String types, DQueryEventListener handler, {String selector, data});
+  void on(String types, DQueryEventListener handler, {String selector});
   
   /** Register a one-time [handler] for events of given [types]. Once called, 
    * the handler will be unregistered.
@@ -73,7 +73,7 @@ abstract class DQuery<T> implements List<T> {
    * be triggered.
    * + If [data] is provided, you can retrieve it in [event.data] in the handler.
    */
-  void one(String types, DQueryEventListener handler, {String selector, data});
+  void one(String types, DQueryEventListener handler, {String selector});
 
   /** Unregister a [handler] for events of given types.
    * // TODO
@@ -88,7 +88,7 @@ abstract class DQuery<T> implements List<T> {
   /** Trigger the given [event] on all matched elements, with given [data] if
    * provided.
    */
-  void triggerEvent(DQueryEvent event, {data});
+  void triggerEvent(DQueryEvent event);
   
   /** 
    * 

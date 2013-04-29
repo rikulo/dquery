@@ -8,7 +8,7 @@ void main() {
   $document().on('click', (DQueryEvent event) {
     print("${event.target}, data:${event.data}");
     
-  }, selector: 'div.button', data: 99);
+  }, selector: 'div.button');
   
   $('#trigger').on('click', (DQueryEvent event) {
     print('trigger');

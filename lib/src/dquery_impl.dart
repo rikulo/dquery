@@ -120,16 +120,16 @@ abstract class _DQuery<T/* extends EventTarget*/> implements DQuery<T> {
   
   // event //
   @override
-  void on(String types, DQueryEventListener handler, {String selector, data}) {
-    _on(types, handler, selector, data, false);
+  void on(String types, DQueryEventListener handler, {String selector}) {
+    _on(types, handler, selector, false);
   }
   
   @override
-  void one(String types, DQueryEventListener handler, {String selector, data}) {
-    _on(types, handler, selector, data, true);
+  void one(String types, DQueryEventListener handler, {String selector}) {
+    _on(types, handler, selector, true);
   }
   
-  void _on(String types, DQueryEventListener handler, String selector, data, bool one) {
+  void _on(String types, DQueryEventListener handler, String selector, bool one) {
     if (handler == null)
       return;
     
@@ -140,7 +140,7 @@ abstract class _DQuery<T/* extends EventTarget*/> implements DQuery<T> {
       handler(dqevent);
     };
     
-    forEach((EventTarget t) => _EventUtil.add(t, types, h, selector, data));
+    forEach((EventTarget t) => _EventUtil.add(t, types, h, selector));
   }
   
   @override
@@ -161,8 +161,8 @@ abstract class _DQuery<T/* extends EventTarget*/> implements DQuery<T> {
       forEach((EventTarget t) => _EventUtil.trigger(type, data, t));
   
   @override
-  void triggerEvent(DQueryEvent event, {data}) =>
-      forEach((EventTarget t) => _EventUtil.triggerEvent(event.._target = t, data));
+  void triggerEvent(DQueryEvent event) =>
+      forEach((EventTarget t) => _EventUtil.triggerEvent(event.._target = t));
   
   @override
   void triggerHandler(String type, {data}) {

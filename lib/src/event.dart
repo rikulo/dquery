@@ -27,7 +27,7 @@ class _EventUtil {
   
   static final Expando<String> guids = new Expando<String>();
   
-  static void add(EventTarget elem, String types, DQueryEventListener handler, String selector, data) {
+  static void add(EventTarget elem, String types, DQueryEventListener handler, String selector) {
     
     final bool hasSelector = selector != null && !selector.isEmpty;
     
@@ -78,9 +78,8 @@ class _EventUtil {
       
       // jQuery: handleObj is passed to all event handlers
       final bool needsContext = hasSelector && _EventUtil._NEEDS_CONTEXT.hasMatch(selector);
-      _HandleObject handleObj = 
-          new _HandleObject(g, selector, type, origType, namespaces.join('.'), needsContext, handler)
-          ..data = data;
+      _HandleObject handleObj = new _HandleObject(g, selector, type, origType, 
+          namespaces.join('.'), needsContext, handler);
       
       // jQuery: Init the event handler queue if we're the first
       _HandleObjectContext handleObjCtx = events.putIfAbsent(type, () {
@@ -196,10 +195,10 @@ class _EventUtil {
   static String _triggered;
   
   static void trigger(String type, data, EventTarget elem, [bool onlyHandlers = false]) {
-    _EventUtil.triggerEvent(new DQueryEvent(type, elem), data, onlyHandlers); // TODO: shall DQueryEvent eats data?
+    _EventUtil.triggerEvent(new DQueryEvent(type, target: elem, data: data), onlyHandlers);
   }
   
-  static void triggerEvent(DQueryEvent event, data, [bool onlyHandlers = false]) {
+  static void triggerEvent(DQueryEvent event, [bool onlyHandlers = false]) {
     
     EventTarget elem = _fallback(event.target, () => document);
     
@@ -233,11 +232,6 @@ class _EventUtil {
     event.namespace_re = event.namespace ?
         new RegExp( "(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|$)" ) : null;
     */
-    
-    // TODO: how to combine data
-    // jQuery: Clone any incoming data and prepend the event, creating the handler arg list
-    // SKIPPED: javascript-specific
-    // src:data = data == null ? [ event ] : jQuery.makeArray( data, [ event ] );
     
     // jQuery: Determine event propagation path in advance, per W3C events spec (#9951)
     //         Bubble up to document, then to window; watch for a global ownerDocument var (#9724)
@@ -325,7 +319,6 @@ class _EventUtil {
         final List<String> hobjns = handleObj.namespace == null ? [] : handleObj.namespace.split('.');
         if (_subsetOf(eventns, hobjns)) {
           dqevent._handleObj = handleObj;
-          dqevent.data = handleObj.data;
           handleObj.handler(dqevent);
         }
       }
@@ -464,7 +457,6 @@ class _HandleObject {
   final String selector, type, origType, namespace;
   final bool needsContext;
   final DQueryEventListener handler;
-  var data;
   
 }
 
@@ -576,17 +568,14 @@ class DQueryEvent {
   /// 
   final Map attributes = new HashMap();
   
-  DQueryEvent.from(Event event, [Map properties]) : 
-  this._(event, null, event.type, event.target, event.timeStamp, properties);
+  DQueryEvent.from(Event event, {data}) : 
+  this._(event, null, event.type, event.target, event.timeStamp, data);
   
-  DQueryEvent(String type, [EventTarget target, Map properties]) : 
-  this._(null, new Event(type), type, target, _now(), properties);
+  DQueryEvent(String type, {EventTarget target, data}) : 
+  this._(null, new Event(type), type, target, _now(), data);
   
   DQueryEvent._(this.originalEvent, this._simulatedEvent, this._type, 
-      this._target, this.timeStamp, Map properties) {
-    _mapMerge(attributes, properties);
-    //attributes[expando] = true; // TODO: may not need this
-  }
+      this._target, this.timeStamp, this.data);
   
   ///
   bool get isDefaultPrevented => _isDefaultPrevented;
