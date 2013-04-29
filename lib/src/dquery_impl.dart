@@ -312,7 +312,7 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
       for (Element c in e.children)
         if (selector == null || c.matches(selector))
           results.add(c);
-    return results;
+    return pushStack(results);
   }
   
   @override
