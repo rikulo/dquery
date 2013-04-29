@@ -91,7 +91,6 @@ class _EventUtil {
       });
       
       // special add: skipped for now
-      
       (hasSelector ? handleObjCtx.delegates : handleObjCtx.handlers).add(handleObj);
       
       // jQuery: Keep track of which events have ever been used, for event optimization
@@ -267,7 +266,7 @@ class _EventUtil {
       // jQuery: jQuery handler
       if (_getEvents(n).containsKey(event.type)) {
         // here we've refactored the implementation apart from jQuery
-        _EventUtil.dispatch(n, event); 
+        _EventUtil.dispatch(n, event);
       }
       
       // native handler is skipped, no way to do it in Dart
