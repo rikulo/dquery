@@ -292,7 +292,7 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
     for (Element e in _elements)
       if ((c = _closest(e, selector)) != null)
         results.add(c);
-    return pushStack(results.toList(true));
+    return pushStack(results.toList(growable: true));
   }
   
   @override
@@ -302,7 +302,7 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
     for (Element e in _elements)
       if ((p = e.parent) != null && (selector == null || p.matches(selector)))
         results.add(p);
-    return pushStack(results.toList(true));
+    return pushStack(results.toList(growable: true));
   }
   
   @override
