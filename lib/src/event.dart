@@ -545,12 +545,12 @@ class DQueryEvent {
   var data;
   
   /// The delegate target of this event.
-  Node get delegateTarget => _delegateTarget;
-  Node _delegateTarget;
+  EventTarget get delegateTarget => _delegateTarget;
+  EventTarget _delegateTarget;
   
   /// 
-  Node get currentTarget => _currentTarget;
-  Node _currentTarget;
+  EventTarget get currentTarget => _currentTarget;
+  EventTarget _currentTarget;
   
   /// The target of this event.
   EventTarget get target => _target;
