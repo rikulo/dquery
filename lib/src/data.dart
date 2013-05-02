@@ -48,36 +48,28 @@ class _Storage {
 final _Storage _dataUser = new _Storage('dquery-data-user');
 final _Storage _dataPriv = new _Storage('dquery-data-priv');
 
+/** The interface for accessing element data.
+ */
 class Data {
   
   final _DQuery _dq;
   
   Data._(this._dq);
   
-  /**
-   * 
+  /** Retrieve the entire space of element data.
    */
   Map space() => _dq.isEmpty ? null : _dataUser.getSpace(_dq.first);
   
-  /**
-   * 
+  /** Retrieve the data of the given [key].
    */
   get(String key) => _dq.isEmpty ? null : space()[key];
   
-  /**
-   * 
+  /** Set the data of the given [key].
    */
   void set(String key, value) => 
       _dq.forEach((t) => _dataUser.set(t, key, value));
   
-  /**
-   * 
-   */
-  void setAll(Map<String, dynamic> properties) => 
-      _dq.forEach((t) => _dataUser.setAll(t, properties));
-  
-  /**
-   * 
+  /** Delete the data of the given [key].
    */
   void remove(String key) =>
       _dq.forEach((t) => _dataUser.remove(t, key: key));

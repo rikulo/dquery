@@ -16,7 +16,6 @@ part 'src/data.dart';
 part 'src/event.dart';
 
 /** Return an [ElementQuery] based on given [selector] and [context].
- * 
  */
 ElementQuery $(selector, [context]) {
   

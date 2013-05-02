@@ -3,19 +3,16 @@ part of dquery;
 
 // TODO: fix selector/context getter
 // TODO: check every incoming List<Element> of ElementQuery
-// TODO: need to solve data conflict with add() at API level
 // TODO: on() handler/selector argument position issue
 
-// TODO: discuss: query object has value of null-safe navigation
-
-/**
- * 
+/** A query object that wraps around DOM Elements, HtmlDocument, or Window, 
+ * which offers API to register event listeners in a batch, or to retrieve
+ * other query objects via selectors.
  */
 abstract class DQuery<T> implements List<T> {
   
   // static methods //
-  /**
-   * 
+  /** Return a sorted List of elements with duplicated items removed.
    */
   static List<Element> unique(List<Element> elements) => _unique(elements);
   
@@ -32,8 +29,8 @@ abstract class DQuery<T> implements List<T> {
   
   // moved from traversing to eliminate cyclic dependency
   // http://api.jquery.com/find/
-  /**
-   * 
+  /** Retrieve an [ElementQuery] containing descendants of this element collection
+   * which match the given [selector].
    */
   ElementQuery find(String selector); // TODO: need to fix for '> a', '+ a', '~ a'
   
@@ -46,14 +43,14 @@ abstract class DQuery<T> implements List<T> {
    */
   ElementQuery pushStack(List<Element> elems);
   
-  /**
-   * 
+  /** Pops out the top [DQuery] object in the stack and retrieve the previous one. 
+   * If there is no previous [DQuery], an empty [DQuery] will be returned.
+   * @see pushStack
    */
   DQuery end();
   
   // data //
-  /**
-   * 
+  /** The interface to access custom element data.
    */
   Data get data;
 
@@ -90,81 +87,81 @@ abstract class DQuery<T> implements List<T> {
    */
   void triggerEvent(DQueryEvent event);
   
-  /** 
-   * 
+  /** Trigger an event of given [type] on the first (if any) matched element, 
+   * with given [data] if provided. However, only the registered handlers will
+   * be called, while the default action is omitted.
    */
   void triggerHandler(String type, {data});
 
   // traversing //
 }
 
-/**
- * 
+/** A query object of an [HtmlDocument].
  */
 abstract class DocumentQuery extends DQuery<HtmlDocument> {
   factory DocumentQuery([HtmlDocument document]) => new _DocQuery(document);
 }
 
-/**
- * 
+/** A query object of a [Window].
  */
 abstract class WindowQuery extends DQuery<Window> {
   factory WindowQuery([Window window]) => new _WinQuery(window);
 }
 
-/**
- * 
+/** A query object of a collection of [Element].
  */
 abstract class ElementQuery extends DQuery<Element> {
   factory ElementQuery(List<Element> elements) => new _ElementQuery(elements);
   
-  /**
-   * 
+  /** Retrieve the closest ancestor (including itself) of each element in this 
+   * collection respectively who matches the given [selector].
    */
   ElementQuery closest(String selector);
   
-  /**
-   * 
+  /** Retrieve the parents of each element in this collection.
+   * + The redundant elements in the resulting collection will be removed.
+   * + If [selector] is provided, parents who do not match the selector is 
+   * filtered out.
    */
   ElementQuery parent([String selector]);
   
-  /**
-   * 
+  /** Retrieve the union of childrens of each element in this collection.
+   * + If [selector] is provided, children who do not match the selector is
+   * filtered out.
    */
   ElementQuery children([String selector]);
   
-  /**
-   * 
+  /** Show all the elements in this collection by changing their CSS display 
+   * properties.
    */
   void show();
   
-  /**
+  /** Hide all the elements in this collection by setting their CSS disaply
+   * properties value to [none].
    * 
    */
   void hide();
   
-  /**
+  /** Toggle the visibility of all the elements in this collection by altering
+   * their CSS display properties.
    * 
    */
   void toggle([bool state]);
   
-  /**
-   * 
+  /** Return true if any of the element contains the given [name] in its CSS
+   * classes.
    */
   bool hasClass(String name);
   
-  /**
-   * 
+  /** Add the CSS class of given [name] to all the elements in this collection.
    */
   void addClass(String name);
   
-  /**
-   * 
+  /** Remove the CSS class of given [name] from all the elements in this collection.
    */
   void removeClass(String name);
   
-  /**
-   * 
+  /** Toggle the CSS class of given [name] in all the elements in this collection.
    */
   void toggleClass(String name);
   
