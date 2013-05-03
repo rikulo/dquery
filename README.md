@@ -30,6 +30,44 @@ For more information, please refer to [Pub: Dependencies](http://pub.dartlang.or
 
 ##Usage
 
+You can create a query object by selector. With context provided, the query will be based on different element.
+
+    // selects all elements containing 'active' in CSS class
+	ElementQuery $elems = $('.active');
+	
+	// selects all descendant elements of div containing 'active' in CSS class
+	ElementQuery $elems = $('.active', div);
+
+It implements List<Element>.
+
+	$('.active')[0];
+	$('.active').isEmpty;
+	for (Element e in $('.active')) { ... }
+
+Create another query object with traversing API, including [find](http://api.rikulo.org/dquery/latest/dquery/DQuery.html#find), [closest](http://api.rikulo.org/dquery/latest/dquery/ElementQuery.html#closest), [parent](http://api.rikulo.org/dquery/latest/dquery/ElementQuery.html#parent), [children](http://api.rikulo.org/dquery/latest/dquery/ElementQuery.html#children).
+
+	$('.active').closest('ul');
+	$('#myDiv').find('a.btn');
+
+Manipulate selected elements.
+
+	$('.active').removeClass('active');
+	$('.fade').hide();
+
+Register event handlers on queried elements, or trigger an event by API.
+
+	$('#myBtn').on('click', (DQueryEvent e) {
+		...
+	});
+	$('#myBtn').trigger('click', data: 'my data');
+
+There are query objects of HtmlDocument and Window too.
+
+	DocumentQuery $doc = $document();
+	WindowQuery $win = $window();
+
+Check the [API reference](http://api.rikulo.org/dquery/latest/dquery.html) for more features.
+
 ##Notes to Contributors
 
 ###Test and Debug
