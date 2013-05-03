@@ -223,7 +223,7 @@ class _EventUtil {
       return;
     
     // jQuery: Trigger bitmask: & 1 for native handlers; & 2 for jQuery (always true)
-    event._isTrigger = onlyHandlers ? 2 : 3;
+    //event._isTrigger = onlyHandlers ? 2 : 3;
     if (!namespaces.isEmpty)
       event._namespace = namespaces.join('.');
     // TODO
@@ -519,20 +519,26 @@ final Map<String, _SpecialEventHandling> _SPECIAL_HANDLINGS = new HashMap<String
   }, delegateType: 'focusout')
 });
 
-/// 
+/** The handler type for [DQueryEvent], which is the DQuery analogy of 
+ * [EventListener].
+ */
 typedef void DQueryEventListener(DQueryEvent event); 
 
-/**
- * 
+/** A wrapping of browser [Event], to attach more information such as custom
+ * event data and name space, etc. 
  */
 class DQueryEvent {
   
   /** The time stamp at which the event occurs. If the event is constructed 
-   * from a native DOM [Event], it uses the time stamp of that event. 
+   * from a native DOM [Event], it uses the time stamp of that event;
+   * otherwise it uses the current time where this event is constructed. 
    */
   final int timeStamp;
   
-  /// The original event, if any.
+  /** The original event, if any. If this [DQueryEvent] was triggered by browser,
+   * it will contain an original event; if triggered by API, this property will
+   * be null.
+   */
   final Event originalEvent;
   
   /** The type of event. If the event is constructed from a native DOM [Event], 
@@ -541,68 +547,86 @@ class DQueryEvent {
   String get type => _type;
   String _type;
   
-  /// Custom event data.
+  /** Custom event data. If user calls trigger method with data, it will show 
+   * up here.
+   */
   var data;
   
-  /// The delegate target of this event.
+  /** The delegate target of this event. i.e. The event target on which the 
+   * handler is registered.
+   */
   EventTarget get delegateTarget => _delegateTarget;
   EventTarget _delegateTarget;
   
-  /// 
+  /** The current target of this event when bubbling up.
+   */
   EventTarget get currentTarget => _currentTarget;
   EventTarget _currentTarget;
   
-  /// The target of this event.
+  /** The original target of this event. i.e. The real event target where the
+   * event occurs.
+   */
   EventTarget get target => _target;
   EventTarget _target;
   
+  /** The namespace of this event. For example, if the event is triggered by 
+   * API with name `click.a.b.c`, it will have type `click` with namespace `a.b.c`
+   */
   String get namespace => _namespace;
-  String _namespace;
+  String _namespace; // TODO: maybe should be List<String> ?
   
-  _HandleObject _handleObj; // TODO: check usage
-  final Event _simulatedEvent;
+  _HandleObject _handleObj;
+  final Event _simulatedEvent; // TODO: check usage
   
-  int _isTrigger; // TODO: check usage
+  //int _isTrigger; // TODO: check usage
   
-  /// 
-  final Map attributes = new HashMap();
+  //final Map attributes = new HashMap();
   
+  /** Construct a DQueryEvent from a native browser event.
+   */
   DQueryEvent.from(Event event, {data}) : 
   this._(event, null, event.type, event.target, event.timeStamp, data);
   
+  /** Construct a DQueryEvent with given [type].
+   */
   DQueryEvent(String type, {EventTarget target, data}) : 
-  this._(null, new Event(type), type, target, _now(), data);
+  this._(null, new Event(type), type, target, _now(), data); // TODO: move target away
   
   DQueryEvent._(this.originalEvent, this._simulatedEvent, this._type, 
       this._target, this.timeStamp, this.data);
   
-  ///
+  /// Return true if [preventDefault] was ever called in this event.
   bool get isDefaultPrevented => _isDefaultPrevented;
   bool _isDefaultPrevented = false;
   
-  ///
+  /// Return true if [stopPropagation] was ever called in this event.
   bool get isPropagationStopped => _isPropagationStopped;
   bool _isPropagationStopped = false;
   
-  ///
+  /// Return true if [stopImmediatePropagation] was ever called in this event.
   bool get isImmediatePropagationStopped => _isImmediatePropagationStopped;
   bool _isImmediatePropagationStopped = false;
   
-  /// Prevent default behavior of the event.
+  /** Prevent the default action of the event being triggered.
+   */
   void preventDefault() {
     _isDefaultPrevented = true;
     if (originalEvent != null)
       originalEvent.preventDefault();
   }
   
-  /// Stop event propagation.
+  /** Prevent the event from bubbling up, and prevent any handlers on parent
+   * elements from being called. 
+   */
   void stopPropagation() {
     _isPropagationStopped = true;
     if (originalEvent != null)
       originalEvent.stopPropagation();
   }
   
-  /// 
+  /** Prevent the event from bubbling up, and prevent any succeeding handlers
+   * from being called. 
+   */
   void stopImmediatePropagation() {
     _isImmediatePropagationStopped = true;
     stopPropagation();
