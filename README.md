@@ -1,6 +1,6 @@
 #DQuery
 
-[DQuery](http://rikulo.org) is a porting of jQuery in Dart.
+[DQuery](http://rikulo.org) is a porting of [jQuery](http://jquery.com/) in Dart.
 
 * [Home](http://rikulo.org)
 * [Tutorial](http://blog.rikulo.org/posts/2013/May/General/bootjack-and-dquery/)
