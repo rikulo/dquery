@@ -94,6 +94,7 @@ abstract class DQuery<T> implements List<T> {
   void triggerHandler(String type, {data});
 
   // traversing //
+  
 }
 
 /** A query object of an [HtmlDocument].
@@ -113,6 +114,7 @@ abstract class WindowQuery extends DQuery<Window> {
 abstract class ElementQuery extends DQuery<Element> {
   factory ElementQuery(List<Element> elements) => new _ElementQuery(elements);
   
+  // traversing //
   /** Retrieve the closest ancestor (including itself) of each element in this 
    * collection respectively who matches the given [selector].
    */
@@ -131,6 +133,7 @@ abstract class ElementQuery extends DQuery<Element> {
    */
   ElementQuery children([String selector]);
   
+  // DOM attribute manipulation //
   /** Show all the elements in this collection by changing their CSS display 
    * properties.
    */
@@ -148,6 +151,7 @@ abstract class ElementQuery extends DQuery<Element> {
    */
   void toggle([bool state]);
   
+  // class manipulation //
   /** Return true if any of the element contains the given [name] in its CSS
    * classes.
    */
@@ -164,5 +168,39 @@ abstract class ElementQuery extends DQuery<Element> {
   /** Toggle the CSS class of given [name] in all the elements in this collection.
    */
   void toggleClass(String name);
+  
+  // DOM element manipulation //
+  /** Insert every element in this collection to the end of the [target].
+   * 
+   * + [target] can be a selector String, an html String, an Element, or a DQuery
+   */
+  void appendTo(target);
+  
+  /** Insert every element in this collection to the beginning of the [target].
+   * 
+   * + [target] can be a selector String, an html String, an Element, or a DQuery
+   */
+  void prependTo(target);
+  
+  //.after()
+  //.append()
+  //.before()
+  //.prepend()
+  
+  //.replaceAll()
+  //.replaceWith()
+  
+  // wrap? later?
+  
+  /** Remove the elements from the DOM.
+   * 
+   * + If [data] is true, also remove associtated data under all elements and 
+   * decendants.
+   */
+  void detach({String selector, bool data: true});
+  
+  /** Remove all child nodes of the elements in this collection from the DOM.
+   */
+  void empty();
   
 }

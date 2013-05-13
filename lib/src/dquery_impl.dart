@@ -347,8 +347,26 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   void toggleClass(String name) =>
       _elements.forEach((Element e) => e.classes.toggle(name));
   
+  @override
+  void appendTo(target) {
+    // TODO
+  }
+  
+  @override
+  void prependTo(target) {
+    // TODO
+  }
+  
+  @override
+  void detach({String selector, bool data: true}) => 
+      (selector != null && !(selector = selector.trim()).isEmpty ? 
+          _filter(selector, _elements) : _elements)
+          .forEach((Element e) => _detach(e, data));
+  
+  @override
+  void empty() => _elements.forEach((Element e) => _empty(e));
+  
 }
-
 
 // All DQuery objects should point back to these
 DocumentQuery _rootDQuery = new DocumentQuery();

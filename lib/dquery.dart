@@ -11,6 +11,7 @@ part 'src/dquery_api.dart';
 part 'src/dquery_impl.dart';
 part 'src/selector.dart';
 part 'src/traversing.dart';
+part 'src/manipulation.dart';
 part 'src/css.dart';
 part 'src/data.dart';
 part 'src/event.dart';
@@ -19,10 +20,15 @@ part 'src/event.dart';
  */
 ElementQuery $(selector, [context]) {
   
-  if (selector == null || selector == '')
+  if (selector == null || (selector = selector.trim()) == '')
     return new ElementQuery([]);
   
   if (selector is String) {
+    // html
+    if ((selector as String).startsWith('<')) {
+      return new ElementQuery([new Element.html(selector)]);
+    }
+    
     if (context == null) {
       return _rootDQuery.find(selector);
       

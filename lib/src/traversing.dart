@@ -230,7 +230,7 @@ Element _closestWhere(Element elem, bool test(Element e)) {
 jQuery.extend({
 */
 
-_filter(String expr, List<Element> elements, [bool not = false]) {
+List<Element> _filter(String expr, List<Element> elements, [bool not = false]) {
   final Element elem = elements.isEmpty ? null : elements.first;
   if (not)
     expr = ":not($expr)";
