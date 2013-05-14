@@ -360,7 +360,7 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   @override
   void detach({String selector, bool data: true}) => 
       (selector != null && !(selector = selector.trim()).isEmpty ? 
-          _filter(selector, _elements) : _elements)
+          _filter(selector, _elements) : new List<Element>.from(_elements))
           .forEach((Element e) => _detach(e, data));
   
   @override

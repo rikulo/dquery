@@ -231,17 +231,9 @@ jQuery.extend({
 */
 
 List<Element> _filter(String expr, List<Element> elements, [bool not = false]) {
-  final Element elem = elements.isEmpty ? null : elements.first;
   if (not)
     expr = ":not($expr)";
-  
-  /*
-  return elems.length === 1 && elem.nodeType === 1 ?
-    jQuery.find.matchesSelector( elem, expr ) ? [ elem ] : [] :
-    jQuery.find.matches( expr, jQuery.grep( elems, function( elem ) {
-      return elem.nodeType === 1;
-    }));
-  */
+  return elements.where((Element elem) => elem.matches(expr)).toList(growable: true);
 }
 
 
