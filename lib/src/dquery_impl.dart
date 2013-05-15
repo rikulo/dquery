@@ -203,6 +203,22 @@ class _DocQuery extends _DQuery<HtmlDocument> with ListMixin<HtmlDocument> imple
   @override
   List<Element> _queryAll(String selector) => _document.queryAll(selector);
   
+  Window get _window => _document.window;
+  
+  @override
+  int get scrollLeft => _window.pageXOffset;
+  
+  @override
+  int get scrollTop => _window.pageYOffset;
+  
+  @override
+  void set scrollLeft(int value) => 
+      _window.scrollTo(value, _window.pageYOffset);
+  
+  @override
+  void set scrollTop(int value) => 
+      _window.scrollTo(_window.pageXOffset, value);
+  
 }
 
 class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements WindowQuery {
@@ -233,6 +249,20 @@ class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements Window
 
   @override
   List<Element> _queryAll(String selector) => [];
+  
+  @override
+  int get scrollLeft => _window.pageXOffset;
+  
+  @override
+  int get scrollTop => _window.pageYOffset;
+  
+  @override
+  void set scrollLeft(int value) => 
+      _window.scrollTo(value, _window.pageYOffset);
+  
+  @override
+  void set scrollTop(int value) => 
+      _window.scrollTo(_window.pageXOffset, value);
   
 }
 
@@ -349,12 +379,12 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   
   @override
   void appendTo(target) {
-    // TODO
+    // TODO: need to clone itself if appending to multiple targets
   }
   
   @override
   void prependTo(target) {
-    // TODO
+    // TODO: need to clone itself if prepending to multiple targets
   }
   
   @override
@@ -365,6 +395,20 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   
   @override
   void empty() => _elements.forEach((Element e) => _empty(e));
+  
+  @override
+  int get scrollLeft => isEmpty ? null : _elements.first.scrollLeft;
+  
+  @override
+  int get scrollTop => isEmpty ? null : _elements.first.scrollTop;
+  
+  @override
+  void set scrollLeft(int value) =>
+      _elements.forEach((Element e) => e.scrollLeft = value);
+  
+  @override
+  void set scrollTop(int value) =>
+      _elements.forEach((Element e) => e.scrollTop = value);
   
 }
 

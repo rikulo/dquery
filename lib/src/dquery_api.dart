@@ -95,6 +95,27 @@ abstract class DQuery<T> implements List<T> {
 
   // traversing //
   
+  // offset //
+  /** Get the current horizontal position of the scroll bar for the first element
+   * in this collection.
+   */
+  int get scrollLeft;
+  
+  /** Get the current vertical position of the scroll bar for the first element
+   * in this collection.
+   */
+  int get scrollTop;
+  
+  /** Set the current horizontal position of the scroll bar for all elements
+   * in this collection.
+   */
+  void set scrollLeft(int value);
+  
+  /** Set the current vertical position of the scroll bar for all elements
+   * in this collection.
+   */
+  void set scrollTop(int value);
+  
 }
 
 /** A query object of an [HtmlDocument].
