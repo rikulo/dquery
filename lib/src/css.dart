@@ -14,11 +14,6 @@ void _showHide(List<Element> elements, bool show) {
   final Map<Element, String> values = new HashMap<Element, String>();
   
   for (Element elem in elements) {
-    /*
-    if ( !elem.style ) {
-      continue;
-    }
-    */
     String oldDisplay = _dataPriv.get(elem, 'olddisplay');
     values[elem] = oldDisplay;
     String display = elem.style.display;
@@ -47,15 +42,9 @@ void _showHide(List<Element> elements, bool show) {
   // Set the display of most of the elements in a second loop
   // to avoid the constant reflow
   for (Element elem in elements) {
-    /*
-    if ( !elem.style ) {
-      continue;
-    }
-    */
     final String display = elem.style.display;
     if (!show || display == 'none' || display == '')
       elem.style.display = show ? _fallback(values[elem], () => '') : 'none';
-    
   }
   
 }
