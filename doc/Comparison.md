@@ -21,10 +21,10 @@
 | [.each()](http://api.jquery.com/each/) | *Dart List API* | since 0.5.0 |
 | [.empty()](http://api.jquery.com/empty/) | .empty() | since 0.5.1 |
 | [.end()](http://api.jquery.com/end/) | .end() | since 0.5.0 |
-| [.eq](http://api.jquery.com/eq/) | | | (Later)
+| [.eq()](http://api.jquery.com/eq/) | | | (Later)
 | [.filter()](http://api.jquery.com/filter/) | | | (Later)
 | [.find()](http://api.jquery.com/find/) | .find() | since 0.5.0 |
-| [.first](http://api.jquery.com/first/) | | | (Later)
+| [.first()](http://api.jquery.com/first/) | | | (Later)
 | [.focus()](http://api.jquery.com/focus/) | | | (Later)
 | [.focusin()](http://api.jquery.com/focusin/) | | | (Later)
 | [.focusout()](http://api.jquery.com/focusout/) | | | (Later)
