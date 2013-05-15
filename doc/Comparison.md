@@ -70,6 +70,10 @@
 | [.removeData()](http://api.jquery.com/removeData/) | .removeData() | since 0.5.0 |
 | [.resize()](http://api.jquery.com/resize/) | | | (Later)
 | [.scroll()](http://api.jquery.com/scroll/) | | | (Later)
+| [.scrollLeft()](http://api.jquery.com/scrollLeft/) | get scrollLeft | since 0.5.1 |
+| | set scrollLeft | since 0.5.1 |
+| [.scrollTop()](http://api.jquery.com/scrollTop/) | get scrollTop | since 0.5.1 |
+| | set scrollTop | since 0.5.1 |
 | [.select()](http://api.jquery.com/select/) | | | (Later)
 | [.show()](http://api.jquery.com/show/) | .show() | since 0.5.0 | (No animation)
 | [.siblings()](http://api.jquery.com/siblings/) | | | (Later)
