@@ -276,6 +276,9 @@ class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements Window
   void set scrollTop(int value) => 
       _window.scrollTo(_window.pageXOffset, value);
   
+  // jQuery: As of 5/8/2012 this will yield incorrect results for Mobile Safari, but there
+  //         isn't a whole lot we can do. See pull request at this URL for discussion:
+  //         https://github.com/jquery/jquery/pull/764
   @override
   int get width => _window.document.documentElement.clientWidth;
   

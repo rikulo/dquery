@@ -12,6 +12,7 @@ part 'src/dquery_api.dart';
 part 'src/dquery_impl.dart';
 part 'src/selector.dart';
 part 'src/traversing.dart';
+part 'src/dimension.dart';
 part 'src/manipulation.dart';
 part 'src/css.dart';
 part 'src/data.dart';
