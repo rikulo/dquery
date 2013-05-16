@@ -352,7 +352,7 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   void hide() => _showHide(_elements, false);
   
   @override
-  void toggle([bool state]) {
+  void toggle([bool state]) { // TODO: save $() construction
     for (Element elem in _elements) {
       if (_fallback(state, () => _isHidden(elem)))
         $(elem).show();
@@ -360,6 +360,11 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
         $(elem).hide();
     }
   }
+  
+  @override
+  css(String name, [String value]) =>
+      value != null ? _elements.forEach((Element e) => _setCss(name, value)) :
+          _elements.isEmpty ? null : _getCss(_elements.first, name);
   
   @override
   bool hasClass(String name) =>

@@ -162,15 +162,21 @@ abstract class ElementQuery extends DQuery<Element> {
   
   /** Hide all the elements in this collection by setting their CSS disaply
    * properties value to [none].
-   * 
    */
   void hide();
   
   /** Toggle the visibility of all the elements in this collection by altering
    * their CSS display properties.
-   * 
    */
   void toggle([bool state]);
+  
+  /** Get the style property value of the given [name] on the first element
+   * in this collection if any, or set the [value] on all the elements in 
+   * this collection.
+   * 
+   * + if [value] is provided, set the value; otherwise read the value.
+   */
+  css(String name, [String value]);
   
   // class manipulation //
   /** Return true if any of the element contains the given [name] in its CSS
