@@ -352,13 +352,9 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   void hide() => _showHide(_elements, false);
   
   @override
-  void toggle([bool state]) { // TODO: save $() construction
-    for (Element elem in _elements) {
-      if (_fallback(state, () => _isHidden(elem)))
-        $(elem).show();
-      else
-        $(elem).hide();
-    }
+  void toggle([bool state]) {
+    for (Element elem in _elements)
+      _showHide([elem], _fallback(state, () => _isHidden(elem)));
   }
   
   @override
