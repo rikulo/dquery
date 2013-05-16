@@ -430,10 +430,10 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
       _elements.forEach((Element e) => e.scrollTop = value);
   
   @override
-  int get width => null;
+  int get width => _elements.isEmpty ? null : _getElementWidth(_elements.first);
   
   @override
-  int get height => null;
+  int get height => _elements.isEmpty ? null : _getElementHeight(_elements.first);
   
 }
 
