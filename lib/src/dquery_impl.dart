@@ -284,9 +284,6 @@ class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements Window
   
 }
 
-/**
- * 
- */
 class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements ElementQuery {
   
   final List<Element> _elements;
