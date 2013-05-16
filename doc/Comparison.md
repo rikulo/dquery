@@ -11,7 +11,7 @@
 | [.children()](http://api.jquery.com/children/) | .children() | since 0.5.0 |
 | [.click()](http://api.jquery.com/click/) | | | (Later)
 | [.closest()](http://api.jquery.com/closest/) | .closest() | since 0.5.0 |
-| [.css()](http://api.jquery.com/css/) | | | (Later)
+| [.css()](http://api.jquery.com/css/) | .css() | since 0.5.1 |
 | [.data()](http://api.jquery.com/data/) | .data.get() | since 0.5.0 | get data
 | | .data.set() | since 0.5.0 | set data
 | | .data.space() | since 0.5.0 | set all data map
@@ -31,6 +31,7 @@
 | [.get()](http://api.jquery.com/get/) | *Dart List API* | since 0.5.0 |
 | [.has()](http://api.jquery.com/has/) | | | (Later)
 | [.hasClass()](http://api.jquery.com/hasClass/) | .hasClass() | since 0.5.0 |
+| [.height()](http://api.jquery.com/height/) | get height | since 0.5.1 | (Only getter part)
 | [.hide()](http://api.jquery.com/hide/) | .hide() | since 0.5.0 | (No animation)
 | [.hover()](http://api.jquery.com/hover/) | | | (Later)
 | [.html()](http://api.jquery.com/html/) | | | (Later)
@@ -86,6 +87,7 @@
 | [.unbind()](http://api.jquery.com/unbind/) | -- | | (Use .off() instead)
 | [.undelegate()](http://api.jquery.com/undelegate/) | -- | | (Use .off() instead)
 | [.unload()](http://api.jquery.com/unload/) | | | (Later)
+| [.width()](http://api.jquery.com/width/) | get width | since 0.5.1 | (Only getter part)
 
 ###Static Functions
 
