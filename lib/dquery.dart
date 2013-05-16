@@ -22,7 +22,10 @@ part 'src/event.dart';
  */
 ElementQuery $(selector, [context]) {
   
-  if (selector == null || (selector = selector.trim()) == '')
+  if (selector is String)
+    selector = selector.trim();
+  
+  if (selector == null || selector == '')
     return new ElementQuery([]);
   
   if (selector is String) {
