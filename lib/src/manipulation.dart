@@ -34,3 +34,11 @@ void _empty(Element elem) {
     _cleanData(c);
   elem.nodes.clear();
 }
+
+/*
+List<Node> _resolveTarget(target) =>
+    target is DocumentQuery || target is ElementQuery ? target :
+    target is Document || target is Element ? [target] :
+    target is String ? $(target) : [];
+*/
+//void _manip(target)

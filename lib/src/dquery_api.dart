@@ -209,13 +209,13 @@ abstract class ElementQuery extends DQuery<Element> {
    * 
    * + [target] can be a selector String, an html String, an Element, or a DQuery
    */
-  void appendTo(target);
+  //void appendTo(target);
   
   /** Insert every element in this collection to the beginning of the [target].
    * 
    * + [target] can be a selector String, an html String, an Element, or a DQuery
    */
-  void prependTo(target);
+  //void prependTo(target);
   
   //.after()
   //.append()

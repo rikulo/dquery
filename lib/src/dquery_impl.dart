@@ -396,6 +396,7 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   void toggleClass(String name) =>
       _elements.forEach((Element e) => e.classes.toggle(name));
   
+  /*
   @override
   void appendTo(target) {
     // TODO: need to clone itself if appending to multiple targets
@@ -405,6 +406,7 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   void prependTo(target) {
     // TODO: need to clone itself if prepending to multiple targets
   }
+  */
   
   @override
   void detach({String selector, bool data: true}) => 
