@@ -3,4 +3,6 @@
 **0.5.1**
 
 * Add $(html) support.
-* Add getter and setter of scrollLeft, scrollTop
+* Add getter, setter of scrollLeft, scrollTop
+* Add .css()
+* Add getter of width, height
