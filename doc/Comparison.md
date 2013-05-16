@@ -4,7 +4,7 @@
 |:-----------|:------------|:------------|:------------|
 | [.add()](http://api.jquery.com/add/) | *Dart List API* | since 0.5.0 |
 | [.addClass()](http://api.jquery.com/addClass/) | .addClass() | since 0.5.0 |
-| [.appendTo()](http://api.jquery.com/appendTo/) | .appendTo() | since 0.5.1 |
+| [.appendTo()](http://api.jquery.com/appendTo/) | | | (Later)
 | [.bind()](http://api.jquery.com/bind/) | -- | | (Use .on() instead)
 | [.blur()](http://api.jquery.com/blur/) | | | (Later)
 | [.change()](http://api.jquery.com/change/) | | | (Later)
@@ -60,7 +60,7 @@
 | [.one()](http://api.jquery.com/one/) | .one() | since 0.5.0 |
 | [.parent()](http://api.jquery.com/parent/) | .parent() | since 0.5.0 |
 | [.parentsUntil()](http://api.jquery.com/parentsUntil/) | | | (Later)
-| [.prependTo()](http://api.jquery.com/prependTo/) | .prependTo() | since 0.5.1 |
+| [.prependTo()](http://api.jquery.com/prependTo/) | | | (Later)
 | [.prev()](http://api.jquery.com/prev/) | | | (Later)
 | [.prevAll()](http://api.jquery.com/prevAll/) | | | (Later)
 | [.prevUntil()](http://api.jquery.com/prevUntil/) | | | (Later)
