@@ -68,6 +68,10 @@ There are query objects of HtmlDocument and Window too.
 
 Check the [API reference](http://api.rikulo.org/dquery/latest/dquery.html) for more features.
 
+##Comparison to jQuery
+
+See [here](https://github.com/rikulo/dquery/blob/master/doc/Comparison.md).
+
 ##Notes to Contributors
 
 ###Test and Debug
