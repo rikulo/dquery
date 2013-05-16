@@ -219,6 +219,18 @@ class _DocQuery extends _DQuery<HtmlDocument> with ListMixin<HtmlDocument> imple
   void set scrollTop(int value) => 
       _window.scrollTo(_window.pageXOffset, value);
   
+  @override
+  int get width =>
+      _max([_document.body.scrollWidth, _document.documentElement.scrollWidth,
+            _document.body.offsetWidth, _document.documentElement.offsetWidth,
+            _document.documentElement.clientWidth]);
+  
+  @override
+  int get height =>
+      _max([_document.body.scrollHeight, _document.documentElement.scrollHeight,
+            _document.body.offsetHeight, _document.documentElement.offsetHeight,
+            _document.documentElement.clientHeight]);
+  
 }
 
 class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements WindowQuery {
@@ -263,6 +275,12 @@ class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements Window
   @override
   void set scrollTop(int value) => 
       _window.scrollTo(_window.pageXOffset, value);
+  
+  @override
+  int get width => _window.document.documentElement.clientWidth;
+  
+  @override
+  int get height => _window.document.documentElement.clientHeight;
   
 }
 
@@ -410,6 +428,12 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   @override
   void set scrollTop(int value) =>
       _elements.forEach((Element e) => e.scrollTop = value);
+  
+  @override
+  int get width => null;
+  
+  @override
+  int get height => null;
   
 }
 

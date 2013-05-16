@@ -17,6 +17,15 @@ final int _RAND_INT_MAX = 1000 * 1000 * 1000;
 Random _r;
 Random get _rand => _fallback(_r, () => (_r = new Random()));
 
+int _max(List<int> nums) {
+  if (nums.isEmpty)
+    return null;
+  num m;
+  for (int n in nums)
+    m = m == null ? n : n > m ? n : m;
+  return m;
+}
+
 
 
 // html //

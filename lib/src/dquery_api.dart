@@ -116,6 +116,14 @@ abstract class DQuery<T> implements List<T> {
    */
   void set scrollTop(int value);
   
+  /** Retrieve the width of the first element of this collection.
+   */
+  int get width;
+  
+  /** Retrieve the height of the first element of this collection.
+   */
+  int get height;
+  
 }
 
 /** A query object of an [HtmlDocument].
