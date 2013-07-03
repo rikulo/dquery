@@ -377,7 +377,7 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   
   @override
   css(String name, [String value]) =>
-      value != null ? _elements.forEach((Element e) => _setCss(name, value)) :
+      value != null ? _elements.forEach((Element e) => _setCss(e, name, value)) :
           _elements.isEmpty ? null : _getCss(_elements.first, name);
   
   @override
