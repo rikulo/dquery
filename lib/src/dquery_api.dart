@@ -238,4 +238,33 @@ abstract class ElementQuery extends DQuery<Element> {
    */
   void empty();
   
+  // offset //
+  /** Get the current coordinates of the first element, relative to the document.
+   */
+  Point get offset;
+  
+  /** Set the coordinates of every element in this collection, relative to the
+   * document.
+   */
+  void set offset(Point offset);
+  
+  /** Set the x coordinate of every element in this collection, relative to the
+   * document.
+   */
+  void set offsetLeft(int left);
+  
+  /** Set the y coordinate of every element in this collection, relative to the
+   * document.
+   */
+  void set offsetTop(int top);
+  
+  /** Get the current coordinates of the first element in the set of matched 
+   * elements, relative to the offset parent.
+   */
+  Point get position;
+  
+  /** Get the closest ancestor element that is positioned.
+   */
+  ElementQuery get offsetParent;
+  
 }

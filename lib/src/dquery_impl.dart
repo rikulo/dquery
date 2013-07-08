@@ -417,6 +417,26 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   @override
   void empty() => _elements.forEach((Element e) => _empty(e));
   
+  Point get offset => isEmpty ? null : _getOffset(_elements.first);
+  
+  void set offset(Point value) =>
+      _elements.forEach((Element e) => _setOffset(e, left: value.x, top: value.y));
+  
+  void set offsetLeft(int left) =>
+      _elements.forEach((Element e) => _setOffset(e, left: left));
+  
+  void set offsetTop(int top) =>
+      _elements.forEach((Element e) => _setOffset(e, top: top));
+  
+  Point get position => isEmpty ? null : _getPosition(_elements.first);
+  
+  ElementQuery get offsetParent {
+    final Set<Element> results = new LinkedHashSet<Element>();
+    for (Element e in _elements)
+      results.add(_getOffsetParent(e));
+    return pushStack(results.toList(growable: true));
+  }
+  
   @override
   int get scrollLeft => isEmpty ? null : _elements.first.scrollLeft;
   

@@ -1,140 +1,135 @@
-//part of dquery;
-/*
-jQuery.fn.offset = function( options ) {
-  if ( arguments.length ) {
-    return options === undefined ?
-      this :
-      this.each(function( i ) {
-        jQuery.offset.setOffset( this, options, i );
-      });
-  }
+part of dquery;
+
+Point _getOffset(Element elem) {
   
-  var docElem, win,
-    elem = this[ 0 ],
-    box = { top: 0, left: 0 },
-    doc = elem && elem.ownerDocument;
+  if (elem == null)
+    return null;
   
-  if ( !doc ) {
-    return;
-  }
+  final Document doc = elem.document;
+  if (doc == null)
+    return null;
   
-  docElem = doc.documentElement;
-  
-  // Make sure it's not a disconnected DOM node
+  Point box = new Point();
+  final Element docElem = doc.documentElement;
+  // jQuery: Make sure it's not a disconnected DOM node
+  /*
   if ( !jQuery.contains( docElem, elem ) ) {
     return box;
   }
+  */
   
-  // If we don't have gBCR, just use 0,0 rather than error
-  // BlackBerry 5, iOS 3 (original iPhone)
-  if ( typeof elem.getBoundingClientRect !== core_strundefined ) {
-    box = elem.getBoundingClientRect();
+  // skipped
+  // jQuery: If we don't have gBCR, just use 0,0 rather than error
+  //         BlackBerry 5, iOS 3 (original iPhone)
+  //if ( typeof elem.getBoundingClientRect !== core_strundefined )
+  final Rect r = elem.getBoundingClientRect();
+  box = new Point(r.left, r.top);
+  
+  return box + new Point(window.pageXOffset, window.pageYOffset) - docElem.client.topLeft;
+}
+
+//setOffset: function( elem, options, i ) {
+void _setOffset(Element elem, {num left, num top}) {
+  if (left == null && top == null)
+    return;
+  
+  final String position = _getCss(elem, 'position');
+  
+  // jQuery: Set position first, in-case top/left are set even on static elem
+  if (position == 'static')
+    elem.style.position = 'relative';
+  
+  final Point curOffset = _getOffset(elem);
+  final String curCSSTop = _getCss(elem, 'top');
+  final String curCSSLeft = _getCss(elem, 'left');
+  
+  // jQuery: Need to be able to calculate position if either top or left is auto 
+  //         and position is either absolute or fixed
+  final bool calculatePosition = 
+      (position == 'absolute' || position == 'fixed') && 
+      ("$curCSSTop $curCSSLeft").indexOf("auto") > -1;
+  final Point curPosition = calculatePosition ? _getPosition(elem) : null;
+  
+  // skipped for now
+  /*
+  if ( jQuery.isFunction( options ) ) {
+    options = options.call( elem, i, curOffset );
   }
-  win = getWindow( doc );
-  return {
-    top: box.top + win.pageYOffset - docElem.clientTop,
-    left: box.left + win.pageXOffset - docElem.clientLeft
-  };
-};
-
-jQuery.offset = {
-
-  setOffset: function( elem, options, i ) {
-    var curPosition, curLeft, curCSSTop, curTop, curOffset, curCSSLeft, calculatePosition,
-      position = jQuery.css( elem, "position" ),
-      curElem = jQuery( elem ),
-      props = {};
-    
-    // Set position first, in-case top/left are set even on static elem
-    if ( position === "static" ) {
-      elem.style.position = "relative";
-    }
-    
-    curOffset = curElem.offset();
-    curCSSTop = jQuery.css( elem, "top" );
-    curCSSLeft = jQuery.css( elem, "left" );
-    calculatePosition = ( position === "absolute" || position === "fixed" ) && ( curCSSTop + curCSSLeft ).indexOf("auto") > -1;
-    
-    // Need to be able to calculate position if either top or left is auto and position is either absolute or fixed
-    if ( calculatePosition ) {
-      curPosition = curElem.position();
-      curTop = curPosition.top;
-      curLeft = curPosition.left;
-    
-    } else {
-      curTop = parseFloat( curCSSTop ) || 0;
-      curLeft = parseFloat( curCSSLeft ) || 0;
-    }
-    
-    if ( jQuery.isFunction( options ) ) {
-      options = options.call( elem, i, curOffset );
-    }
-    
-    if ( options.top != null ) {
-      props.top = ( options.top - curOffset.top ) + curTop;
-    }
-    if ( options.left != null ) {
-      props.left = ( options.left - curOffset.left ) + curLeft;
-    }
-    
-    if ( "using" in options ) {
-      options.using.call( elem, props );
-      
-    } else {
-      curElem.css( props );
-    }
+  */
+  
+  // skipped
+  /*
+  if ( "using" in options ) {
+    options.using.call( elem, props );
   }
-};
-
-
-jQuery.fn.extend({
-
-  position: function() {
-    if ( !this[ 0 ] ) {
-      return;
-    }
-
-    var offsetParent, offset,
-      elem = this[ 0 ],
-      parentOffset = { top: 0, left: 0 };
-    
-    // Fixed elements are offset from window (parentOffset = {top:0, left: 0}, because it is it's only offset parent
-    if ( jQuery.css( elem, "position" ) === "fixed" ) {
-      // We assume that getBoundingClientRect is available when computed position is fixed
-      offset = elem.getBoundingClientRect();
-      
-    } else {
-      // Get *real* offsetParent
-      offsetParent = this.offsetParent();
-      
-      // Get correct offsets
-      offset = this.offset();
-      if ( !jQuery.nodeName( offsetParent[ 0 ], "html" ) ) {
-        parentOffset = offsetParent.offset();
-      }
-      
-      // Add offsetParent borders
-      parentOffset.top += jQuery.css( offsetParent[ 0 ], "borderTopWidth", true );
-      parentOffset.left += jQuery.css( offsetParent[ 0 ], "borderLeftWidth", true );
-    }
-    
-    // Subtract parent offsets and element margins
-    return {
-      top: offset.top - parentOffset.top - jQuery.css( elem, "marginTop", true ),
-      left: offset.left - parentOffset.left - jQuery.css( elem, "marginLeft", true )
-    };
-  },
-
-  offsetParent: function() {
-    return this.map(function() {
-      var offsetParent = this.offsetParent || docElem;
-    
-      while ( offsetParent && ( !jQuery.nodeName( offsetParent, "html" ) && jQuery.css( offsetParent, "position") === "static" ) ) {
-        offsetParent = offsetParent.offsetParent;
-      }
-      
-      return offsetParent || docElem;
-    });
+  */
+  
+  if (left != null) {
+    final num curLeft = calculatePosition ? curPosition.x : _parseDouble(curCSSLeft);
+    elem.style.left = "${left - curOffset.x + curLeft}px";
   }
-});
-*/
+  
+  if (top != null) {
+    final num curTop = calculatePosition ? curPosition.y : _parseDouble(curCSSTop);
+    elem.style.top = "${top - curOffset.y + curTop}px";
+  }
+  
+}
+
+Point _getPosition(Element elem) {
+  if (elem == null)
+    return null;
+  
+  final ElementQuery $elem = $(elem);
+  Point offset;
+  Point parentOffset = new Point();
+  
+  // jQuery: Fixed elements are offset from window (parentOffset = {top:0, left: 0}, because it is it's only offset parent
+  if (_getCss(elem, 'position') == 'fixed') {
+    // jQuery: We assume that getBoundingClientRect is available when computed position is fixed
+    offset = elem.getBoundingClientRect().topLeft;
+    
+  } else {
+    // jQuery: Get *real* offsetParent
+    final Element offsetParent = _getOffsetParent(elem);
+    
+    // jQuery: Get correct offsets
+    offset = elem.offset.topLeft;
+    if (offsetParent.tagName != 'html')
+      parentOffset = offsetParent.offset.topLeft;
+    
+    // jQuery: Add offsetParent borders
+    parentOffset += _parseCssPoint(offsetParent, 'borderLeftWidth', 'borderTopWidth', 0, 0);
+  }
+  
+  // jQuery: Subtract parent offsets and element margins
+  return offset + parentOffset - _parseCssPoint(elem, 'marginLeft', 'marginTop', 0, 0);
+}
+
+Point _parseCssPoint(Element elem, String nameX, String nameY, [num defaultX, num defaultY]) =>
+    new Point(_parseCss(elem, nameX, defaultX), _parseCss(elem, nameY, defaultY));
+
+num _parseCss(Element elem, String name, num defaultValue) =>
+    _parseDouble(_getCss(elem, name), defaultValue); // TODO: double.parse() is different from parseFloat()
+
+num _parseDouble(String src, [num defaultValue = 0.0]) =>
+    double.parse(_trimSuffix(src, 'px'), (String source) => defaultValue);
+
+String _trimSuffix(String src, String suffix) =>
+    src == null ? null :
+    src.endsWith(suffix) ? src.substring(0, src.length - suffix.length) : src;
+
+Element _getOffsetParent(Element elem) {
+  Element offsetParent = elem.offsetParent;
+  if (offsetParent == null)
+    offsetParent = document.documentElement;
+  
+  while (offsetParent != null && (offsetParent.tagName != 'html') && 
+      _getCss(offsetParent, "position") == 'static') {
+    offsetParent = offsetParent.offsetParent;
+  }
+  
+  if (offsetParent == null)
+    offsetParent = document.documentElement;
+  return offsetParent;
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>offset-01</title>
+  </head>
+  <body>
+    <style>
+      body {
+        margin: 0;
+      }
+      .gray {
+        background: #DDD;
+      }
+    </style>
+    <div id="info">Text should be in the box. </div>
+    <div class="gray" style="height: 120px; margin: 60px 0; padding: 0 60px;">
+      <div style="display: inline-block; height: 120px; width; 120px;">
+        <div id="target" style="border: 1px solid #333; width: 60px; height: 60px; margin: 0 auto;"></div>
+      </div>
+    </div>
+    <div class="gray" style="height: 120px">
+      
+    </div>
+    <div class="gray" style="height: 120px; margin: 60px; padding: 60px">
+      <span id="span">Text</span>
+    </div>
+    <script type="application/dart" src="offset-01.dart"></script>
+    <script src="packages/browser/dart.js"></script>
+  </body>
+</html>
