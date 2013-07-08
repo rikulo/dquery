@@ -55,11 +55,16 @@
 | [.nextUntil()](http://api.jquery.com/nextUntil/) | | | (Later)
 | [.not()](http://api.jquery.com/not/) | | | (Later)
 | [.off()](http://api.jquery.com/off/) | .off() | since 0.5.0 |
-| [.offsetParent()](http://api.jquery.com/offsetParent/) | | | (Later)
+| [.offset()](http://api.jquery.com/offset/) | get offset | since 0.5.2 |
+| | set offset | since 0.5.2 |
+| | set offsetLeft | since 0.5.2 |
+| | set offsetTop | since 0.5.2 |
+| [.offsetParent()](http://api.jquery.com/offsetParent/) | get offsetParent | since 0.5.2 |
 | [.on()](http://api.jquery.com/on/) | .on() | since 0.5.0 |
 | [.one()](http://api.jquery.com/one/) | .one() | since 0.5.0 |
 | [.parent()](http://api.jquery.com/parent/) | .parent() | since 0.5.0 |
 | [.parentsUntil()](http://api.jquery.com/parentsUntil/) | | | (Later)
+| [.position()](http://api.jquery.com/position/) | get position | since 0.5.2 |
 | [.prependTo()](http://api.jquery.com/prependTo/) | | | (Later)
 | [.prev()](http://api.jquery.com/prev/) | | | (Later)
 | [.prevAll()](http://api.jquery.com/prevAll/) | | | (Later)
