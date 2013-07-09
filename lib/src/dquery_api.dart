@@ -238,6 +238,22 @@ abstract class ElementQuery extends DQuery<Element> {
    */
   void empty();
   
+  /** Get the combined text contents over all elements in this collection.
+   */
+  String get text;
+  
+  /** Set the text contents for all elements in this collection.
+   */
+  void set text(String value);
+  
+  /** Get the inner HTML contents of the first element.
+   */
+  String get html;
+  
+  /** Set the inner HTML contents for all elements in this collection.
+   */
+  void set html(String value);
+  
   // offset //
   /** Get the current coordinates of the first element, relative to the document.
    */

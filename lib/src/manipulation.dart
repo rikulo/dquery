@@ -41,4 +41,20 @@ List<Node> _resolveTarget(target) =>
     target is Document || target is Element ? [target] :
     target is String ? $(target) : [];
 */
-//void _manip(target)
+void _domManip(x, void f(Element elem)) {
+  
+}
+
+void _setText(Element elem, String value) {
+  elem.children.clear();
+  elem.append(new Text(value));
+}
+
+// in strong type system, no way to get to text node or document fragment
+/*
+String _getText(Node node) =>
+    node is Element ? (node as Element).text :
+    node is Document ? (node as Document).text :
+    node is DocumentFragment ? (node as DocumentFragment).text :
+    node is Text ? node.nodeValue : '';
+*/

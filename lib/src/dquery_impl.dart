@@ -417,19 +417,42 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   @override
   void empty() => _elements.forEach((Element e) => _empty(e));
   
+  @override
+  String get text =>
+      (new StringBuffer()..writeAll(_elements.map((Element elem) => elem.text)))
+      .toString();
+  
+  @override
+  void set text(String value) =>
+      _elements.forEach((Element e) => _setText(e, value));
+  
+  @override
+  String get html =>
+      isEmpty ? null : _elements.first.innerHtml;
+  
+  @override
+  void set html(String value) =>
+      _elements.forEach((Element e) => e.innerHtml = value);
+  
+  @override
   Point get offset => isEmpty ? null : _getOffset(_elements.first);
   
+  @override
   void set offset(Point value) =>
       _elements.forEach((Element e) => _setOffset(e, left: value.x, top: value.y));
   
+  @override
   void set offsetLeft(int left) =>
       _elements.forEach((Element e) => _setOffset(e, left: left));
   
+  @override
   void set offsetTop(int top) =>
       _elements.forEach((Element e) => _setOffset(e, top: top));
   
+  @override
   Point get position => isEmpty ? null : _getPosition(_elements.first);
   
+  @override
   ElementQuery get offsetParent {
     final Set<Element> results = new LinkedHashSet<Element>();
     for (Element e in _elements)
