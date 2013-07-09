@@ -95,7 +95,11 @@
 | [.unbind()](http://api.jquery.com/unbind/) | -- | | (Use .off() instead)
 | [.undelegate()](http://api.jquery.com/undelegate/) | -- | | (Use .off() instead)
 | [.unload()](http://api.jquery.com/unload/) | | | (Later)
+| [.unwrap()](http://api.jquery.com/unwrap/) | | | (Later)
 | [.width()](http://api.jquery.com/width/) | get width | since 0.5.1 | (Only getter part)
+| [.wrap()](http://api.jquery.com/wrap/) | | | (Later)
+| [.wrapAll()](http://api.jquery.com/wrapAll/) | | | (Later)
+| [.wrapInner()](http://api.jquery.com/wrapInner/) | | | (Later)
 
 ###Static Functions
 
