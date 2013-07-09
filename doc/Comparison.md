@@ -4,12 +4,16 @@
 |:-----------|:------------|:------------|:------------|
 | [.add()](http://api.jquery.com/add/) | *Dart List API* | since 0.5.0 |
 | [.addClass()](http://api.jquery.com/addClass/) | .addClass() | since 0.5.0 |
-| [.appendTo()](http://api.jquery.com/appendTo/) | | | (Later)
+| [.after()](http://api.jquery.com/after/) | .after() | since 0.5.2 |
+| [.append()](http://api.jquery.com/append/) | .append() | since 0.5.2 |
+| [.appendTo()](http://api.jquery.com/appendTo/) | .appendTo() | since 0.5.2 |
+| [.before()](http://api.jquery.com/before/) | .before() | since 0.5.2 |
 | [.bind()](http://api.jquery.com/bind/) | -- | | (Use .on() instead)
 | [.blur()](http://api.jquery.com/blur/) | | | (Later)
 | [.change()](http://api.jquery.com/change/) | | | (Later)
 | [.children()](http://api.jquery.com/children/) | .children() | since 0.5.0 |
 | [.click()](http://api.jquery.com/click/) | | | (Later)
+| [.clone()](http://api.jquery.com/clone/) | .clone() | since 0.5.2 |
 | [.closest()](http://api.jquery.com/closest/) | .closest() | since 0.5.0 |
 | [.css()](http://api.jquery.com/css/) | .css() | since 0.5.1 |
 | [.data()](http://api.jquery.com/data/) | .data.get() | since 0.5.0 | get data
@@ -66,7 +70,8 @@
 | [.parent()](http://api.jquery.com/parent/) | .parent() | since 0.5.0 |
 | [.parentsUntil()](http://api.jquery.com/parentsUntil/) | | | (Later)
 | [.position()](http://api.jquery.com/position/) | get position | since 0.5.2 |
-| [.prependTo()](http://api.jquery.com/prependTo/) | | | (Later)
+| [.prepend()](http://api.jquery.com/prepend/) | .prepend() | since 0.5.2 |
+| [.prependTo()](http://api.jquery.com/prependTo/) | .prependTo() | since 0.5.2 |
 | [.prev()](http://api.jquery.com/prev/) | | | (Later)
 | [.prevAll()](http://api.jquery.com/prevAll/) | | | (Later)
 | [.prevUntil()](http://api.jquery.com/prevUntil/) | | | (Later)
