@@ -34,7 +34,8 @@
 | [.height()](http://api.jquery.com/height/) | get height | since 0.5.1 | (Only getter part)
 | [.hide()](http://api.jquery.com/hide/) | .hide() | since 0.5.0 | (No animation)
 | [.hover()](http://api.jquery.com/hover/) | | | (Later)
-| [.html()](http://api.jquery.com/html/) | | | (Later)
+| [.html()](http://api.jquery.com/html/) | get html | since 0.5.2 |
+| | set html | since 0.5.2 | (String value only)
 | [.index()](http://api.jquery.com/index/) | *Dart List API* | since 0.5.0 |
 | [.is()](http://api.jquery.com/is/) | | | (Later)
 | [.keydown()](http://api.jquery.com/keydown/) | | | (Later)
@@ -56,9 +57,9 @@
 | [.not()](http://api.jquery.com/not/) | | | (Later)
 | [.off()](http://api.jquery.com/off/) | .off() | since 0.5.0 |
 | [.offset()](http://api.jquery.com/offset/) | get offset | since 0.5.2 |
-| | set offset | since 0.5.2 |
-| | set offsetLeft | since 0.5.2 |
-| | set offsetTop | since 0.5.2 |
+| | set offset | since 0.5.2 | (Point only)
+| | set offsetLeft | since 0.5.2 | (numeric value only)
+| | set offsetTop | since 0.5.2 | (numeric value only)
 | [.offsetParent()](http://api.jquery.com/offsetParent/) | get offsetParent | since 0.5.2 |
 | [.on()](http://api.jquery.com/on/) | .on() | since 0.5.0 |
 | [.one()](http://api.jquery.com/one/) | .one() | since 0.5.0 |
@@ -85,6 +86,8 @@
 | [.siblings()](http://api.jquery.com/siblings/) | | | (Later)
 | [.slice()](http://api.jquery.com/slice/) | | | (Later)
 | [.submit()](http://api.jquery.com/submit/) | | | (Later)
+| [.text()](http://api.jquery.com/text/) | get text | since 0.5.2 |
+| | set text | since 0.5.2 | (String value only)
 | [.toggle()](http://api.jquery.com/toggle/) | .toggle() | since 0.5.0 | (No animation)
 | [.toggleClass()](http://api.jquery.com/toggleClass/) | .toggleClass() | since 0.5.0 |
 | [.trigger()](http://api.jquery.com/trigger/) | .trigger() | since 0.5.0 |
