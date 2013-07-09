@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>manipulation-02</title>
+  </head>
+  <body>
+    <input id="input" value="<button>B</button>" />
+    <div>
+      <button id="append">append</button>
+      <button id="prepend">prepend</button>
+      <button id="after">after</button>
+      <button id="before">before</button>
+    </div>
+    <div>
+      <button id="appendTo">appendTo</button>
+      <button id="prependTo">appendTo</button>
+      (Different APIs, should act the same as Append/Prepend)
+    </div>
+    <div>
+      Some text here.
+      <div id="target" style="border: 2px solid #333">
+        Some text here.
+      </div>
+      Some text here.
+    </div>
+    <script type="application/dart" src="manipulation-02.dart"></script>
+    <script src="packages/browser/dart.js"></script>
+  </body>
+</html>

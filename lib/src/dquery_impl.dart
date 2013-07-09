@@ -74,7 +74,6 @@ abstract class _DQuery<T/* extends EventTarget*/> implements DQuery<T> {
   _DQuery _prevObject;
   
   // DQuery //
-  @override
   List<Element> _queryAll(String selector);
   
   @override
@@ -111,6 +110,7 @@ abstract class _DQuery<T/* extends EventTarget*/> implements DQuery<T> {
 
   @override
   DQuery end() => _fallback(_prevObject, () => new ElementQuery([]));
+  
   
   
   // data //
@@ -396,17 +396,29 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   void toggleClass(String name) =>
       _elements.forEach((Element e) => e.classes.toggle(name));
   
-  /*
   @override
-  void appendTo(target) {
-    // TODO: need to clone itself if appending to multiple targets
-  }
+  void appendTo(target) =>
+      _domManip(_resolveManipTarget(target), this, _appendFunc);
   
   @override
-  void prependTo(target) {
-    // TODO: need to clone itself if prepending to multiple targets
-  }
-  */
+  void prependTo(target) =>
+      _domManip(_resolveManipTarget(target), this, _prependFunc);
+  
+  @override
+  void append(content) => _domManip(this, content, _appendFunc);
+  
+  @override
+  void prepend(content) => _domManip(this, content, _prependFunc);
+  
+  @override
+  void before(content) => _domManip(this, content, _beforeFunc);
+  
+  @override
+  void after(content) => _domManip(this, content, _afterFunc);
+  
+  @override
+  ElementQuery clone([bool withDataAndEvents, bool deepWithDataAndEvents]) =>
+      pushStack(_elements.map((Element e) => _clone(e)));
   
   @override
   void detach({String selector, bool data: true}) => 

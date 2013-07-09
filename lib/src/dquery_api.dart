@@ -205,27 +205,80 @@ abstract class ElementQuery extends DQuery<Element> {
   void toggleClass(String name);
   
   // DOM element manipulation //
-  /** Insert every element in this collection to the end of the [target].
+  /** Insert every element in this collection to the end of the [target]. 
+   * If [target] refers to multiple elements, the inserted content will be
+   * cloned. In such cases, the fragment inserted to the last element in target 
+   * will be the original content. 
    * 
-   * + [target] can be a selector String, an html String, an Element, or a DQuery
+   * + [target] can be a selector String, an html String, an Element, or an 
+   * [ElementQuery].
    */
-  //void appendTo(target);
+  void appendTo(target);
   
   /** Insert every element in this collection to the beginning of the [target].
+   * If [target] refers to multiple elements, the inserted content will be
+   * cloned. In such cases, the fragment inserted to the last element in target 
+   * will be the original content. 
    * 
-   * + [target] can be a selector String, an html String, an Element, or a DQuery
+   * + [target] can be a selector String, an html String, an Element, or an 
+   * [ElementQuery].
    */
-  //void prependTo(target);
+  void prependTo(target);
   
-  //.after()
-  //.append()
-  //.before()
-  //.prepend()
+  /** Insert [content] to the end of each element in this collection.
+   * If this collection contains multiple elements, the inserted content will
+   * be cloned. In such cases, the fragment inserted to the last element in this
+   * collection will be the original content. 
+   * 
+   * + [content] can be an html String, an Element, or an [ElementQuery].
+   */
+  void append(content);
+  
+  /** Insert [content] to the beginning of each element in this collection.
+   * If this collection contains multiple elements, the inserted content will
+   * be cloned. In such cases, the fragment inserted to the last element in this
+   * collection will be the original content. 
+   * 
+   * + [content] can be an html String, an Element, or an [ElementQuery].
+   */
+  void prepend(content);
+  
+  /** Insert [content] before each element in this collection.
+   * If this collection contains multiple elements, the inserted content will
+   * be cloned. In such cases, the fragment inserted to the last element in this
+   * collection will be the original content. 
+   * 
+   * + [content] can be an html String, an Element, or an [ElementQuery].
+   */
+  void before(content);
+  
+  /** Insert [content] after each element in this collection.
+   * If this collection contains multiple elements, the inserted content will
+   * be cloned. In such cases, the fragment inserted to the last element in this
+   * collection will be the original content. 
+   * 
+   * + [content] can be an html String, an Element, or an [ElementQuery].
+   */
+  void after(content);
   
   //.replaceAll()
   //.replaceWith()
   
-  // wrap? later?
+  //.unwrap()
+  //.wrap()
+  //.wrapAll()
+  //.wrapInner()
+  
+  /** Create a deep copy of the elements in this collection.
+   * 
+   * + If [withDataAndEvents] is true, the [data] on the elements are cloned as 
+   * well. Default: false.
+   * 
+   * + In addition to above, is [deepWithDataAndEvents] is also true, the [data]
+   * on the descendants of the elements are also cloned. Default: same as
+   * [withDataAndEvents].
+   */
+  ElementQuery clone([bool withDataAndEvents, bool deepWithDataAndEvents]);
   
   /** Remove the elements from the DOM.
    * 
