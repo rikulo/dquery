@@ -201,7 +201,7 @@ class _DocQuery extends _DQuery<HtmlDocument> with ListMixin<HtmlDocument> imple
   }
   
   @override
-  List<Element> _queryAll(String selector) => _document.queryAll(selector);
+  List<Element> _queryAll(String selector) => _document.querySelectorAll(selector);
   
   Window get _window => _document.window;
   
@@ -323,11 +323,11 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
       case 0:
         return [];
       case 1:
-        return first.queryAll(selector);
+        return first.querySelectorAll(selector);
       default:
         final List<Element> matched = new List<Element>();
         for (Element elem in _elements)
-          matched.addAll(elem.queryAll(selector));
+          matched.addAll(elem.querySelectorAll(selector));
         return DQuery.unique(matched);
     }
   }
