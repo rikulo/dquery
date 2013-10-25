@@ -5,7 +5,7 @@ void main() {
   
   final Point offset = $('#target').offset;
   
-  final Element info = query('#info');
+  final Element info = querySelector('#info');
   info.innerHtml = "${info.innerHtml} (${offset.x}, ${offset.y})";
   
   $('span').offset = offset;

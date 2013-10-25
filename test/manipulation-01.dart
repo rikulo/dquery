@@ -3,7 +3,7 @@ import 'package:dquery/dquery.dart';
 
 void main() {
   
-  final InputElement input = query('#input');
+  final InputElement input = querySelector('#input');
   final ElementQuery $html = $('#html');
   final ElementQuery $text = $('#text');
   

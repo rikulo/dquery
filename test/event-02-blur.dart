@@ -7,8 +7,8 @@ void main() {
   int docHit = 1;
   int elemHit = 1;
   
-  final Element docRes = query('#doc-result');
-  final Element elemRes = query('#elem-result');
+  final Element docRes = querySelector('#doc-result');
+  final Element elemRes = querySelector('#elem-result');
   
   $document().on('blur', (DQueryEvent e) {
     docRes.innerHtml = '${docHit++}';

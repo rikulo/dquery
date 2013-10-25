@@ -3,7 +3,7 @@ import 'package:dquery/dquery.dart';
 
 void main() {
   
-  final InputElement input = query('#input');
+  final InputElement input = querySelector('#input');
   final ElementQuery $target = $('#target');
   
   $('#append').on('click', (DQueryEvent event) => $target.append(input.value));
