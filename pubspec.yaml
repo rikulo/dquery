@@ -9,5 +9,4 @@ homepage: https://github.com/rikulo/dquery
 documentation: http://blog.rikulo.org/posts/2013/May/General/bootjack-and-dquery/ 
 dependencies:
   browser: any
-  meta: any
   rikulo_commons: any
