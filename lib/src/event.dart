@@ -86,7 +86,7 @@ class _EventUtil {
         
         // special setup: skipped for now
         
-        elem.$dom_addEventListener(type, eventHandle, false);
+        elem.addEventListener(type, eventHandle, false);
         return new _HandleObjectContext();
       });
       
@@ -237,7 +237,7 @@ class _EventUtil {
     String bubbleType = null;
     _SpecialEventHandling special = _getSpecial(type);
     if (!onlyHandlers && !special.noBubble && elem is Node) {
-      Node n = elem as Node;
+      Node n = elem;
       bubbleType = _fallback(special.delegateType, () => type);
       final bool focusMorph = _focusMorphMatch(bubbleType, type);
       
@@ -354,7 +354,7 @@ class _EventUtil {
           final String sel = "${trim(handleObj.selector)} ";
           if (matches.putIfAbsent(sel, () => (cur is Element) &&
               (handleObj.needsContext ? $(sel, elem).contains(cur) : 
-              (cur as Element).matches(sel)))) {
+              cur.matches(sel)))) {
             matched.add(handleObj);
           }
         }
@@ -375,7 +375,7 @@ class _EventUtil {
   }
   
   static EventTarget parentNode(EventTarget target) =>
-      target is Node ? (target as Node).parentNode : null;
+      target is Node ? target.parentNode : null;
   
   static DQueryEvent fix(Event event) {
     // TODO: find properties to copy from fix hook
@@ -523,7 +523,7 @@ final Map<String, _SpecialEventHandling> _SPECIAL_HANDLINGS = new HashMap<String
   'click': new _SpecialEventHandling(trigger: (EventTarget elem, data) {
     // jQuery: For checkbox, fire native event so checked state will be right
     if (elem is CheckboxInputElement) {
-      (elem as CheckboxInputElement).click();
+      elem.click();
       return false;
     }
     return true;
@@ -532,7 +532,7 @@ final Map<String, _SpecialEventHandling> _SPECIAL_HANDLINGS = new HashMap<String
   'focus': new _SpecialEventHandling(trigger: (EventTarget elem, data) {
     // jQuery: Fire native event if possible so blur/focus sequence is correct
     if (elem != _activeElement() && elem is Element) {
-      (elem as Element).focus();
+      elem.focus();
       return false;
     }
     return true;

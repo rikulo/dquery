@@ -4,7 +4,6 @@ import 'dart:math';
 import 'dart:html';
 import 'dart:html_common';
 import 'dart:collection';
-import 'package:meta/meta.dart';
 
 part 'src/util/util.dart';
 part 'src/dquery_api.dart';

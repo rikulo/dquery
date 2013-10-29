@@ -5,7 +5,7 @@ Point _getOffset(Element elem) {
   if (elem == null)
     return null;
   
-  final Document doc = elem.document;
+  final Document doc = elem.ownerDocument;
   if (doc == null)
     return null;
   

@@ -7,7 +7,7 @@ Map<String, String> _elemDisplay = new HashMap<String, String>.from({
 bool _isHidden(Element elem) =>
     elem.style.display == 'none' || 
     elem.getComputedStyle().display == 'none' ||
-    !elem.document.contains(elem); // TODO: do experiment
+    !elem.ownerDocument.contains(elem); // TODO: do experiment
 
 void _showHide(List<Element> elements, bool show) {
   
