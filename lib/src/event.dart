@@ -85,7 +85,6 @@ class _EventUtil {
       _HandleObjectContext handleObjCtx = events.putIfAbsent(type, () {
         
         // special setup: skipped for now
-        
         elem.addEventListener(type, eventHandle, false);
         return new _HandleObjectContext();
       });
@@ -354,7 +353,7 @@ class _EventUtil {
           final String sel = "${trim(handleObj.selector)} ";
           if (matches.putIfAbsent(sel, () => (cur is Element) &&
               (handleObj.needsContext ? $(sel, elem).contains(cur) : 
-              cur.matches(sel)))) {
+              (cur as Element).matches(sel)))) {
             matched.add(handleObj);
           }
         }

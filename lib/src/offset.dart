@@ -9,7 +9,7 @@ Point _getOffset(Element elem) {
   if (doc == null)
     return null;
   
-  Point box = new Point();
+  Point box = new Point(0, 0);
   final Element docElem = doc.documentElement;
   // jQuery: Make sure it's not a disconnected DOM node
   /*
@@ -82,7 +82,7 @@ Point _getPosition(Element elem) {
   
   final ElementQuery $elem = $(elem);
   Point offset;
-  Point parentOffset = new Point();
+  Point parentOffset = new Point(0, 0);
   
   // jQuery: Fixed elements are offset from window (parentOffset = {top:0, left: 0}, because it is it's only offset parent
   if (_getCss(elem, 'position') == 'fixed') {
