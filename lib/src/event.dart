@@ -122,7 +122,7 @@ class _EventUtil {
       // jQuery: Unbind all events (on this namespace, if provided) for the element
       if (type.isEmpty) {
         final String ns = namespaces.join('.');
-        for (String t in events.keys)
+        for (String t in events.keys.toList())
           remove(elem, "$t.$ns", handler, selector, true);
         continue;
       }
