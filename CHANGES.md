@@ -1,5 +1,9 @@
 #CHANGES
 
+**0.5.4**
+
+* Fix event name space.
+
 **0.5.2**
 
 * Add getter/setter of offset, getter of offsetLeft, offsetTop
