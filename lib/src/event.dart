@@ -225,11 +225,8 @@ class _EventUtil {
     //event._isTrigger = onlyHandlers ? 2 : 3;
     if (!namespaces.isEmpty)
       event._namespace = namespaces.join('.');
-    // TODO
-    /* src:
-    event.namespace_re = event.namespace ?
-        new RegExp( "(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|$)" ) : null;
-    */
+    event._namespace_re = event.namespace != null ?
+        new RegExp( '(^|\\.)${namespaces.join("\\.(?:.*\\.|)")}(\\.|\$)') : null;
     
     // jQuery: Determine event propagation path in advance, per W3C events spec (#9951)
     //         Bubble up to document, then to window; watch for a global ownerDocument var (#9724)
@@ -313,11 +310,13 @@ class _EventUtil {
         if (dqevent.isImmediatePropagationStopped) break;
         // jQuery: Triggered event must either 1) have no namespace, or
         //         2) have namespace(s) a subset or equal to those in the bound event (both can have no namespace).
-        final List<String> eventns = dqevent.namespace == null ? [] : dqevent.namespace.split('.');
-        final List<String> hobjns = handleObj.namespace == null ? [] : handleObj.namespace.split('.');
-        if (_subsetOf(eventns, hobjns)) {
-          dqevent._handleObj = handleObj;
-          handleObj.handler(dqevent);
+        if (dqevent.namespace_re == null || dqevent.namespace_re.hasMatch(handleObj.namespace)) {
+          final List<String> eventns = dqevent.namespace == null ? [] : dqevent.namespace.split('.');
+          final List<String> hobjns = handleObj.namespace == null ? [] : handleObj.namespace.split('.');
+          if (_subsetOf(eventns, hobjns)) {
+            dqevent._handleObj = handleObj;
+            handleObj.handler(dqevent);
+          }
         }
       }
     }
@@ -601,6 +600,9 @@ class DQueryEvent {
    */
   String get namespace => _namespace;
   String _namespace; // TODO: maybe should be List<String> ?
+  
+  RegExp get namespace_re => _namespace_re;
+  RegExp _namespace_re;
   
   _HandleObject _handleObj;
   final Event _simulatedEvent; // TODO: check usage
