@@ -30,8 +30,13 @@ class _Storage {
     return space;
   }
   
-  void remove(Node owner, {key, List keys}) {
-    // TODO: check what jquery really does here
+  void remove(Node owner, String key) {
+    Map space = _cache[owner];
+    if (space != null) {
+      space.remove(key);
+      if (space.isEmpty)
+        _cache[owner] = null;
+    }
   }
   
   bool hasData(owner) {
@@ -72,7 +77,7 @@ class Data {
   /** Delete the data of the given [key].
    */
   void remove(String key) =>
-      _dq.forEach((t) => _dataUser.remove(t, key: key));
+      _dq.forEach((t) => _dataUser.remove(t, key));
   
 }
 

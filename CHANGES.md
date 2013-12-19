@@ -3,6 +3,7 @@
 **0.5.4**
 
 * Fix event name space.
+* Fix data remove.
 
 **0.5.2**
 

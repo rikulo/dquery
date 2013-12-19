@@ -2,8 +2,6 @@
 import 'package:dquery/dquery.dart';
 
 void main() {
-  print('in');
-  
   $('#e').on('show',(DQueryEvent e) {
     $('#msg').append('<div>show<br/></div>');
   });
