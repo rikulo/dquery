@@ -59,7 +59,7 @@ completed = function() {
 };
 */
 
-abstract class _DQuery<T/* extends EventTarget*/> implements DQuery<T> {
+abstract class _DQuery<T extends EventTarget> implements DQuery<T> {
   
   // skipped unless necessary
   // void _dquery(DQuery dquery) {}

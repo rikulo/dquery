@@ -6,6 +6,7 @@
 #
 #Copyright (C) 2012 Potix Corporation. All Rights Reserved.
 #
+defdir=web/client/dart
 SDK=/usr/dart/dart-sdk
 if [ ! -d $SDK ] ; then
 	echo $SDK not found
@@ -18,18 +19,22 @@ else
 	dart2js=$SDK/bin/dart2js
 fi
 
-if [ $# = 0 ] ; then
+if [ "$1" == "--help" ] || [ "$1" == "-h" ] ; then
 	echo d2j - Compile Dart to Javascript
 	echo
 	echo Usage:
+	echo "  d2j"
+	echo "  d2j --help"
 	echo "  d2j --cleanup"
 	echo "  d2j [--debug] file1.dart directory1 file2.dart..."
 	echo
-	echo "If the directory is specified all dart files containing main() will be compiled"
+	echo "* If a directory is specified, all dart files containing main() will be compiled"
+	echo "* If nothing is specified, $defdir is assumed"
 	exit 1
 fi
 
 if [ "$1" == "--cleanup" ] ; then
+	echo cleanup
 	find -name '*.dart.js' | xargs rm -f
 	find -name '*.dart.js.map' | xargs rm -f
 	exit
@@ -42,11 +47,13 @@ function d2j {
 	if [ ${f%.dart} != $f ] ; then
 		grep -w 'main[(] *[)]' $f > /dev/null
 		if [ "$?" = "0" ] ; then #found
+			echo $dart2js $minify -o$f.js $(pwd)/$f
 			$dart2js $minify -o$f.js $f
 			if [ "$?" = "0" ] ; then
 				if [ "$minify" = "--minify" ] ; then
 					rm $f.js.map
 					rm $f.js.deps
+					rm $f.precompiled.js
 				fi
 			else
 				exit 1
@@ -59,7 +66,7 @@ function d2j {
 function d2jx {
 	for f in *; do
 		if [ -d $f ] ; then
-			if [ $f != dartdoc ] && [ $f != issues ] ; then
+			if [ $f != dartdoc ] && [ $f != issues ] && [ $f != packages ] ; then
 				(
 				cd $f
 				d2jx
@@ -70,12 +77,9 @@ function d2jx {
 		fi
 	done
 }
-for f in $* ; do
-	if [ "$f" == "--debug" ] ; then
-		minify=
-	elif [ "$f" == "--minify" ] ; then
-		minify=--minify
-	elif [ -f "$f" ] ; then
+function d2jy {
+	f=$1
+	if [ -f "$f" ] ; then
 		warning=true
 		d2j "$f"
 	elif [ -d "$f" ] ; then
@@ -87,4 +91,26 @@ for f in $* ; do
 	else
 		echo "$f not found"
 	fi
-done
+}
+
+if [ "$1" == "--debug" ] ; then
+	minify=
+	shift
+elif [ "$f" == "--minify" ] ; then
+	minify=--minify
+	shift
+fi
+
+if [ $# == 0 ] ; then
+	if [ -d "$defdir" ] ; then
+		echo "Compile $defdir..."
+		d2jy "$defdir"
+	else
+		echo "Directory not found: $defdir"
+		exit 1
+	fi
+else
+	for f in $* ; do
+		d2jy $f
+	done
+fi
