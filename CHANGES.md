@@ -4,6 +4,7 @@
 
 * Fix event name space.
 * Fix data remove.
+* Fine tune JavaScript compatibility.
 
 **0.5.2**
 
