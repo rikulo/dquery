@@ -11,4 +11,3 @@ environment:
   sdk: ">=1.2.0"
 dependencies:
   browser: any
-  rikulo_commons: any
