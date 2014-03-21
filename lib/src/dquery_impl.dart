@@ -424,6 +424,13 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   @override
   int get height => _elements.isEmpty ? null : _getElementHeight(_elements.first);
   
+  @override
+  void reflow() {
+    _elements.forEach((Element e) {
+      if (e.offsetWidth == null)
+        ; //TODO: refer to Issue 17366. It works now but might need something more
+    });
+  }
 }
 
 class _ShadowRootQuery extends _Query<ShadowRoot> with ListMixin<ShadowRoot> {

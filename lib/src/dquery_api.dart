@@ -128,7 +128,7 @@ abstract class DQuery<T> extends Query<T> {
   /** Retrieve the height of the first element of this collection.
    */
   int get height;
-  
+
 }
 
 /** A query object of a collection of [Element].
@@ -329,4 +329,10 @@ abstract class ElementQuery extends DQuery<Element> {
    */
   ElementQuery get offsetParent;
   
+  /** Force the browser to reflow the given element to apply the latest
+   * CSS changes.
+   * Otherwise, the browser will defer the CSS changes later (i.e., handled
+   * asynchronously)
+   */
+  void reflow();
 }
