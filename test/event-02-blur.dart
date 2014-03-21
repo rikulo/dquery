@@ -10,12 +10,12 @@ void main() {
   final Element docRes = querySelector('#doc-result');
   final Element elemRes = querySelector('#elem-result');
   
-  $document().on('blur', (DQueryEvent e) {
+  $document().on('blur', (QueryEvent e) {
     docRes.innerHtml = '${docHit++}';
     
   }, selector: '#input');
   
-  $('#input').on('blur', (DQueryEvent e) {
+  $('#input').on('blur', (QueryEvent e) {
     elemRes.innerHtml = '${elemHit++}';
     
   });

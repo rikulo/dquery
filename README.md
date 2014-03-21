@@ -49,15 +49,15 @@ Manipulate selected elements.
 
 Register event handlers on queried elements, or trigger an event by API.
 
-	$('#myBtn').on('click', (DQueryEvent e) {
+	$('#myBtn').on('click', (QueryEvent e) {
 		...
 	});
 	$('#myBtn').trigger('click', data: 'my data');
 
-There are query objects of HtmlDocument and Window too.
+There are query objects of `Document` and `Window` too.
 
-	DocumentQuery $doc = $document();
-	WindowQuery $win = $window();
+	Query $doc = $document();
+	Query $win = $window();
 
 Check the [API reference](http://api.rikulo.org/dquery/latest/dquery.html) for more features.
 

@@ -27,7 +27,7 @@ class _EventUtil {
   
   static final Expando<String> guids = new Expando<String>();
   
-  static void add(EventTarget elem, String types, DQueryEventListener handler, String selector) {
+  static void add(EventTarget elem, String types, QueryEventListener handler, String selector) {
     
     final bool hasSelector = selector != null && !selector.isEmpty;
     
@@ -100,7 +100,7 @@ class _EventUtil {
   }
   
   // jQuery: Detach an event or set of events from an element
-  static void remove(EventTarget elem, String types, DQueryEventListener handler, 
+  static void remove(EventTarget elem, String types, QueryEventListener handler, 
                      String selector, [bool mappedTypes = false]) {
     
     final Map<String, _HandleObjectContext> events = _dataPriv.get(elem, 'events');
@@ -193,10 +193,10 @@ class _EventUtil {
   static String _triggered;
   
   static void trigger(String type, data, EventTarget elem, [bool onlyHandlers = false]) {
-    _EventUtil.triggerEvent(new DQueryEvent(type, target: elem, data: data), onlyHandlers);
+    _EventUtil.triggerEvent(new QueryEvent(type, target: elem, data: data), onlyHandlers);
   }
   
-  static void triggerEvent(DQueryEvent event, [bool onlyHandlers = false]) {
+  static void triggerEvent(QueryEvent event, [bool onlyHandlers = false]) {
     
     EventTarget elem = _fallback(event.target, () => document);
     
@@ -292,7 +292,7 @@ class _EventUtil {
     }
   }
   
-  static void dispatch(EventTarget elem, DQueryEvent dqevent) {
+  static void dispatch(EventTarget elem, QueryEvent dqevent) {
     
     final Map<String, _HandleObjectContext> events = _getEvents(elem);
     final _HandleObjectContext handleObjCtx = _getHandleObjCtx(elem, dqevent.type);
@@ -323,7 +323,7 @@ class _EventUtil {
     
   }
   
-  static List<_HandlerQueueEntry> handlers(EventTarget elem, DQueryEvent dqevent, 
+  static List<_HandlerQueueEntry> handlers(EventTarget elem, QueryEvent dqevent, 
       _HandleObjectContext handleObjCtx) {
     
     final List<_HandlerQueueEntry> handlerQueue = new List<_HandlerQueueEntry>();
@@ -349,7 +349,7 @@ class _EventUtil {
         final Map<String, bool> matches = new HashMap<String, bool>();
         final List<_HandleObject> matched = new List<_HandleObject>();
         for (_HandleObject handleObj in delegates) {
-          final String sel = "${trim(handleObj.selector)} ";
+          final String sel = "${_trim(handleObj.selector)} ";
           if (matches.putIfAbsent(sel, () => (cur is Element) &&
               (handleObj.needsContext ? $(sel, elem).contains(cur) : 
               (cur as Element).matches(sel)))) {
@@ -375,9 +375,9 @@ class _EventUtil {
   static EventTarget parentNode(EventTarget target) =>
       target is Node ? target.parentNode : null;
   
-  static DQueryEvent fix(Event event) {
+  static QueryEvent fix(Event event) {
     // TODO: find properties to copy from fix hook
-    final DQueryEvent dqevent = new DQueryEvent.from(event);
+    final QueryEvent dqevent = new QueryEvent.from(event);
     
     // jQuery: Support: Chrome 23+, Safari?
     //         Target should not be a text node (#504, #13143)
@@ -401,7 +401,7 @@ class _EventUtil {
     //         Fake originalEvent to avoid donor's stopPropagation, but if the
     //         simulated event prevents default then we do the same on the donor.
     
-    DQueryEvent e;
+    QueryEvent e;
     // TODO
     /*
     var e = jQuery.extend(
@@ -481,7 +481,7 @@ class _HandleObject {
   final int guid;
   final String selector, type, origType, namespace;
   final bool needsContext;
-  final DQueryEventListener handler;
+  final QueryEventListener handler;
   
 }
 
@@ -499,7 +499,7 @@ class _SpecialEventHandling {
   final Function trigger; // bool f(Element elem, data)
   //Function _default; // bool f(Document document, data)
   final String delegateType, bindType;
-  //DQueryEventListener postDispatch, handle;
+  //QueryEventListener postDispatch, handle;
   
   static final _SpecialEventHandling EMPTY = new _SpecialEventHandling();
   
@@ -545,15 +545,15 @@ final Map<String, _SpecialEventHandling> _SPECIAL_HANDLINGS = new HashMap<String
   }, delegateType: 'focusout')
 });
 
-/** The handler type for [DQueryEvent], which is the DQuery analogy of 
+/** The handler type for [QueryEvent], which is the DQuery analogy of 
  * [EventListener].
  */
-typedef void DQueryEventListener(DQueryEvent event); 
+typedef void QueryEventListener(QueryEvent event); 
 
 /** A wrapping of browser [Event], to attach more information such as custom
  * event data and name space, etc. 
  */
-class DQueryEvent {
+class QueryEvent {
   
   /** The time stamp at which the event occurs. If the event is constructed 
    * from a native DOM [Event], it uses the time stamp of that event;
@@ -561,7 +561,7 @@ class DQueryEvent {
    */
   final int timeStamp;
   
-  /** The original event, if any. If this [DQueryEvent] was triggered by browser,
+  /** The original event, if any. If this [QueryEvent] was triggered by browser,
    * it will contain an original event; if triggered by API, this property will
    * be null.
    */
@@ -611,17 +611,17 @@ class DQueryEvent {
   
   //final Map attributes = new HashMap();
   
-  /** Construct a DQueryEvent from a native browser event.
+  /** Construct a QueryEvent from a native browser event.
    */
-  DQueryEvent.from(Event event, {data}) : 
+  QueryEvent.from(Event event, {data}) : 
   this._(event, null, event.type, event.target, event.timeStamp, data);
   
-  /** Construct a DQueryEvent with given [type].
+  /** Construct a QueryEvent with given [type].
    */
-  DQueryEvent(String type, {EventTarget target, data}) : 
+  QueryEvent(String type, {EventTarget target, data}) : 
   this._(null, new Event(type), type, target, _now(), data); // TODO: move target away
   
-  DQueryEvent._(this.originalEvent, this._simulatedEvent, this._type, 
+  QueryEvent._(this.originalEvent, this._simulatedEvent, this._type, 
       this._target, this.timeStamp, this.data);
   
   /// Return true if [preventDefault] was ever called in this event.

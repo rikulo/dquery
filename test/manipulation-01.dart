@@ -7,7 +7,7 @@ void main() {
   final ElementQuery $html = $('#html');
   final ElementQuery $text = $('#text');
   
-  $('#go').on('click', (DQueryEvent event) {
+  $('#go').on('click', (QueryEvent event) {
     $html.html = input.value;
     $text.text = input.value;
   });

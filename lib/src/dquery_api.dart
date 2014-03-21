@@ -5,11 +5,12 @@ part of dquery;
 // TODO: check every incoming List<Element> of ElementQuery
 // TODO: on() handler/selector argument position issue
 
-/** A query object that wraps around DOM Elements, HtmlDocument, or Window, 
+/** A query object that wraps around DOM Elements, `HTMLDocument`,
+ * `Window` and `ShadowRoot`
  * which offers API to register event listeners in a batch, or to retrieve
  * other query objects via selectors.
  */
-abstract class DQuery<T> implements List<T> {
+abstract class Query<T> implements List<T> {
   
   // static methods //
   /** Return a sorted List of elements with duplicated items removed.
@@ -17,7 +18,7 @@ abstract class DQuery<T> implements List<T> {
   static List<Element> unique(List<Element> elements) => _unique(elements);
   
   // http://api.jquery.com/context/
-  /** The DOM node context originally passed to DQuery; if none was passed 
+  /** The DOM node context originally passed to Query; if none was passed 
    * then context will likely be the document.
    */
   get context;
@@ -35,19 +36,19 @@ abstract class DQuery<T> implements List<T> {
   ElementQuery find(String selector); // TODO: need to fix for '> a', '+ a', '~ a'
   
   // skipped unless necessary
-  //DQuery find(DQuery dquery); // requires filter()
-  //DQuery find(Element element);
+  //Query find(Query dquery); // requires filter()
+  //Query find(Element element);
   
   // http://api.jquery.com/pushStack/
-  /** Add a collection of DOM elements onto the DQuery stack.
+  /** Add a collection of DOM elements onto the Query stack.
    */
   ElementQuery pushStack(List<Element> elems);
   
-  /** Pops out the top [DQuery] object in the stack and retrieve the previous one. 
-   * If there is no previous [DQuery], an empty [DQuery] will be returned.
+  /** Pops out the top [Query] object in the stack and retrieve the previous one. 
+   * If there is no previous [Query], an empty [Query] will be returned.
    * @see pushStack
    */
-  DQuery end();
+  Query end();
   
   // data //
   /** The interface to access custom element data.
@@ -61,7 +62,7 @@ abstract class DQuery<T> implements List<T> {
    * be triggered.
    * + If [data] is provided, you can retrieve it in [event.data] in the handler.
    */
-  void on(String types, DQueryEventListener handler, {String selector});
+  void on(String types, QueryEventListener handler, {String selector});
   
   /** Register a one-time [handler] for events of given [types]. Once called, 
    * the handler will be unregistered.
@@ -70,12 +71,12 @@ abstract class DQuery<T> implements List<T> {
    * be triggered.
    * + If [data] is provided, you can retrieve it in [event.data] in the handler.
    */
-  void one(String types, DQueryEventListener handler, {String selector});
+  void one(String types, QueryEventListener handler, {String selector});
 
   /** Unregister a [handler] for events of given types.
    * // TODO
    */
-  void off(String types, {String selector, DQueryEventListener handler});
+  void off(String types, {String selector, QueryEventListener handler});
   
   /** Trigger an event of given [type] on all matched elements, with given 
    * [data] if provided.
@@ -85,7 +86,7 @@ abstract class DQuery<T> implements List<T> {
   /** Trigger the given [event] on all matched elements, with given [data] if
    * provided.
    */
-  void triggerEvent(DQueryEvent event);
+  void triggerEvent(QueryEvent event);
   
   /** Trigger an event of given [type] on the first (if any) matched element, 
    * with given [data] if provided. However, only the registered handlers will
@@ -93,8 +94,12 @@ abstract class DQuery<T> implements List<T> {
    */
   void triggerHandler(String type, {data});
 
-  // traversing //
-  
+}
+
+/** A query object that wraps around tangible objects, such as
+ * DOM Elements, `HtmlDocument` and `Window`,
+ */
+abstract class DQuery<T> extends Query<T> {
   // offset //
   /** Get the current horizontal position of the scroll bar for the first element
    * in this collection.
@@ -124,18 +129,6 @@ abstract class DQuery<T> implements List<T> {
    */
   int get height;
   
-}
-
-/** A query object of an [HtmlDocument].
- */
-abstract class DocumentQuery extends DQuery<HtmlDocument> {
-  factory DocumentQuery([HtmlDocument document]) => new _DocQuery(document);
-}
-
-/** A query object of a [Window].
- */
-abstract class WindowQuery extends DQuery<Window> {
-  factory WindowQuery([Window window]) => new _WinQuery(window);
 }
 
 /** A query object of a collection of [Element].

@@ -2,14 +2,14 @@
 import 'package:dquery/dquery.dart';
 
 void main() {
-  $('#addBtn').on('click', (DQueryEvent e) {
+  $('#addBtn').on('click', (QueryEvent e) {
     $('#e').data.set('time', new DateTime.now());
   });
-  $('#rmBtn').on('click', (DQueryEvent e) {
+  $('#rmBtn').on('click', (QueryEvent e) {
     $('#e').data.remove('time');
   });
   
-  $('#showBtn').on('click', (DQueryEvent e) {
+  $('#showBtn').on('click', (QueryEvent e) {
     Data d = $('#e').data;
     $('#msg').append('<div>time: ${d.get("time")}<br/></div>');
   });

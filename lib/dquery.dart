@@ -40,7 +40,7 @@ ElementQuery $(selector, [context]) {
       return (context as DQuery).find(selector);
       
     } else if (context is Document) {
-      return new DocumentQuery(context).find(selector);
+      return $document(context).find(selector);
       
     } else if (context is Element) {
       return new ElementQuery([context]).find(selector);
@@ -62,10 +62,14 @@ ElementQuery $(selector, [context]) {
 /** Return a [DocumentQuery] wrapping the given [document]. If [document] is 
  * omitted, the default document instance is assumed.
  */
-DocumentQuery $document([HtmlDocument document]) => new DocumentQuery(document);
+DQuery $document([Document document]) => new _DocumentQuery(document);
 
 /** Return a [WindowQuery] wrapping the given [window]. If [window] is omitted,
  * the default window instance is used.
  */
-WindowQuery $window([Window window]) => new WindowQuery(window);
+DQuery $window([Window window]) => new _WindowQuery(window);
 
+/** Return a [WindowQuery] wrapping the given [window]. If [window] is omitted,
+ * the default window instance is used.
+ */
+Query $shadowRoot(ShadowRoot shadowRoot) => new _ShadowRootQuery(shadowRoot);

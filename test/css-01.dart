@@ -2,15 +2,15 @@ import 'package:dquery/dquery.dart';
 
 void main() {
   
-  $('#show').on('click', (DQueryEvent e) {
+  $('#show').on('click', (QueryEvent e) {
     $(':checked + .target').show();
   });
   
-  $('#hide').on('click', (DQueryEvent e) {
+  $('#hide').on('click', (QueryEvent e) {
     $(':checked + .target').hide();
   });
   
-  $('#toggle').on('click', (DQueryEvent e) {
+  $('#toggle').on('click', (QueryEvent e) {
     $(':checked + .target').toggle();
   });
   

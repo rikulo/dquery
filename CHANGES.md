@@ -1,5 +1,11 @@
 #CHANGES
 
+**0.6.0**
+
+* Query is added for query any object including shadow roots.
+* DocumentQuery and WindowQuery are removed, and replaced with DQuery.
+* DQueryEvent is renamed to QueryEvent.
+
 **0.5.4**
 
 * Fix event name space.

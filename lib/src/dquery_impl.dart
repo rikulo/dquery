@@ -3,63 +3,8 @@ part of dquery;
 
 // TODO: may simplify _first and _forEachEventTarget()
 
-/*
-// The deferred used on DOM ready
-readyList,
-*/
-
-/*
-// Use the correct document accordingly with window argument (sandbox)
-location = window.location,
-document = window.document,
-docElem = document.documentElement,
-*/
-
-/*
-// List of deleted data cache ids, so we can reuse them
-core_deletedIds = [],
-*/
-/*
-// Save a reference to some core methods
-core_concat = core_deletedIds.concat,
-core_push = core_deletedIds.push,
-core_slice = core_deletedIds.slice,
-core_indexOf = core_deletedIds.indexOf,
-core_toString = class2type.toString,
-core_hasOwn = class2type.hasOwnProperty,
-core_trim = core_version.trim,
-  // Used for matching numbers
-core_pnum = /[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/.source,
-
-// Used for splitting on whitespace
-core_rnotwhite = /\S+/g,
-
-// A simple way to check for HTML strings
-// Prioritize #id over <tag> to avoid XSS via location.hash (#9521)
-// Strict HTML recognition (#11290: must start with <)
-rquickExpr = /^(?:(<[\w\W]+>)[^>]*|#([\w-]*))$/,
-
-// Match a standalone tag
-rsingleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/,
-
-// Matches dashed string for camelizing
-rmsPrefix = /^-ms-/,
-rdashAlpha = /-([\da-z])/gi,
-
-// Used by jQuery.camelCase as callback to replace()
-fcamelCase = function( all, letter ) {
-  return letter.toUpperCase();
-},
-
-// The ready event handler and self cleanup method
-completed = function() {
-  document.removeEventListener( "DOMContentLoaded", completed, false );
-  window.removeEventListener( "load", completed, false );
-  jQuery.ready();
-};
-*/
-
-abstract class _DQuery<T extends EventTarget> implements DQuery<T> {
+///Skeltal implementation of [Query]
+abstract class _Query<T extends EventTarget> implements Query<T> {
   
   // skipped unless necessary
   // void _dquery(DQuery dquery) {}
@@ -71,7 +16,7 @@ abstract class _DQuery<T extends EventTarget> implements DQuery<T> {
   get context => _context;
   var _context;
 
-  _DQuery _prevObject;
+  _Query _prevObject;
   
   // DQuery //
   List<Element> _queryAll(String selector);
@@ -95,23 +40,8 @@ abstract class _DQuery<T extends EventTarget> implements DQuery<T> {
       .._prevObject = this
       .._context = _context;
   
-  /*
-  eq: function( i ) {
-    var len = this.length,
-    j = +i + ( i < 0 ? len : 0 );
-    return this.pushStack( j >= 0 && j < len ? [ this[j] ] : [] );
-  },
-  map: function( callback ) {
-    return this.pushStack( jQuery.map(this, function( elem, i ) {
-      return callback.call( elem, i, elem );
-    }));
-  },
-  */
-
   @override
   DQuery end() => _fallback(_prevObject, () => new ElementQuery([]));
-  
-  
   
   // data //
   @override
@@ -120,21 +50,21 @@ abstract class _DQuery<T extends EventTarget> implements DQuery<T> {
   
   // event //
   @override
-  void on(String types, DQueryEventListener handler, {String selector}) {
+  void on(String types, QueryEventListener handler, {String selector}) {
     _on(types, handler, selector, false);
   }
   
   @override
-  void one(String types, DQueryEventListener handler, {String selector}) {
+  void one(String types, QueryEventListener handler, {String selector}) {
     _on(types, handler, selector, true);
   }
   
-  void _on(String types, DQueryEventListener handler, String selector, bool one) {
+  void _on(String types, QueryEventListener handler, String selector, bool one) {
     if (handler == null)
       return;
     
     // TODO: handle guid for removal
-    DQueryEventListener h = !one ? handler : (DQueryEvent dqevent) {
+    QueryEventListener h = !one ? handler : (QueryEvent dqevent) {
       // jQuery: Can use an empty set, since event contains the info
       _offEvent(dqevent);
       handler(dqevent);
@@ -144,11 +74,11 @@ abstract class _DQuery<T extends EventTarget> implements DQuery<T> {
   }
   
   @override
-  void off(String types, {String selector, DQueryEventListener handler}) =>
+  void off(String types, {String selector, QueryEventListener handler}) =>
       forEach((EventTarget t) => _EventUtil.remove(t, types, handler, selector));
   
   // utility refactored from off() to make type clearer
-  static void _offEvent(DQueryEvent dqevent) {
+  static void _offEvent(QueryEvent dqevent) {
     final _HandleObject handleObj = dqevent._handleObj;
     final String namespace = handleObj.namespace;
     final String type = namespace != null && !namespace.isEmpty ? 
@@ -161,7 +91,7 @@ abstract class _DQuery<T extends EventTarget> implements DQuery<T> {
       forEach((EventTarget t) => _EventUtil.trigger(type, data, t));
   
   @override
-  void triggerEvent(DQueryEvent event) =>
+  void triggerEvent(QueryEvent event) =>
       forEach((EventTarget t) => _EventUtil.triggerEvent(event.._target = t));
   
   @override
@@ -174,21 +104,22 @@ abstract class _DQuery<T extends EventTarget> implements DQuery<T> {
   
 }
 
-class _DocQuery extends _DQuery<HtmlDocument> with ListMixin<HtmlDocument> implements DocumentQuery {
+class _DocumentQuery extends _Query<HtmlDocument> with ListMixin<HtmlDocument>
+    implements DQuery<HtmlDocument> {
   
-  HtmlDocument _document;
+  HtmlDocument _doc;
   
-  _DocQuery([HtmlDocument doc]) : this._document = _fallback(doc, () => document);
+  _DocumentQuery([HtmlDocument doc]) : this._doc = _fallback(doc, () => document);
   
   // DQuery //
   @override
-  HtmlDocument operator [](int index) => _document;
+  HtmlDocument operator [](int index) => _doc;
   
   @override
   void operator []=(int index, HtmlDocument value) {
     if (index != 0 || value == null)
       throw new ArgumentError("$index: $value");
-    _document = value;
+    _doc = value;
   }
   
   @override
@@ -201,53 +132,53 @@ class _DocQuery extends _DQuery<HtmlDocument> with ListMixin<HtmlDocument> imple
   }
   
   @override
-  List<Element> _queryAll(String selector) => _document.querySelectorAll(selector);
+  List<Element> _queryAll(String selector) => _doc.querySelectorAll(selector);
   
-  Window get _window => _document.window;
+  Window get _win => _doc.window;
+
+ @override
+  int get scrollLeft => _win.pageXOffset;
   
   @override
-  int get scrollLeft => _window.pageXOffset;
-  
-  @override
-  int get scrollTop => _window.pageYOffset;
+  int get scrollTop => _win.pageYOffset;
   
   @override
   void set scrollLeft(int value) => 
-      _window.scrollTo(value, _window.pageYOffset);
+      _win.scrollTo(value, _win.pageYOffset);
   
   @override
   void set scrollTop(int value) => 
-      _window.scrollTo(_window.pageXOffset, value);
+      _win.scrollTo(_win.pageXOffset, value);
   
   @override
   int get width =>
-      _max([_document.body.scrollWidth, _document.documentElement.scrollWidth,
-            _document.body.offsetWidth, _document.documentElement.offsetWidth,
-            _document.documentElement.clientWidth]);
+      _max([_doc.body.scrollWidth, _doc.documentElement.scrollWidth,
+            _doc.body.offsetWidth, _doc.documentElement.offsetWidth,
+            _doc.documentElement.clientWidth]);
   
   @override
   int get height =>
-      _max([_document.body.scrollHeight, _document.documentElement.scrollHeight,
-            _document.body.offsetHeight, _document.documentElement.offsetHeight,
-            _document.documentElement.clientHeight]);
-  
+      _max([_doc.body.scrollHeight, _doc.documentElement.scrollHeight,
+            _doc.body.offsetHeight, _doc.documentElement.offsetHeight,
+            _doc.documentElement.clientHeight]);
 }
 
-class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements WindowQuery {
+class _WindowQuery extends _Query<Window> with ListMixin<Window>
+    implements DQuery<Window> {
   
-  Window _window;
+  Window _win;
   
-  _WinQuery([Window win]) : this._window = _fallback(win, () => window);
+  _WindowQuery([Window win]) : this._win = _fallback(win, () => window);
   
   // DQuery //
   @override
-  Window operator [](int index) => _window;
+  Window operator [](int index) => _win;
   
   @override
   void operator []=(int index, Window value) {
     if (index != 0 || value == null)
       throw new ArgumentError("$index: $value");
-    _window = value;
+    _win = value;
   }
   
   @override
@@ -261,33 +192,34 @@ class _WinQuery extends _DQuery<Window> with ListMixin<Window> implements Window
 
   @override
   List<Element> _queryAll(String selector) => [];
+
+  @override
+  int get scrollLeft => _win.pageXOffset;
   
   @override
-  int get scrollLeft => _window.pageXOffset;
-  
-  @override
-  int get scrollTop => _window.pageYOffset;
+  int get scrollTop => _win.pageYOffset;
   
   @override
   void set scrollLeft(int value) => 
-      _window.scrollTo(value, _window.pageYOffset);
+      _win.scrollTo(value, _win.pageYOffset);
   
   @override
   void set scrollTop(int value) => 
-      _window.scrollTo(_window.pageXOffset, value);
+      _win.scrollTo(_win.pageXOffset, value);
   
   // jQuery: As of 5/8/2012 this will yield incorrect results for Mobile Safari, but there
   //         isn't a whole lot we can do. See pull request at this URL for discussion:
   //         https://github.com/jquery/jquery/pull/764
   @override
-  int get width => _window.document.documentElement.clientWidth;
+  int get width => _win.document.documentElement.clientWidth;
   
   @override
-  int get height => _window.document.documentElement.clientHeight;
+  int get height => _win.document.documentElement.clientHeight;
   
 }
 
-class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements ElementQuery {
+class _ElementQuery extends _Query<Element> with ListMixin<Element>
+    implements ElementQuery {
   
   final List<Element> _elements;
   
@@ -328,7 +260,7 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
         final List<Element> matched = new List<Element>();
         for (Element elem in _elements)
           matched.addAll(elem.querySelectorAll(selector));
-        return DQuery.unique(matched);
+        return Query.unique(matched);
     }
   }
   
@@ -494,473 +426,49 @@ class _ElementQuery extends _DQuery<Element> with ListMixin<Element> implements 
   
 }
 
+class _ShadowRootQuery extends _Query<ShadowRoot> with ListMixin<ShadowRoot> {
+  
+  ShadowRoot _shadowRoot;
+  
+  _ShadowRootQuery(ShadowRoot this._shadowRoot);
+  
+  // DQuery //
+  @override
+  ShadowRoot operator [](int index) => _shadowRoot;
+  
+  @override
+  void operator []=(int index, ShadowRoot value) {
+    if (index != 0 || value == null)
+      throw new ArgumentError("$index: $value");
+    _shadowRoot = value;
+  }
+  
+  @override
+  int get length => 1;
+  
+  @override
+  void set length(int length) {
+    if (length != 1)
+      throw new UnsupportedError("fixed length");
+  }
+  
+  @override
+  List<Element> _queryAll(String selector) => _shadowRoot.querySelectorAll(selector);
+}
+
 // All DQuery objects should point back to these
-DocumentQuery _rootDQuery = new DocumentQuery();
+final DQuery _rootDQuery = $document();
 
-/*
-// Is the DOM ready to be used? Set to true once it occurs.
-isReady: false,
-
-// A counter to track how many items to wait for before
-// the ready event fires. See #6781
-readyWait: 1,
-
-// Hold (or release) the ready event
-holdReady: function( hold ) {
-  if ( hold ) {
-    jQuery.readyWait++;
-  } else {
-    jQuery.ready( true );
-  }
-},
-
-// Handle when the DOM is ready
-ready: function( wait ) {
-
-  // Abort if there are pending holds or we're already ready
-  if ( wait === true ? --jQuery.readyWait : jQuery.isReady ) {
-    return;
-  }
-
-  // Remember that the DOM is ready
-  jQuery.isReady = true;
-
-  // If a normal DOM Ready event fired, decrement, and wait if need be
-  if ( wait !== true && --jQuery.readyWait > 0 ) {
-    return;
-  }
-
-  // If there are functions bound, to execute
-    readyList.resolveWith( document, [ jQuery ] );
-
-  // Trigger any bound ready events
-  if ( jQuery.fn.trigger ) {
-    jQuery( document ).trigger("ready").off("ready");
-  }
-},
-*/
-
-// jQuery: See test/unit/core.js for details concerning isFunction.
-//         Since version 1.3, DOM methods and functions like alert
-//         aren't supported. They return false on IE (#2968).
-// SKIPPED: js only
-// src: isFunction: function( obj ) {
-
-// SKIPPED: js only
-// src: isArray: Array.isArray,
-
-//bool _isWindow(obj) => obj != null && obj is Window;
-
-/*
-isNumeric: function( obj ) {
-  return !isNaN( parseFloat(obj) ) && isFinite( obj );
-},
-
-type: function( obj ) {
-  if ( obj == null ) {
-    return String( obj );
-  }
-  // Support: Safari <= 5.1 (functionish RegExp)
-  return typeof obj === "object" || typeof obj === "function" ?
-    class2type[ core_toString.call(obj) ] || "object" :
-    typeof obj;
-},
-
-isPlainObject: function( obj ) {
-  // Not plain objects:
-  // - Any object or value whose internal [[Class]] property is not "[object Object]"
-  // - DOM nodes
-  // - window
-  if ( jQuery.type( obj ) !== "object" || obj.nodeType || jQuery.isWindow( obj ) ) {
-    return false;
-  }
-  
-  // Support: Firefox <20
-  // The try/catch suppresses exceptions thrown when attempting to access
-  // the "constructor" property of certain host objects, ie. |window.location|
-  // https://bugzilla.mozilla.org/show_bug.cgi?id=814622
-  try {
-    if ( obj.constructor &&
-    !core_hasOwn.call( obj.constructor.prototype, "isPrototypeOf" ) ) {
-      return false;
-    }
-  } catch ( e ) {
-    return false;
-  }
-  
-  // If the function hasn't returned already, we're confident that
-  // |obj| is a plain object, created by {} or constructed with new Object
-  return true;
-},
-*/
-
-/*
-
-// data: string of html
-// context (optional): If specified, the fragment will be created in this context, defaults to document
-// keepScripts (optional): If true, will include scripts passed in the html string
-parseHTML: function( data, context, keepScripts ) {
-  if ( !data || typeof data !== "string" ) {
-    return null;
-  }
-  if ( typeof context === "boolean" ) {
-    keepScripts = context;
-    context = false;
-  }
-  context = context || document;
-
-  var parsed = rsingleTag.exec( data ),
-  scripts = !keepScripts && [];
-
-  // Single tag
-  if ( parsed ) {
-    return [ context.createElement( parsed[1] ) ];
-  }
-
-  parsed = jQuery.buildFragment( [ data ], context, scripts );
-
-  if ( scripts ) {
-    jQuery( scripts ).remove();
-  }
-
-  return jQuery.merge( [], parsed.childNodes );
-},
-
-parseJSON: JSON.parse,
-
-// Cross-browser xml parsing
-parseXML: function( data ) {
-  var xml, tmp;
-  if ( !data || typeof data !== "string" ) {
-    return null;
-  }
-
-  // Support: IE9
-  try {
-    tmp = new DOMParser();
-    xml = tmp.parseFromString( data , "text/xml" );
-  } catch ( e ) {
-    xml = undefined;
-  }
-
-  if ( !xml || xml.getElementsByTagName( "parsererror" ).length ) {
-    jQuery.error( "Invalid XML: " + data );
-  }
-  return xml;
-},
-*/
-//void _noop() {}
-/*
-// Evaluates a script in a global context
-globalEval: function( code ) {
-  var script,
-  indirect = eval;
-
-  code = jQuery.trim( code );
-
-  if ( code ) {
-    // If the code includes a valid, prologue position
-    // strict mode pragma, execute code by injecting a
-    // script tag into the document.
-    if ( code.indexOf("use strict") === 1 ) {
-      script = document.createElement("script");
-      script.text = code;
-      document.head.appendChild( script ).parentNode.removeChild( script );
-    } else {
-      // Otherwise, avoid the DOM node creation, insertion
-      // and removal by using an indirect global eval
-      indirect( code );
-    }
-  }
-},
-
-// Convert dashed to camelCase; used by the css and data modules
-// Microsoft forgot to hump their vendor prefix (#9572)
-camelCase: function( string ) {
-  return string.replace( rmsPrefix, "ms-" ).replace( rdashAlpha, fcamelCase );
-},
-*/
 bool _nodeName(elem, String name) =>
     elem is Element && (elem as Element).tagName.toLowerCase() == name.toLowerCase();
 
-/*
-// args is for internal usage only
-each: function( obj, callback, args ) {
-  var value,
-    i = 0,
-    length = obj.length,
-    isArray = isArraylike( obj );
-
-  if ( args ) {
-    if ( isArray ) {
-      for ( ; i < length; i++ ) {
-        value = callback.apply( obj[ i ], args );
-
-        if ( value === false ) {
-          break;
-        }
-      }
-    } else {
-      for ( i in obj ) {
-        value = callback.apply( obj[ i ], args );
-
-        if ( value === false ) {
-          break;
-        }
-      }
-    }
-
-    // A special, fast, case for the most common use of each
-  } else {
-    if ( isArray ) {
-      for ( ; i < length; i++ ) {
-        value = callback.call( obj[ i ], i, obj[ i ] );
-
-        if ( value === false ) {
-          break;
-        }
-      }
-    } else {
-      for ( i in obj ) {
-        value = callback.call( obj[ i ], i, obj[ i ] );
-
-        if ( value === false ) {
-          break;
-        }
-      }
-    }
-  }
-
-  return obj;
-},
-*/
-String trim(String text) => text == null ? '' : text.trim();
-
-/*
-// results is for internal usage only
-makeArray: function( arr, results ) {
-  var ret = results || [];
-
-  if ( arr != null ) {
-    if ( isArraylike( Object(arr) ) ) {
-      jQuery.merge( ret,
-        typeof arr === "string" ?
-        [ arr ] : arr
-      );
-    } else {
-      core_push.call( ret, arr );
-    }
-  }
-
-  return ret;
-},
-
-inArray: function( elem, arr, i ) {
-  return arr == null ? -1 : core_indexOf.call( arr, elem, i );
-},
-
-merge: function( first, second ) {
-  var l = second.length,
-  i = first.length,
-  j = 0;
-
-  if ( typeof l === "number" ) {
-    for ( ; j < l; j++ ) {
-      first[ i++ ] = second[ j ];
-    }
-  } else {
-    while ( second[j] !== undefined ) {
-      first[ i++ ] = second[ j++ ];
-    }
-  }
-
-  first.length = i;
-
-  return first;
-},
-*/
-
-/**
- * 
- */
 List _grep(List list, bool test(obj, index), [bool invert = false]) {
   // USE Dart's implementation
   int i = 0;
   return new List.from(list.where((obj) => invert != test(obj, i++)));
 }
 
-/*
-// arg is for internal usage only
-map: function( elems, callback, arg ) {
-  var value,
-    i = 0,
-    length = elems.length,
-    isArray = isArraylike( elems ),
-    ret = [];
-
-  // Go through the array, translating each of the items to their
-  if ( isArray ) {
-    for ( ; i < length; i++ ) {
-      value = callback( elems[ i ], i, arg );
-
-      if ( value != null ) {
-        ret[ ret.length ] = value;
-      }
-    }
-
-  // Go through every key on the object,
-  } else {
-    for ( i in elems ) {
-      value = callback( elems[ i ], i, arg );
-
-      if ( value != null ) {
-        ret[ ret.length ] = value;
-      }
-    }
-  }
-
-  // Flatten any nested arrays
-  return core_concat.apply( [], ret );
-},
-*/
+String _trim(String text) => text == null ? '' : text.trim();
 
 // jQuery: A global GUID counter for objects
 int _guid = 1;
-
-/*
-// Bind a function to a context, optionally partially applying any
-// arguments.
-proxy: function( fn, context ) {
-  var tmp, args, proxy;
-
-  if ( typeof context === "string" ) {
-    tmp = fn[ context ];
-    context = fn;
-    fn = tmp;
-  }
-
-  // Quick check to determine if target is callable, in the spec
-  // this throws a TypeError, but we will just return undefined.
-  if ( !jQuery.isFunction( fn ) ) {
-    return undefined;
-  }
-
-  // Simulated bind
-  args = core_slice.call( arguments, 2 );
-  proxy = function() {
-    return fn.apply( context || this, args.concat( core_slice.call( arguments ) ) );
-  };
-
-  // Set the guid of unique handler to the same of original handler, so it can be removed
-  proxy.guid = fn.guid = fn.guid || jQuery.guid++;
-
-  return proxy;
-},
-
-// Multifunctional method to get and set values of a collection
-// The value/s can optionally be executed if it's a function
-access: function( elems, fn, key, value, chainable, emptyGet, raw ) {
-  var i = 0,
-    length = elems.length,
-    bulk = key == null;
-
-  // Sets many values
-  if ( jQuery.type( key ) === "object" ) {
-    chainable = true;
-    for ( i in key ) {
-      jQuery.access( elems, fn, i, key[i], true, emptyGet, raw );
-    }
-
-  // Sets one value
-  } else if ( value !== undefined ) {
-    chainable = true;
-
-    if ( !jQuery.isFunction( value ) ) {
-      raw = true;
-    }
-
-    if ( bulk ) {
-      // Bulk operations run against the entire set
-      if ( raw ) {
-        fn.call( elems, value );
-        fn = null;
-
-        // ...except when executing function values
-      } else {
-        bulk = fn;
-        fn = function( elem, key, value ) {
-          return bulk.call( jQuery( elem ), value );
-        };
-      }
-    }
-
-    if ( fn ) {
-      for ( ; i < length; i++ ) {
-        fn( elems[i], key, raw ? value : value.call( elems[i], i, fn( elems[i], key ) ) );
-      }
-    }
-  }
-
-  return chainable ?
-    elems :
-
-    // Gets
-    bulk ?
-      fn.call( elems ) :
-      length ? fn( elems[0], key ) : emptyGet;
-},
-
-now: Date.now,
-
-// A method for quickly swapping in/out CSS properties to get correct calculations.
-// Note: this method belongs to the css module but it's needed here for the support module.
-// If support gets modularized, this method should be moved back to the css module.
-swap: function( elem, options, callback, args ) {
-  var ret, name,
-    old = {};
-
-  // Remember the old values, and insert the new ones
-  for ( name in options ) {
-    old[ name ] = elem.style[ name ];
-    elem.style[ name ] = options[ name ];
-  }
-
-  ret = callback.apply( elem, args || [] );
-
-  // Revert the old values
-  for ( name in options ) {
-    elem.style[ name ] = old[ name ];
-  }
-
-  return ret;
-},
-*/
-
-/*
-// [[Class]] -> type pairs
-class2type = {},
-
-// Populate the class2type map
-jQuery.each("Boolean Number String Function Array Date RegExp Object Error".split(" "), function(i, name) {
-  class2type[ "[object " + name + "]" ] = name.toLowerCase();
-});
-*/
-
-/*
-function isArraylike( obj ) {
-  var length = obj.length,
-    type = jQuery.type( obj );
-
-  if ( jQuery.isWindow( obj ) ) {
-    return false;
-  }
-
-  if ( obj.nodeType === 1 && length ) {
-    return true;
-  }
-
-  return type === "array" || type !== "function" &&
-     ( length === 0 ||
-      typeof length === "number" && length > 0 && ( length - 1 ) in obj );
-}
-*/

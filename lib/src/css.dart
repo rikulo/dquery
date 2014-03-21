@@ -51,23 +51,22 @@ void _showHide(List<Element> elements, bool show) {
 
 // Try to determine the default display value of an element
 String _cssDefaultDisplay(String nodeName) {
-  HtmlDocument doc = document;
   String display = _elemDisplay[nodeName];
   if (display == null) {
-    display = _actualDisplay(nodeName, doc);
+    display = _actualDisplay(nodeName, document);
     
-    // TODO: later
+    // TODO: later (handle iframe)
     /*
     // If the simple way fails, read from inside an iframe
-    if ( display === "none" || !display ) {
+    if ( display == "none" || !display ) {
       // Use the already-created iframe if possible
       iframe = ( iframe ||
         jQuery("<iframe frameborder='0' width='0' height='0'/>")
         .css( "cssText", "display:block !important" )
-      ).appendTo( doc.documentElement );
+      ).appendTo( document.documentElement );
       
       // Always write a new HTML skeleton so Webkit and Firefox don't choke on reuse
-      doc = ( iframe[0].contentWindow || iframe[0].contentDocument ).document;
+      HtmlDocument doc = ( iframe[0].contentWindow || iframe[0].contentDocument ).document;
       doc.write("<!doctype html><html><body>");
       doc.close();
       
