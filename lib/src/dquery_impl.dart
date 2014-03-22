@@ -426,11 +426,14 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   
   @override
   void reflow() {
-    _elements.forEach((Element e) {
-      if (e.offsetWidth == null)
-        ; //TODO: refer to Issue 17366. It works now but might need something more
-    });
+    _elements.forEach(_reflow);
   }
+}
+
+void _reflow(Element e) {
+  //TODO: If Issue 17366 fixed, we don't need it.
+  if (e != null && e.offsetWidth == null) //avoid being optimized
+    _reflow(null);
 }
 
 class _ShadowRootQuery extends _Query<ShadowRoot> with ListMixin<ShadowRoot> {
