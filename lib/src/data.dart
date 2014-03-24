@@ -63,11 +63,11 @@ class Data {
   
   /** Retrieve the entire space of element data.
    */
-  Map space() => _dq.isEmpty ? null : _dataUser.getSpace(_dq.first);
+  Map get space => _dq.isEmpty ? null : _dataUser.getSpace(_dq.first);
   
   /** Retrieve the data of the given [key].
    */
-  get(String key) => _dq.isEmpty ? null : space()[key];
+  get(String key) => _dq.isEmpty ? null : space[key];
   
   /** Set the data of the given [key].
    */

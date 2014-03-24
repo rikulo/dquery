@@ -2,9 +2,10 @@
 
 **0.6.0**
 
-* Query is added for query any object including shadow roots.
-* DocumentQuery and WindowQuery are removed, and replaced with DQuery.
-* DQueryEvent is renamed to QueryEvent.
+* Query was added for query any object including shadow roots.
+* DocumentQuery and WindowQuery were removed, and replaced with DQuery.
+* DQueryEvent was renamed to QueryEvent.
+* Data.space() became a getter: Date.space
 
 **0.5.4**
 
