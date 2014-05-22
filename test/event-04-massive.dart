@@ -16,7 +16,9 @@ void render(QueryEvent event) {
   final int t = new DateTime.now().millisecondsSinceEpoch;
   for (int i = 0; i < 1000; i++) {
     item = new LIElement()..innerHtml = '$i';
-    $(item).on('click', (QueryEvent e) {});
+    $(item).on('click', (QueryEvent e) {
+      window.alert("$i");
+    });
     root.append(item);
   }
   print(new DateTime.now().millisecondsSinceEpoch - t);

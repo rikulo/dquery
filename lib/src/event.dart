@@ -11,22 +11,6 @@ class _EventUtil {
   
   //static Set<String> _global = new HashSet<String>();
   
-  // guid management
-  // TODO: use expando
-  static Map _handleGuid = new HashMap();
-  static int _getGuid(handler) =>
-      _handleGuid.putIfAbsent(handler, () => _guid++);
-  /*
-  static bool _hasGuid(handler) =>
-      _handleGuid.containsKey(handler);
-  static void _copyGuid(handler1, handler2) {
-    if (!_hasGuid(handler1) && _hasGuid(handler2))
-      _handleGuid[handler1] = _handleGuid[handler2];
-  }
-  */
-  
-  static final Expando<String> guids = new Expando<String>();
-  
   static void add(EventTarget elem, String types, QueryEventListener handler, String selector) {
     
     final bool hasSelector = selector != null && !selector.isEmpty;
@@ -37,9 +21,6 @@ class _EventUtil {
     
     final Map space = _dataPriv.getSpace(elem);
     // if (elemData == null) return;
-    
-    // jQuery: Make sure that the handler has a unique ID, used to find/remove it later
-    final int g = _getGuid(handler); // TODO: need better management
     
     // jQuery: Init the element's event structure and main handler, if this is the first
     final Map<String, _HandleObjectContext> events = 
@@ -78,7 +59,7 @@ class _EventUtil {
       
       // jQuery: handleObj is passed to all event handlers
       final bool needsContext = hasSelector && _EventUtil._NEEDS_CONTEXT.hasMatch(selector);
-      _HandleObject handleObj = new _HandleObject(g, selector, type, origType, 
+      _HandleObject handleObj = new _HandleObject(selector, type, origType, 
           namespaces.join('.'), needsContext, handler);
       
       // jQuery: Init the event handler queue if we're the first
@@ -138,7 +119,7 @@ class _EventUtil {
       Function filter = (_HandleObject handleObj) {
         final bool res = 
             (mappedTypes || origType == handleObj.origType) &&
-            (handler == null || _getGuid(handler) == handleObj.guid) &&
+            (handler == null || handler == handleObj.handler) &&
             _subsetOf(namespaces, handleObj.namespace.split('.')) &&
             (selector == null || selector == handleObj.selector || (selector == '**' && handleObj.selector != null));
         
@@ -475,10 +456,9 @@ class _HandlerQueueEntry {
 
 class _HandleObject {
   
-  _HandleObject(this.guid, this.selector, this.type, this.origType, this.namespace,
+  _HandleObject(this.selector, this.type, this.origType, this.namespace,
       this.needsContext, this.handler);
   
-  final int guid;
   final String selector, type, origType, namespace;
   final bool needsContext;
   final QueryEventListener handler;
