@@ -1,5 +1,9 @@
 #CHANGES
 
+**0.6.1**
+
+* Fix event memory issue.
+
 **0.6.0**
 
 * Query was added for query any object including shadow roots.
