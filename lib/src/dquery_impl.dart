@@ -429,13 +429,17 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
     _elements.forEach(_reflow);
   }
   @override
-  void click([handler]){
+  void click([QueryEventListener handler]){
    
-    _elements.forEach((Element e)=>(handler is Function)?_EventUtil.add(e, 'click', handler,''):_EventUtil.trigger('click', {}, e));
+    _elements.forEach((Element e) =>
+      handler != null ? _EventUtil.add(e, 'click', handler,''):
+        _EventUtil.trigger('click', const {}, e));
   }
   @override
-    void change([handler]){
-      _elements.forEach((Element e)=>(handler is Function)?_EventUtil.add(e, 'change', handler,''):_EventUtil.trigger('click', {}, e));
+    void change([QueryEventListener handler]){
+      _elements.forEach((Element e) =>
+        handler != null ?_EventUtil.add(e, 'change', handler, ''):
+        _EventUtil.trigger('click', const {}, e));
     }
 }
 

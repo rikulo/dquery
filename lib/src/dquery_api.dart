@@ -335,6 +335,12 @@ abstract class ElementQuery extends DQuery<Element> {
    * asynchronously)
    */
   void reflow();
-  void click([dynamic handler]);
-  void change([dynamic handler]);
+  /** Bind an event handler to the "click" event, or trigger that event
+   * on elements.
+   */
+  void click([QueryEventListener handler]);
+  /** Bind an event handler to the "change" event, or trigger that event
+   * on elements.
+   */
+  void change([QueryEventListener handler]);
 }
