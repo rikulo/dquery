@@ -335,4 +335,6 @@ abstract class ElementQuery extends DQuery<Element> {
    * asynchronously)
    */
   void reflow();
+  void click([dynamic handler]);
+  void change([dynamic handler]);
 }
