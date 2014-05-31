@@ -439,7 +439,7 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
     void change([QueryEventListener handler]){
       _elements.forEach((Element e) =>
         handler != null ?_EventUtil.add(e, 'change', handler, ''):
-        _EventUtil.trigger('click', const {}, e));
+        _EventUtil.trigger('change', const {}, e));
     }
 }
 
