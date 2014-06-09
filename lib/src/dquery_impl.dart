@@ -99,9 +99,6 @@ abstract class _Query<T extends EventTarget> implements Query<T> {
     if (!isEmpty)
       _EventUtil.trigger(type, data, first, true);
   }
-  
-  // traversing //
-  
 }
 
 class _DocumentQuery extends _Query<HtmlDocument> with ListMixin<HtmlDocument>
@@ -430,17 +427,18 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   }
   @override
   void click([QueryEventListener handler]){
-   
-    _elements.forEach((Element e) =>
-      handler != null ? _EventUtil.add(e, 'click', handler,''):
-        _EventUtil.trigger('click', const {}, e));
+    if (handler != null)
+      on('click', handler);
+    else
+      trigger('click');
   }
   @override
-    void change([QueryEventListener handler]){
-      _elements.forEach((Element e) =>
-        handler != null ?_EventUtil.add(e, 'change', handler, ''):
-        _EventUtil.trigger('change', const {}, e));
-    }
+  void change([QueryEventListener handler]){
+    if (handler != null)
+      on('change', handler);
+    else
+      trigger('change');
+  }
 }
 
 void _reflow(Element e) {
