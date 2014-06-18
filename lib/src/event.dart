@@ -291,7 +291,7 @@ class _EventUtil {
         if (dqevent.isImmediatePropagationStopped) break;
         // jQuery: Triggered event must either 1) have no namespace, or
         //         2) have namespace(s) a subset or equal to those in the bound event (both can have no namespace).
-        if (dqevent.namespace_re == null || dqevent.namespace_re.hasMatch(handleObj.namespace)) {
+        if (dqevent._namespace_re == null || dqevent._namespace_re.hasMatch(handleObj.namespace)) {
           final List<String> eventns = dqevent.namespace == null ? [] : dqevent.namespace.split('.');
           final List<String> hobjns = handleObj.namespace == null ? [] : handleObj.namespace.split('.');
           if (_subsetOf(eventns, hobjns)) {
@@ -580,12 +580,74 @@ class QueryEvent {
    */
   String get namespace => _namespace;
   String _namespace; // TODO: maybe should be List<String> ?
-  
-  RegExp get namespace_re => _namespace_re;
+
+  ///Returns the key code.
+  int get keyCode {
+    if (originalEvent != null)
+      try {
+        return (originalEvent as dynamic).keyCode;
+      } catch (e) {
+      }
+    return 0;
+  }
+  ///Returns the key location.
+  int get keyLocation {
+    if (originalEvent != null)
+      try {
+        return (originalEvent as dynamic).keyLocation;
+      } catch (e) {
+      }
+    return 0;
+  }
+  ///Returns the character code.
+  int get charCode {
+    if (originalEvent != null)
+      try {
+        return (originalEvent as dynamic).charCode;
+      } catch (e) {
+      }
+    return 0;
+  }
+  ///Returns whether the alt key is pressed.
+  bool get altKey {
+    if (originalEvent != null)
+      try {
+        return (originalEvent as dynamic).altKey;
+      } catch (e) {
+      }
+    return false;
+  }
+  ///Returns whether the alt-graph key is pressed.
+  bool get altGraphKey {
+    if (originalEvent != null)
+      try {
+        return (originalEvent as dynamic).altGraphKey;
+      } catch (e) {
+      }
+    return false;
+  }
+  ///Returns whether the ctrl key is pressed.
+  bool get ctrlKey {
+    if (originalEvent != null)
+      try {
+        return (originalEvent as dynamic).ctrlKey;
+      } catch (e) {
+      }
+    return false;
+  }
+  ///Returns whether the meta key is pressed.
+  bool get metaKey {
+    if (originalEvent != null)
+      try {
+        return (originalEvent as dynamic).metaKey;
+      } catch (e) {
+      }
+    return false;
+  }
+
   RegExp _namespace_re;
   
   _HandleObject _handleObj;
-  final Event _simulatedEvent; // TODO: check usage
   
   //int _isTrigger; // TODO: check usage
   
@@ -594,14 +656,14 @@ class QueryEvent {
   /** Construct a QueryEvent from a native browser event.
    */
   QueryEvent.from(Event event, {data}) : 
-  this._(event, null, event.type, event.target, event.timeStamp, data);
+  this._(event, event.type, event.target, event.timeStamp, data);
   
   /** Construct a QueryEvent with given [type].
    */
   QueryEvent(String type, {EventTarget target, data}) : 
-  this._(null, new Event(type), type, target, _now(), data); // TODO: move target away
+  this._(null, type, target, _now(), data); // TODO: move target away
   
-  QueryEvent._(this.originalEvent, this._simulatedEvent, this._type, 
+  QueryEvent._(this.originalEvent, this._type, 
       this._target, this.timeStamp, this.data);
   
   /// Return true if [preventDefault] was ever called in this event.

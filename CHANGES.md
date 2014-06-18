@@ -2,7 +2,8 @@
 
 **0.7.0**
 
-* #6: Support cookie API
+* #6: DocumentQuery supported cookie API
+* #2: QueryEvent supported keystroke API
 
 **0.6.1**
 
