@@ -31,10 +31,11 @@ _getCookie(Document doc, [String key]) {
 }
 
 String _parseCookieValue(String value) {
-  if (value.indexOf('"') == 0)
+  if (value.startsWith('"')) {
+    // This is a quoted cookie as according to RFC2068, unescape...
     value = value.substring(1, value.length - 1)
       .replaceAll(_reQuot, '"').replaceAll(_reBS, r'\');
-    // This is a quoted cookie as according to RFC2068, unescape...
+  }
 
   try {
     // Replace server-side written pluses with spaces.
