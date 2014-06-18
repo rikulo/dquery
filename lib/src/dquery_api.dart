@@ -344,3 +344,31 @@ abstract class ElementQuery extends DQuery<Element> {
    */
   void change([QueryEventListener handler]);
 }
+
+/** A query object of [document].
+ * 
+ * * See also [$document].
+ */
+abstract class DocumentQuery extends DQuery<HtmlDocument> {
+  /** Accesses the cookie.
+   *
+   * + [value] - the value to set.
+   * If [value] is null (default), it means read, i.e., the cookie's value will
+   * be returned. If [value] is specified, the value will be set, and nothing
+   * will be returned.
+   * 
+   * + [expires] - the duration that the cookie will expire.
+   * If null (default), the cookie is deleted when the browser is closed.
+   * + [path] - the path that the cookie belongs to.
+   * If null (default), it belongs to the current page.
+   * 
+   * [expires] and [path] are ignored if [value] is null.
+   */
+  String cookie(String name, {String value, Duration expires, String path, bool secure});
+  /** Returns all cookies.
+   */
+  Map<String, String> get cookies;
+  /** Removes the cookie.
+   */
+  void removeCookie(String name);
+}

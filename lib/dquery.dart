@@ -5,6 +5,8 @@ import 'dart:html';
 import 'dart:html_common';
 import 'dart:collection';
 
+import "package:intl/intl.dart" show DateFormat;
+
 part 'src/util/util.dart';
 part 'src/dquery_api.dart';
 part 'src/dquery_impl.dart';
@@ -16,6 +18,7 @@ part 'src/manipulation.dart';
 part 'src/css.dart';
 part 'src/data.dart';
 part 'src/event.dart';
+part 'src/cookie.dart';
 
 /** Return an [ElementQuery] based on given [selector] and [context].
  */
@@ -62,7 +65,7 @@ ElementQuery $(selector, [context]) {
 /** Return a [DocumentQuery] wrapping the given [document]. If [document] is 
  * omitted, the default document instance is assumed.
  */
-DQuery $document([Document document]) => new _DocumentQuery(document);
+DocumentQuery $document([Document document]) => new _DocumentQuery(document);
 
 /** Return a [WindowQuery] wrapping the given [window]. If [window] is omitted,
  * the default window instance is used.

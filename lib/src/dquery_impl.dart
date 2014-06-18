@@ -102,7 +102,7 @@ abstract class _Query<T extends EventTarget> implements Query<T> {
 }
 
 class _DocumentQuery extends _Query<HtmlDocument> with ListMixin<HtmlDocument>
-    implements DQuery<HtmlDocument> {
+    implements DocumentQuery {
   
   HtmlDocument _doc;
   
@@ -158,6 +158,23 @@ class _DocumentQuery extends _Query<HtmlDocument> with ListMixin<HtmlDocument>
       _max([_doc.body.scrollHeight, _doc.documentElement.scrollHeight,
             _doc.body.offsetHeight, _doc.documentElement.offsetHeight,
             _doc.documentElement.clientHeight]);
+
+  @override
+  String cookie(String name, {String value, Duration expires, String path, bool secure}) {
+    assert(name != null);
+
+    if (value != null) {
+      _setCookie(_doc, name, value, expires, path, secure);
+      return null;
+    }
+    return _getCookie(_doc, name);
+  }
+  @override
+  Map<String, String> get cookies => _getCookie(_doc);
+  @override
+  void removeCookie(String name) {
+    cookie(name, value: "", expires: const Duration(days: -1));
+  }
 }
 
 class _WindowQuery extends _Query<Window> with ListMixin<Window>

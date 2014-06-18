@@ -1,5 +1,9 @@
 #CHANGES
 
+**0.7.0**
+
+* #6: Support cookie API
+
 **0.6.1**
 
 * Fix event memory issue.
