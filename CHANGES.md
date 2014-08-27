@@ -1,5 +1,8 @@
 #CHANGES
 
+**0.7.1**
+* Focus/blur event bubbling ready
+
 **0.7.0**
 
 * #6: DocumentQuery supported cookie API

@@ -64,9 +64,10 @@ class _EventUtil {
       
       // jQuery: Init the event handler queue if we're the first
       _HandleObjectContext handleObjCtx = events.putIfAbsent(type, () {
-        
-        // special setup: skipped for now
-        elem.addEventListener(type, eventHandle, false);
+        _SetupHandling setup = _getSetup(type);
+        // jQuery: Only use addEventListener/attachEvent if the special events handler returns false
+        if (setup == null || !setup.setup())
+          elem.addEventListener(type, eventHandle, false);
         return new _HandleObjectContext();
       });
       
@@ -134,8 +135,11 @@ class _EventUtil {
       // jQuery: Remove generic event handler if we removed something and no more handlers exist
       //         (avoids potential for endless recursion during removal of special event handlers)
       if (delegates.isEmpty && handlers.isEmpty) {
-        
-        // special teardown: skipped for now
+        _SetupHandling setup = _getSetup(type);
+                
+        if (setup == null || !setup.teardown()) {
+          //jQuery.removeEvent( elem, type, elemData.handle );
+        }
         
         events.remove(type);
       }
@@ -375,28 +379,15 @@ class _EventUtil {
   static _HandleObjectContext _getHandleObjCtx(EventTarget elem, String type) =>
       _fallback(_getEvents(elem)[type], () => _HandleObjectContext.EMPTY);
   
-  // TODO: later
-  /*
   static void simulate(String type, EventTarget elem, event, bool bubble) {
     // jQuery: Piggyback on a donor event to simulate a different one.
     //         Fake originalEvent to avoid donor's stopPropagation, but if the
     //         simulated event prevents default then we do the same on the donor.
     
-    QueryEvent e;
-    // TODO
-    /*
-    var e = jQuery.extend(
-        new jQuery.Event(),
-        event,
-        {
-          type: type,
-          isSimulated: true,
-          originalEvent: {}
-        }
-    );
-    */
+    QueryEvent e = new QueryEvent(type).._isSimulated = true;
+    
     if (bubble)
-      _EventUtil.trigger(e, null, elem);
+      _EventUtil.triggerEvent(e.._target = elem);
     else
       _EventUtil.dispatch(elem, e);
     
@@ -404,37 +395,50 @@ class _EventUtil {
       event.preventDefault();
     
   }
-  */
+  
   
 }
 
-/*
+typedef bool SetupSupplier<bool>();
+typedef bool TeardownSupplier<bool>();
+
+class _SetupHandling {
+  final SetupSupplier setup;
+  final TeardownSupplier teardown;
+  _SetupHandling({this.setup, this.teardown});
+}
+
+_SetupHandling _getSetup(String type )=> _SPECIAL_SETUP_HANDLINGS[type];
+
+
 // Create "bubbling" focus and blur events
 // Support: Firefox, Chrome, Safari
-if ( !jQuery.support.focusinBubbles ) {
-  jQuery.each({ focus: "focusin", blur: "focusout" }, function( orig, fix ) {
+//if ( !jQuery.support.focusinBubbles ) {
+Map<String, _SetupHandling> _SPECIAL_SETUP_HANDLINGS = {
+  'focusin':  focusBlurSetupHandler('focus', 'focusin'),
+  'focusout': focusBlurSetupHandler('blur', 'focusout')
+};
 
-    // Attach a single capturing handler while someone wants focusin/focusout
-    var attaches = 0,
-      handler = function( event ) {
-        jQuery.event.simulate( fix, event.target, jQuery.event.fix( event ), true );
-      };
+
+_SetupHandling focusBlurSetupHandler(String orig, String fix) {
+  // Attach a single capturing handler while someone wants focusin/focusout
+  var attaches = 0,
+      handler = (event) =>
+        _EventUtil.simulate( fix, event.target, _EventUtil.fix(event), true );
   
-    jQuery.event.special[ fix ] = {
-      setup: function() {
-        if ( attaches++ === 0 ) {
-          document.addEventListener( orig, handler, true );
-        }
-      },
-      teardown: function() {
-        if ( --attaches === 0 ) {
-          document.removeEventListener( orig, handler, true );
-        }
-      }
-    };
-  });
+  return new _SetupHandling(
+    setup: () {
+      if (attaches++ == 0)
+        document.addEventListener(orig, handler, true);
+     return true;
+    },
+    teardown: () {
+      if (--attaches == 0)
+        document.removeEventListener(orig, handler, true);
+      return true;
+    });
 }
-*/
+
 
 class _HandleObjectContext {
   
@@ -677,6 +681,10 @@ class QueryEvent {
   /// Return true if [stopImmediatePropagation] was ever called in this event.
   bool get isImmediatePropagationStopped => _isImmediatePropagationStopped;
   bool _isImmediatePropagationStopped = false;
+  
+/// Return true if the event is simulated
+  bool get isSimulated => _isSimulated;
+  bool _isSimulated = false;
   
   /** Prevent the default action of the event being triggered.
    */
