@@ -2,6 +2,7 @@
 
 **0.7.1**
 * Focus/blur event bubbling ready
+* Fix mouseenter/mouseleave delegate event
 
 **0.7.0**
 

@@ -3,21 +3,68 @@
 <html>
   <head>
     <title>test</title>
-  </head>
- 
-  <body>
+    
     <style>
-      .button {
+      .section {
+        padding: 5px;
+        border: 1px solid #000;
+        width: 150px;
+        height: 150px;
+        
+        display: inline-block;
+        vertical-align: top;
+      }
+      
+      .test-area {
+        border: 1px solid #5F5F5F;
+        width: 100px;
+        height: 50px;
         text-align: center;
-        border: 1px solid #999;
-        border-radius: 5px;
-        width: 60px;
+        cursor: default;
+      }
+      
+      .test-area div {
         padding: 5px;
       }
     </style>
-    <input id="input">
-    <div id="doc-result">0</div>
-    <div id="elem-result">0</div>
+    
+  </head>
+  <body>
+  
+    <div class="section focus">
+      <h3>Focus</h3>
+      <input>
+      <div class="doc-result">0</div>
+      <div class="elem-result">0</div>
+    </div>
+    
+    <div class="section blur">
+      <h3>Blur</h3>
+      <input>
+      <div class="doc-result">0</div>
+      <div class="elem-result">0</div>
+    </div>
+    
+    <div class="section click">
+      <h3>Click</h3>
+      <button>Click</button>
+      <div class="doc-result">0</div>
+      <div class="elem-result">0</div>
+    </div>
+    
+    <div class="section mouseenter">
+      <h3>Mouseenter</h3>
+      <div class="test-area">
+        <div class="a">
+          <div class="b">
+            <span>Here</span>
+          </div>
+        </div>
+      </div>
+      <div class="doc-result">0</div>
+      <div class="elem-result">0</div>
+    </div>
+    
     <script type="application/dart" src="event-02-blur.dart"></script>
     <script src="packages/browser/dart.js"></script>
   </body>
