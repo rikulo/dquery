@@ -401,12 +401,16 @@ class _EventUtil {
     List<String> copy = new List.from(props);
     if (fixHook is _Hooks)
       copy.addAll(fixHook.props);
-
-    for (String prop in copy) {
-      if (prop == 'relatedTarget')
-        dqevent._relatedTarget = (event as dynamic).relatedTarget;
-      
-    }
+    
+    try {// ignore not found getter error
+      for (String prop in copy) {
+        var val;
+        if (prop == 'relatedTarget' && (val = (event as dynamic).relatedTarget) != null) 
+          dqevent._relatedTarget = val;
+        
+      }
+    } catch(e){}
+    
 //    
 //    i = copy.length;
 //    while ( i-- ) {

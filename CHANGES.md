@@ -3,6 +3,7 @@
 **0.7.1**
 * Focus/blur event bubbling ready
 * Fix mouseenter/mouseleave delegate event
+* Fix delegate target not found error
 
 **0.7.0**
 
