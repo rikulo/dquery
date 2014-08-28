@@ -393,13 +393,13 @@ class _EventUtil {
       fixHooks[type] = fixHook =
         rmouseEvent.hasMatch(type) ? new _MouseHooks() :
         rkeyEvent.hasMatch(type) ? new _KeyHooks() :
-        {};
+        null;
     }
     
     final QueryEvent dqevent = new QueryEvent.from(event);
 //    TODO: Copy prop
     List<String> copy = new List.from(props);
-    if (fixHook.props != null)
+    if (fixHook is _Hooks)
       copy.addAll(fixHook.props);
 
     for (String prop in copy) {
