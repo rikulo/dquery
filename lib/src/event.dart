@@ -669,13 +669,13 @@ _SpecialEventHandling initNotSupportFocusinBubbles(String orig, String fix) {
         _EventUtil.simulate( fix, event.target, _EventUtil.fix(event), true );
 
   return new _SpecialEventHandling(
-    setup:  (Node node) {
+    setup:  (_) {
       if (attaches++ == 0)
         document.addEventListener(orig, handler, true);
      return true;
     },
 
-    teardown: (Node node) {
+    teardown: (_) {
       if (--attaches == 0)
         document.removeEventListener(orig, handler, true);
       return true;
