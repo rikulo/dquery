@@ -482,7 +482,7 @@ class _MouseHooks extends _Hooks {
     Document eventDoc;
 
     int button = original.button;
-    Node fromElement = original.fromElement;
+//    Node fromElement = original.fromElement;
 
     Point client = original.client;
     // jQuery: Calculate pageX/Y if missing and clientX/Y available
@@ -496,9 +496,9 @@ class _MouseHooks extends _Hooks {
     }
 
     // jQuery: Add relatedTarget, if necessary
-    if (event.relatedTarget == null && fromElement != null ) {
-      event._relatedTarget = fromElement == event.target ? original.toElement : fromElement;
-    }
+//    if (event.relatedTarget == null && fromElement != null ) {
+//      event._relatedTarget = fromElement == event.target ? original.toElement : fromElement;
+//    }
 
     // jQuery: Add which for click: 1 === left; 2 === middle; 3 === right
     // jQuery: Note: button is not normalized, so don't use it

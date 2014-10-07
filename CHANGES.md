@@ -4,6 +4,7 @@
 * Focus/blur event bubbling ready
 * Fix mouseenter/mouseleave delegate event
 * Fix delegate target not found error
+* Removed deprecated event API
 
 **0.7.0**
 
