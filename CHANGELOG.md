@@ -1,15 +1,16 @@
 #CHANGES
 
 **0.7.1**
-* Focus/blur event bubbling ready
-* Fix mouseenter/mouseleave delegate event
-* Fix delegate target not found error
-* Removed deprecated event API
+* Focus/blur event bubbling ready.
+* Fix mouseenter/mouseleave delegate event.
+* Fix delegate target not found error.
+* Removed deprecated event API.
+* Fine tune QueryEvent constructor.
 
 **0.7.0**
 
-* #6: DocumentQuery supported cookie API
-* #2: QueryEvent supported keystroke API
+* #6: DocumentQuery supported cookie API.
+* #2: QueryEvent supported keystroke API.
 
 **0.6.1**
 

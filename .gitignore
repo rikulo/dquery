@@ -21,3 +21,4 @@ out
 packages
 packages/
 pubspec.lock
+.pub

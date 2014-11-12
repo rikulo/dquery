@@ -839,10 +839,10 @@ class QueryEvent {
 
   //final Map attributes = new HashMap();
 
-  /** Construct a QueryEvent from a native browser event.
+  /** Construct a QueryEvent from a native DOM [event].
    */
-  QueryEvent.from(Event event, {data}) :
-  this._(event, event.type, event.target, event.timeStamp, data);
+  QueryEvent.from(Event event, {String type, data}) :
+  this._(event, type != null ? type : event.type, event.target, event.timeStamp, data);
 
   /** Construct a QueryEvent with given [type].
    */
