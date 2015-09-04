@@ -402,14 +402,15 @@ class _EventUtil {
     if (fixHook is _Hooks)
       copy.addAll(fixHook.props);
 
-    try {// ignore not found getter error
-      for (String prop in copy) {
-        var val;
-        if (prop == 'relatedTarget' && (val = (event as dynamic).relatedTarget) != null)
+    for (String prop in copy) {
+      var val;
+      if (prop == 'relatedTarget') {
+        if (event is MouseEvent && (val = (event as MouseEvent).relatedTarget) != null)
           dqevent._relatedTarget = val;
-
+        else if (event is FocusEvent && (val = (event as FocusEvent).relatedTarget) != null)
+          dqevent._relatedTarget = val;
       }
-    } catch(e){}
+    }
 
 //
 //    i = copy.length;
