@@ -2,6 +2,7 @@ name: dquery
 version: 0.7.0+5
 authors:
 - Simon Pai <simonpai@rikulo.org>
+- Jimmy Shiau <jimmyshiau@rikulo.org>
 - Tom Yeh <tomyeh@rikulo.org>
 description: |
   DQuery is a porting of jQuery in Dart.
