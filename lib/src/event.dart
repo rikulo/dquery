@@ -402,14 +402,15 @@ class _EventUtil {
     if (fixHook is _Hooks)
       copy.addAll(fixHook.props);
 
-    try {// ignore not found getter error
-      for (String prop in copy) {
-        var val;
-        if (prop == 'relatedTarget' && (val = (event as dynamic).relatedTarget) != null)
+    for (String prop in copy) {
+      var val;
+      if (prop == 'relatedTarget') {
+        if (event is MouseEvent && (val = (event as MouseEvent).relatedTarget) != null)
           dqevent._relatedTarget = val;
-
+        else if (event is FocusEvent && (val = (event as FocusEvent).relatedTarget) != null)
+          dqevent._relatedTarget = val;
       }
-    } catch(e){}
+    }
 
 //
 //    i = copy.length;
@@ -482,7 +483,7 @@ class _MouseHooks extends _Hooks {
     Document eventDoc;
 
     int button = original.button;
-    Node fromElement = original.fromElement;
+//    Node fromElement = original.fromElement;
 
     Point client = original.client;
     // jQuery: Calculate pageX/Y if missing and clientX/Y available
@@ -496,9 +497,9 @@ class _MouseHooks extends _Hooks {
     }
 
     // jQuery: Add relatedTarget, if necessary
-    if (event.relatedTarget == null && fromElement != null ) {
-      event._relatedTarget = fromElement == event.target ? original.toElement : fromElement;
-    }
+//    if (event.relatedTarget == null && fromElement != null ) {
+//      event._relatedTarget = fromElement == event.target ? original.toElement : fromElement;
+//    }
 
     // jQuery: Add which for click: 1 === left; 2 === middle; 3 === right
     // jQuery: Note: button is not normalized, so don't use it
@@ -839,10 +840,10 @@ class QueryEvent {
 
   //final Map attributes = new HashMap();
 
-  /** Construct a QueryEvent from a native browser event.
+  /** Construct a QueryEvent from a native DOM [event].
    */
-  QueryEvent.from(Event event, {data}) :
-  this._(event, event.type, event.target, event.timeStamp, data);
+  QueryEvent.from(Event event, {String type, data}) :
+  this._(event, type != null ? type : event.type, event.target, event.timeStamp, data);
 
   /** Construct a QueryEvent with given [type].
    */
