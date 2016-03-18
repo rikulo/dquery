@@ -26,7 +26,7 @@ class _Storage {
   Map getSpace(owner, [bool autoCreate = true]) {
     Map space = _cache[owner];
     if (autoCreate && space == null)
-      space = _cache[owner] = new HashMap();
+      space = _cache[owner] = {};
     return space;
   }
   

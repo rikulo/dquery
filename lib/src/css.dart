@@ -1,8 +1,8 @@
 part of dquery;
 
-Map<String, String> _elemDisplay = new HashMap<String, String>.from({
+final Map<String, String> _elemDisplay = {
   'body': 'block'
-});
+};
 
 bool _isHidden(Element elem) =>
     elem.style.display == 'none' || 
@@ -11,7 +11,7 @@ bool _isHidden(Element elem) =>
 
 void _showHide(List<Element> elements, bool show) {
   
-  final Map<Element, String> values = new HashMap<Element, String>();
+  final Map<Element, String> values = {};
   
   for (Element elem in elements) {
     String oldDisplay = _dataPriv.get(elem, 'olddisplay');

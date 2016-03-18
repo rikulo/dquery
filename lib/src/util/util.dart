@@ -4,8 +4,6 @@ part of dquery;
 
 _fallback(a, b()) => a != null ? a : b();
 
-int _now() => new DateTime.now().millisecondsSinceEpoch;
-
 final int _RAND_INT_MAX = 1000 * 1000 * 1000;
 Random _r;
 
