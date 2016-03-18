@@ -500,11 +500,13 @@ final DQuery _rootDQuery = $document();
 bool _nodeName(elem, String name) =>
     elem is Element && (elem as Element).tagName.toLowerCase() == name.toLowerCase();
 
+/*
 List _grep(List list, bool test(obj, index), [bool invert = false]) {
   // USE Dart's implementation
   int i = 0;
   return new List.from(list.where((obj) => invert != test(obj, i++)));
 }
+*/
 
 String _trim(String text) => text == null ? '' : text.trim();
 

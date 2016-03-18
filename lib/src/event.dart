@@ -203,7 +203,6 @@ class _EventUtil {
     final String ontype = type.indexOf(':') < 0 ? "on$type" : null; // TODO: check use
 
     final List<Node> eventPath = [elem];
-    Window eventPathWindow = null;
 
     // jQuery: Don't do events on text and comment nodes
     if (elem is CharacterData)
@@ -229,10 +228,8 @@ class _EventUtil {
       bubbleType = _fallback(special.delegateType, () => type);
       final bool focusMorph = _focusMorphMatch(bubbleType, type);
 
-      Node tmp = elem;
       for (Node cur = focusMorph ? n : n.parentNode; cur != null; cur = cur.parentNode) {
         eventPath.add(cur);
-        tmp = cur;
       }
 
       // jQuery: Only add window if we got to document (e.g., not plain obj or detached DOM)
@@ -286,7 +283,6 @@ class _EventUtil {
 
   static void dispatch(EventTarget elem, QueryEvent dqevent) {
 
-    final Map<String, _HandleObjectContext> events = _getEvents(elem);
     final _HandleObjectContext handleObjCtx = _getHandleObjCtx(elem, dqevent.type);
 
     dqevent._delegateTarget = elem;
@@ -355,7 +351,7 @@ class _EventUtil {
           final String sel = "${_trim(handleObj.selector)} ";
           if (matches.putIfAbsent(sel, () => (cur is Element) &&
               (handleObj.needsContext ? $(sel, elem).contains(cur) :
-              (cur as Element).matches(sel)))) {
+              cur.matches(sel)))) {
             matched.add(handleObj);
           }
         }
@@ -405,9 +401,9 @@ class _EventUtil {
     for (String prop in copy) {
       var val;
       if (prop == 'relatedTarget') {
-        if (event is MouseEvent && (val = (event as MouseEvent).relatedTarget) != null)
+        if (event is MouseEvent && (val = event.relatedTarget) != null)
           dqevent._relatedTarget = val;
-        else if (event is FocusEvent && (val = (event as FocusEvent).relatedTarget) != null)
+        else if (event is FocusEvent && (val = event.relatedTarget) != null)
           dqevent._relatedTarget = val;
       }
     }
@@ -641,7 +637,6 @@ final Map<String, _SpecialEventHandling> _SPECIAL_HANDLINGS = new HashMap<String
 _SpecialEventHandling _mouseenterHandling, _mouseleaveHandling;
 _SpecialEventHandling initMouseenterleave(String orig, String fix) {
   return new _SpecialEventHandling(handle: (QueryEvent event) {
-    var ret;
     Node target = event._currentTarget as Node,
          related = event.relatedTarget as Node;
     _HandleObject handleObj = event._handleObj;

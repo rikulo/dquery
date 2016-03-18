@@ -271,7 +271,8 @@ List<Element> _filter(String expr, List<Element> elements, [bool not = false]) {
 */
 
 // Implement the identical functionality for filter and not
-List<Element> _winnow(List<Element> elements, String selector, 
+/*
+List<Element> _winnow(List<Element> elements, String selector,
     bool test(Element elem, int index), Element element, DQuery dquery, bool not) {
   
   if (test != null) {
@@ -294,3 +295,4 @@ List<Element> _winnow(List<Element> elements, String selector,
   // TODO: may simplify
   return _grep(elements, (elem, index) => elements.contains(elem) != not);
 }
+*/

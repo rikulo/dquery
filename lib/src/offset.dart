@@ -80,7 +80,6 @@ Point _getPosition(Element elem) {
   if (elem == null)
     return null;
   
-  final ElementQuery $elem = $(elem);
   Point offset;
   Point parentOffset = new Point(0, 0);
   
