@@ -407,7 +407,8 @@ class _EventUtil {
 Element _activeElement() {
   try {
     return document.activeElement;
-  } catch (err) {}
+  } catch (_) {
+  }
 }
 
 class _HandleObjectContext {
@@ -522,7 +523,7 @@ _SpecialEventHandling initMouseenterleave(String orig, String fix) {
 
     // For mousenter/leave call the handler if related is outside the target.
     // NB: No relatedTarget if the mouse left/entered the browser window
-    if ( related == null || (related != target && !target.contains(related))) {
+    if (related == null || (related != target && !target.contains(related))) {
       event._type = handleObj.origType;
       handleObj.handler(event);
       event._type = fix;
@@ -544,7 +545,7 @@ _SpecialEventHandling initNotSupportFocusinBubbles(String orig, String fix) {
         _EventUtil.simulate(fix, event.target, new QueryEvent.from(event), true);
 
   return new _SpecialEventHandling(
-    setup:  (_) {
+    setup: (_) {
       if (attaches++ == 0)
         document.addEventListener(orig, handler, true);
      return true;
@@ -623,16 +624,7 @@ class QueryEvent {
 
   /** The other DOM element involved in the event, if any.
    */
-  EventTarget get relatedTarget {
-    if (_relatedTarget == null) {
-      if (originalEvent is MouseEvent)
-        _relatedTarget = (originalEvent as MouseEvent).relatedTarget;
-      else if (originalEvent is FocusEvent)
-        _relatedTarget = (originalEvent as FocusEvent).relatedTarget;
-    }
-    return _relatedTarget;
-  }
-  EventTarget _relatedTarget;
+  EventTarget get relatedTarget => _safeOriginal((e) => e.relatedTarget);
 
   /** The namespace of this event. For example, if the event is triggered by
    * API with name `click.a.b.c`, it will have type `click` with namespace `a.b.c`
@@ -702,67 +694,27 @@ class QueryEvent {
   int _which;
 
   ///Returns the key code.
-  int get keyCode {
-    if (originalEvent != null)
-      try {
-        return (originalEvent as dynamic).keyCode;
-      } catch (e) {
-      }
-    return 0;
-  }
+  int get keyCode => _safeOriginal((e) => e.keyCode, 0);
   ///Returns the key location.
-  int get keyLocation {
-    if (originalEvent != null)
-      try {
-        return (originalEvent as dynamic).keyLocation;
-      } catch (e) {
-      }
-    return 0;
-  }
+  int get keyLocation => _safeOriginal((e) => e.keyLocation, 0);
   ///Returns the character code.
-  int get charCode {
-    if (originalEvent != null)
-      try {
-        return (originalEvent as dynamic).charCode;
-      } catch (e) {
-      }
-    return 0;
-  }
+  int get charCode => _safeOriginal((e) => e.charCode, 0);
   ///Returns whether the alt key is pressed.
-  bool get altKey {
-    if (originalEvent != null)
-      try {
-        return (originalEvent as dynamic).altKey;
-      } catch (e) {
-      }
-    return false;
-  }
+  bool get altKey => _safeOriginal((e) => e.altKey, false);
   ///Returns whether the alt-graph key is pressed.
-  bool get altGraphKey {
-    if (originalEvent != null)
-      try {
-        return (originalEvent as dynamic).altGraphKey;
-      } catch (e) {
-      }
-    return false;
-  }
+  bool get altGraphKey => _safeOriginal((e) => e.altGraphKey, false);
   ///Returns whether the ctrl key is pressed.
-  bool get ctrlKey {
-    if (originalEvent != null)
-      try {
-        return (originalEvent as dynamic).ctrlKey;
-      } catch (e) {
-      }
-    return false;
-  }
+  bool get ctrlKey => _safeOriginal((e) => e.ctrlKey, false);
   ///Returns whether the meta key is pressed.
-  bool get metaKey {
+  bool get metaKey => _safeOriginal((e) => e.metaKey, false);
+
+  _safeOriginal(f(event), [defaultValue]) {
     if (originalEvent != null)
       try {
-        return (originalEvent as dynamic).metaKey;
-      } catch (e) {
+        return f(originalEvent);
+      } catch (_) {
       }
-    return false;
+    return defaultValue;
   }
 
   RegExp _namespace_re;
@@ -821,7 +773,4 @@ class QueryEvent {
     _isImmediatePropagationStopped = true;
     stopPropagation();
   }
-
 }
-
-// TODO: check 661-711 browser hack
