@@ -223,7 +223,7 @@ class _EventUtil {
     //event._isTrigger = onlyHandlers ? 2 : 3;
     if (!namespaces.isEmpty)
       event._namespace = namespaces.join('.');
-    event._namespace_re = event.namespace != null ?
+    event._reNamespace = event.namespace != null ?
         new RegExp( '(^|\\.)${namespaces.join("\\.(?:.*\\.|)")}(\\.|\$)') : null;
 
     // jQuery: Determine event propagation path in advance, per W3C events spec (#9951)
@@ -251,7 +251,7 @@ class _EventUtil {
     // jQuery: Fire handlers on the event path
     bool first = true;
     for (Node n in eventPath) {
-      if (event.isPropagationStopped)
+      if (event.propagationStopped)
         break;
       event._type = !first ? bubbleType : _fallback(special.bindType, () => type);
 
@@ -273,7 +273,7 @@ class _EventUtil {
     event._type = type;
 
     // jQuery: If nobody prevented the default action, do it now
-    if (!onlyHandlers && !event.isDefaultPrevented) {
+    if (!onlyHandlers && !event.defaultPrevented) {
       if (!(type == "click" && _nodeName(elem, "a"))) {
         // jQuery: Call a native DOM method on the target with the same name name as the event.
         // jQuery: Don't do default actions on window, that's where global variables be (#6170)
@@ -298,14 +298,14 @@ class _EventUtil {
     final List<_HandlerQueueEntry> handlerQueue = _EventUtil.handlers(elem, dqevent, handleObjCtx);
 
     for (_HandlerQueueEntry matched in handlerQueue) {
-      if (dqevent.isPropagationStopped) break;
+      if (dqevent.propagationStopped) break;
       dqevent._currentTarget = matched.elem;
       // copy to avoid concurrent modification
       for (_HandleObject handleObj in new List<_HandleObject>.from(matched.handlers)) {
-        if (dqevent.isImmediatePropagationStopped) break;
+        if (dqevent.immediatePropagationStopped) break;
         // jQuery: Triggered event must either 1) have no namespace, or
         //         2) have namespace(s) a subset or equal to those in the bound event (both can have no namespace).
-        if (dqevent._namespace_re == null || dqevent._namespace_re.hasMatch(handleObj.namespace)) {
+        if (dqevent._reNamespace == null || dqevent._reNamespace.hasMatch(handleObj.namespace)) {
           final List<String> eventns = dqevent.namespace == null ? [] : dqevent.namespace.split('.');
           final List<String> hobjns = handleObj.namespace == null ? [] : handleObj.namespace.split('.');
           if (_subsetOf(eventns, hobjns)) {
@@ -392,14 +392,14 @@ class _EventUtil {
     //         Fake originalEvent to avoid donor's stopPropagation, but if the
     //         simulated event prevents default then we do the same on the donor.
 
-    QueryEvent e = new QueryEvent(type).._isSimulated = true;
+    QueryEvent e = new QueryEvent(type).._simulated = true;
 
     if (bubble)
       _EventUtil.triggerEvent(e.._target = elem);
     else
       _EventUtil.dispatch(elem, e, type: type);
 
-    if (e.isDefaultPrevented)
+    if (e.defaultPrevented)
       event.preventDefault();
   }
 }
@@ -506,16 +506,16 @@ final Map<String, _SpecialEventHandling> _SPECIAL_HANDLINGS = {
     return true;
   }, delegateType: 'focusout'),
 
-  'focusin': _fallback(_focusinHandling, () => _focusinHandling = initNotSupportFocusinBubbles('focus', 'focusin')),
-  'focusout': _fallback(_focusoutHandling, () => _focusoutHandling = initNotSupportFocusinBubbles('blur', 'focusout')),
+  'focusin': _fallback(_focusinHandling, () => _focusinHandling = _initNotSupportFocusinBubbles('focus', 'focusin')),
+  'focusout': _fallback(_focusoutHandling, () => _focusoutHandling = _initNotSupportFocusinBubbles('blur', 'focusout')),
 
-  'mouseenter': _fallback(_mouseenterHandling, () => _mouseenterHandling = initMouseenterleave('mouseenter', 'mouseover')),
-  'mouseleave': _fallback(_mouseleaveHandling, () => _mouseleaveHandling = initMouseenterleave('mouseleave', 'mouseout')),
+  'mouseenter': _fallback(_mouseenterHandling, () => _mouseenterHandling = _initMouseenterleave('mouseenter', 'mouseover')),
+  'mouseleave': _fallback(_mouseleaveHandling, () => _mouseleaveHandling = _initMouseenterleave('mouseleave', 'mouseout')),
 };
 
 // jQuery: Create mouseenter/leave events using mouseover/out and event-time checks
 _SpecialEventHandling _mouseenterHandling, _mouseleaveHandling;
-_SpecialEventHandling initMouseenterleave(String orig, String fix) {
+_SpecialEventHandling _initMouseenterleave(String orig, String fix) {
   return new _SpecialEventHandling(handle: (QueryEvent event) {
     Node target = event._currentTarget as Node,
          related = event.relatedTarget as Node;
@@ -537,7 +537,7 @@ _SpecialEventHandling initMouseenterleave(String orig, String fix) {
 //if ( !jQuery.support.focusinBubbles ) {
 
 _SpecialEventHandling _focusinHandling, _focusoutHandling;
-_SpecialEventHandling initNotSupportFocusinBubbles(String orig, String fix) {
+_SpecialEventHandling _initNotSupportFocusinBubbles(String orig, String fix) {
 
   // Attach a single capturing handler while someone wants focusin/focusout
   var attaches = 0,
@@ -566,7 +566,7 @@ typedef void QueryEventListener(QueryEvent event);
 /** A wrapping of browser [Event], to attach more information such as custom
  * event data and name space, etc.
  */
-class QueryEvent {
+class QueryEvent implements Event {
 
   /** The original event, if any. If this [QueryEvent] was triggered by browser,
    * it will contain an original event; if triggered by API, this property will
@@ -708,6 +708,24 @@ class QueryEvent {
   ///Returns whether the meta key is pressed.
   bool get metaKey => _safeOriginal((e) => e.metaKey, false);
 
+  @override
+  bool get bubbles => _safeOriginal((e) => e.bubbles, false);
+  @override
+  bool get cancelable => _safeOriginal((e) => e.cancelable, false);
+  @override
+  get clipboardData => _safeOriginal((e) => e.clipboardData);
+  @override
+  int get eventPhase => _safeOriginal((e) => e.eventPhase, 0);
+  @override
+  Element get matchingTarget {
+    if (originalEvent != null) return originalEvent.matchingTarget;
+    throw new UnsupportedError(''); //follow SDK spec
+  }
+  @override
+  List<Node> get path => _safeOriginal((e) => e.path);
+  @override
+  int get timeStamp => _safeOriginal((e) => e.timeStamp, 0);
+
   _safeOriginal(f(event), [defaultValue]) {
     if (originalEvent != null)
       try {
@@ -717,7 +735,7 @@ class QueryEvent {
     return defaultValue;
   }
 
-  RegExp _namespace_re;
+  RegExp _reNamespace;
 
   _HandleObject _handleObj;
 
@@ -736,41 +754,51 @@ class QueryEvent {
   _type = type, _target = target, originalEvent = null;
 
   /// Return true if [preventDefault] was ever called in this event.
-  bool get isDefaultPrevented => _isDefaultPrevented;
-  bool _isDefaultPrevented = false;
+  @override
+  bool get defaultPrevented
+  => _defaultPrevented ?? _safeOriginal((e) => e.defaultPrevented, false);
+  bool _defaultPrevented;
 
   /// Return true if [stopPropagation] was ever called in this event.
-  bool get isPropagationStopped => _isPropagationStopped;
-  bool _isPropagationStopped = false;
+  bool get propagationStopped => _propagationStopped;
+  bool _propagationStopped = false;
 
   /// Return true if [stopImmediatePropagation] was ever called in this event.
-  bool get isImmediatePropagationStopped => _isImmediatePropagationStopped;
-  bool _isImmediatePropagationStopped = false;
+  bool get immediatePropagationStopped => _immediatePropagationStopped;
+  bool _immediatePropagationStopped = false;
 
 /// Return true if the event is simulated
-  bool get isSimulated => _isSimulated;
-  bool _isSimulated = false;
+  bool get simulated => _simulated;
+  bool _simulated = false;
+
+  @deprecated
+  bool get isDefaultPrevented => defaultPrevented;
+  @deprecated
+  bool get isPropagationStopped => propagationStopped;
 
   /** Prevent the default action of the event being triggered.
    */
+  @override
   void preventDefault() {
-    _isDefaultPrevented = true;
+    _defaultPrevented = true;
     originalEvent?.preventDefault();
   }
 
   /** Prevent the event from bubbling up, and prevent any handlers on parent
    * elements from being called.
    */
+  @override
   void stopPropagation() {
-    _isPropagationStopped = true;
+    _propagationStopped = true;
     originalEvent?.stopPropagation();
   }
 
   /** Prevent the event from bubbling up, and prevent any succeeding handlers
    * from being called.
    */
+  @override
   void stopImmediatePropagation() {
-    _isImmediatePropagationStopped = true;
-    stopPropagation();
+    _immediatePropagationStopped = _propagationStopped = true;
+    originalEvent?.stopImmediatePropagation();
   }
 }
