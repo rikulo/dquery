@@ -656,7 +656,7 @@ class QueryEvent implements Event {
     final MouseEvent original = originalEvent;
     final Point client = original.client;
     if (client.x != null ) {
-      final Document eventDoc = _fallback((target as Element).ownerDocument, () => document);
+      final Document eventDoc = target is Element ? (target as Element).ownerDocument: document;
       final Element doc = eventDoc.documentElement,
               body = document.body;
 
@@ -738,6 +738,10 @@ class QueryEvent implements Event {
   RegExp _reNamespace;
 
   _HandleObject _handleObj;
+
+  JsObject get blink_jsObject => originalEvent?.blink_jsObject;
+
+  void set blink_jsObject(JsObject obj){}
 
   //int _isTrigger; // TODO: check usage
 
