@@ -674,6 +674,7 @@ class QueryEvent implements Event {
      body != null ? body.scrollTop - body.clientTop: 0;
 
   ///For key or mouse events, this property indicates the specific key or button that was pressed.
+  /* Better not to introduce additional API that Dart SDK can do
   int get which {
     if (_which == null) {
       if (originalEvent is KeyboardEvent) {
@@ -692,6 +693,7 @@ class QueryEvent implements Event {
     return _which;
   }
   int _which;
+  */
 
   ///Returns the key code.
   int get keyCode => _safeOriginal((e) => e.keyCode, 0);
@@ -712,8 +714,6 @@ class QueryEvent implements Event {
   bool get bubbles => _safeOriginal((e) => e.bubbles, false);
   @override
   bool get cancelable => _safeOriginal((e) => e.cancelable, false);
-  @override
-  get clipboardData => _safeOriginal((e) => e.clipboardData);
   @override
   int get eventPhase => _safeOriginal((e) => e.eventPhase, 0);
   @override
