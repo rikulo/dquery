@@ -4,7 +4,6 @@ import 'dart:math';
 import 'dart:html';
 import 'dart:html_common';
 import 'dart:collection';
-import 'dart:js' show JsObject;
 
 import "package:intl/intl.dart" show DateFormat;
 

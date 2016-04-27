@@ -740,10 +740,6 @@ class QueryEvent implements Event {
 
   _HandleObject _handleObj;
 
-  JsObject get blink_jsObject => originalEvent?.blink_jsObject;
-
-  void set blink_jsObject(JsObject obj){}
-
   //int _isTrigger; // TODO: check usage
 
   //final Map attributes = {};
