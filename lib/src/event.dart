@@ -774,11 +774,6 @@ class QueryEvent implements Event {
   bool get simulated => _simulated;
   bool _simulated = false;
 
-  @deprecated
-  bool get isDefaultPrevented => defaultPrevented;
-  @deprecated
-  bool get isPropagationStopped => propagationStopped;
-
   /** Prevent the default action of the event being triggered.
    */
   @override

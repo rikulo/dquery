@@ -1,6 +1,8 @@
 #CHANGES
 
+**0.8.3**
 
+* Remove QueryEvent's isDefaultPrevented and isPropagationStopped. Please use defaultPrevented and propagationStopped instead.
 **0.8.2**
 * Remove QueryEvent's which and clipboardData to be compatible with Dart 1.16
 
