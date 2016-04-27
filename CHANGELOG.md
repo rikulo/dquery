@@ -1,10 +1,12 @@
 #CHANGES
 
+
 **0.8.2**
-# Fixed client error when access pageX (Firefox)
+* Remove QueryEvent's which and clipboardData to be compatible with Dart 1.16
 
 **0.8.1**
 * Close #11: QueryEvent implements Event
+# Fixed client error when access pageX (Firefox)
 
 **0.8.0
 * Refector: DQuery doesn't depend on Event.target/type for basic event handling
