@@ -676,27 +676,40 @@ class QueryEvent implements Event {
   => doc != null ? doc.scrollTop - doc.clientTop:
      body != null ? body.scrollTop - body.clientTop: 0;
 
-  ///For key or mouse events, this property indicates the specific key or button that was pressed.
-  /* Better not to introduce additional API that Dart SDK can do
+  /** For key or mouse events, this property indicates the specific key
+   * or button that was pressed.
+   * 
+   * For key events, it normalizes event.keyCode and event.charCode.
+   * It is recommended to watch event.which for keyboard key input.
+   *
+   * For mouse events, it normalizes button presses (mousedown and mouseupevents),
+   * reporting 1 for left button, 2 for middle, and 3 for right.
+   * Use event.which instead of event.button.
+   */
   int get which {
-    if (_which == null) {
-      if (originalEvent is KeyboardEvent) {
-    //jQuery: Add which for key events
-        final KeyboardEvent original = originalEvent;
-        _which = original.charCode ?? original.keyCode;
-
-      } else if (originalEvent is MouseEvent) {
-    // jQuery: Add which for click: 1 === left; 2 === middle; 3 === right
-    // jQuery: Note: button is not normalized, so don't use it
-        final MouseEvent original = originalEvent;
-        final button = original.button;
-        _which = button == 1 ? 1 : (button == 2 ? 3 :(button == 4 ? 2 : 0));
-      }
-    }
+    if (_which == null)
+      _which = getWhich(originalEvent);
     return _which;
   }
   int _which;
-  */
+
+  /// Converts [MouseEvent.button] to [QueryEvent.which].
+  /// That is, reporting 1 for left button, 2 for middle, and 3 for right.
+  static int getWhich(Event event) {
+    if (event is KeyboardEvent) { //including KeyEvent
+  //jQuery: Add which for key events
+      return event.charCode ?? event.keyCode;
+
+    } else if (event is MouseEvent) {
+  // jQuery: Add which for click: 1 === left; 2 === middle; 3 === right
+  // jQuery: Note: button is not normalized, so don't use it
+      final button = event.button;
+      return button == 1 ? 1 : (button == 2 ? 3 :(button == 4 ? 2 : 0));
+    } else if (event is QueryEvent) {
+      return event.which;
+    }
+    return 0;
+  }
 
   ///Returns the key code.
   int get keyCode => _safeOriginal((e) => e.keyCode, 0);
