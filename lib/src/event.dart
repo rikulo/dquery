@@ -703,8 +703,9 @@ class QueryEvent implements Event {
     } else if (event is MouseEvent) {
   // jQuery: Add which for click: 1 === left; 2 === middle; 3 === right
   // jQuery: Note: button is not normalized, so don't use it
-      final button = event.button;
-      return button == 1 ? 1 : (button == 2 ? 3 :(button == 4 ? 2 : 0));
+      final buttons = event.buttons;
+      return (buttons & 1) != 0 ? 1:
+             (buttons & 2) != 0 ? 3: (buttons & 4) != 0 ? 2 : 0;
     } else if (event is QueryEvent) {
       return event.which;
     }
