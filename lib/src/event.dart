@@ -577,6 +577,7 @@ class QueryEvent implements Event {
   /** The type of event. If the event is constructed from a native DOM [Event],
    * it uses the type of that event.
    */
+  @override
   String get type => _type ?? originalEvent?.type;
   String _type;
 
@@ -609,6 +610,7 @@ class QueryEvent implements Event {
   /** The original target of this event. i.e. The real event target where the
    * event occurs.
    */
+  @override
   EventTarget get target {
     if (_target == null && originalEvent != null) {
       _target = originalEvent.target;
