@@ -686,38 +686,39 @@ class QueryEvent implements Event {
    * reporting 1 for left button, 2 for middle, and 3 for right.
    * Use event.which instead of event.button.
    */
+  @deprecated
   int get which {
-    if (_which == null)
-      _which = getWhich(originalEvent);
+    if (_which == null) {
+      final event = originalEvent;
+      if (event is KeyboardEvent) { //including KeyEvent
+    //jQuery: Add which for key events
+        _which = event.charCode ?? event.keyCode;
+
+      } else if (event is MouseEvent) {
+    // jQuery: Add which for click: 1 === left; 2 === middle; 3 === right
+    // jQuery: Note: button is not normalized, so don't use it
+        final buttons = event.buttons;
+        _which = 
+            buttons == null ? event.button + 1: //Safari: no buttons
+            (buttons & 1) != 0 ? 1:
+            (buttons & 2) != 0 ? 3: (buttons & 4) != 0 ? 2 : 0;
+      } else if (event is QueryEvent) {
+        _which = event.which;
+      }
+    }
     return _which;
   }
   int _which;
 
-  /// Converts [MouseEvent.button] to [QueryEvent.which].
-  /// That is, reporting 1 for left button, 2 for middle, and 3 for right.
-  static int getWhich(Event event) {
-    if (event is KeyboardEvent) { //including KeyEvent
-  //jQuery: Add which for key events
-      return event.charCode ?? event.keyCode;
+  ///Returns the key code if it is a keyboard event, or null if not.
+  int get keyCode => _safeOriginal((e) => e.keyCode);
+  ///Returns the key location if it is a keyboard event, or null if not.
+  int get location => _safeOriginal((e) => e.location);
+  @deprecated
+  int get keyLocation => location;
+  ///Returns the character code if it is a keyboard event, or null if not.
+  int get charCode => _safeOriginal((e) => e.charCode);
 
-    } else if (event is MouseEvent) {
-  // jQuery: Add which for click: 1 === left; 2 === middle; 3 === right
-  // jQuery: Note: button is not normalized, so don't use it
-      final buttons = event.buttons;
-      return (buttons & 1) != 0 ? 1:
-             (buttons & 2) != 0 ? 3: (buttons & 4) != 0 ? 2 : 0;
-    } else if (event is QueryEvent) {
-      return event.which;
-    }
-    return 0;
-  }
-
-  ///Returns the key code.
-  int get keyCode => _safeOriginal((e) => e.keyCode, 0);
-  ///Returns the key location.
-  int get keyLocation => _safeOriginal((e) => e.keyLocation, 0);
-  ///Returns the character code.
-  int get charCode => _safeOriginal((e) => e.charCode, 0);
   ///Returns whether the alt key is pressed.
   bool get altKey => _safeOriginal((e) => e.altKey, false);
   ///Returns whether the alt-graph key is pressed.
@@ -726,6 +727,10 @@ class QueryEvent implements Event {
   bool get ctrlKey => _safeOriginal((e) => e.ctrlKey, false);
   ///Returns whether the meta key is pressed.
   bool get metaKey => _safeOriginal((e) => e.metaKey, false);
+
+  ///Returns the button being clicked if it is a mouse event,
+  ///or null if not.
+  int get button => _safeOriginal((e) => e.button);
 
   @override
   bool get bubbles => _safeOriginal((e) => e.bubbles, false);
