@@ -1,5 +1,9 @@
 # CHANGES
 
+**0.8.5**
+
+* Fixed off event with namespace
+
 **0.8.4**
 
 * Deprecate QueryEvent.type since Dart 1.16 doesn't support MouseEvent.which, and it is not non-standard.

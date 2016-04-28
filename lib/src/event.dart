@@ -120,10 +120,17 @@ class _EventUtil {
 
       // jQuery: Remove matching events
       Function filter = (_HandleObject handleObj) {
+        bool matchNamespaces() {
+          for (final ns in handleObj.namespace.split('.')) {
+            if (namespaces.contains(ns))
+              return true;
+          }
+          return false;
+        }
         final bool res =
             (mappedTypes || origType == handleObj.origType) &&
             (handler == null || handler == handleObj.handler) &&
-            _subsetOf(namespaces, handleObj.namespace.split('.')) &&
+            (namespaces.isEmpty || matchNamespaces()) &&
             (selector == null || selector == handleObj.selector || (selector == '**' && handleObj.selector != null));
 
         // special remove: skipped for now
