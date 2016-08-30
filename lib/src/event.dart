@@ -734,6 +734,8 @@ class QueryEvent implements Event {
   bool get ctrlKey => _safeOriginal((e) => e.ctrlKey, false);
   ///Returns whether the meta key is pressed.
   bool get metaKey => _safeOriginal((e) => e.metaKey, false);
+  ///Returns whether the shift key is pressed.
+  bool get shiftKey => _safeOriginal((e) => e.shiftKey, false);
 
   ///Returns the button being clicked if it is a mouse event,
   ///or null if not.

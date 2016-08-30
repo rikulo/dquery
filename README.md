@@ -1,15 +1,15 @@
-#DQuery
+# DQuery
 
 [DQuery](http://rikulo.org) is a porting of [jQuery](http://jquery.com/) in Dart.
 
 * [Home](http://rikulo.org)
 * [Tutorial](http://blog.rikulo.org/posts/2013/May/General/bootjack-and-dquery/)
-* [API Reference](http://www.dartdocs.org/documentation/dquery/0.8.4/index.html)
+* [API Reference](http://www.dartdocs.org/documentation/dquery/0.8.5/index.html)
 * [Git Repository](https://github.com/rikulo/dquery)
 * [Discussion](http://stackoverflow.com/questions/tagged/rikulo)
 * [Issues](https://github.com/rikulo/dquery/issues)
 
-##Install from Dart Pub Repository
+## Install from Dart Pub Repository
 
 Include the following in your `pubspec.yaml`:
 
@@ -21,7 +21,7 @@ Then run the [Pub Package Manager](http://pub.dartlang.org/doc) in Dart Editor (
 
     pub install
 
-##Usage
+## Usage
 
 You can create a query object by selector. With context provided, the query will be based on different element.
 
@@ -61,17 +61,17 @@ There are query objects of `Document` and `Window` too.
 
 Check the [API reference](http://api.rikulo.org/dquery/latest/dquery.html) for more features.
 
-##Comparison to jQuery
+## Comparison to jQuery
 
 See [here](https://github.com/rikulo/dquery/blob/master/doc/Comparison.md).
 
-##Notes to Contributors
+## Notes to Contributors
 
-###Test and Debug
+### Test and Debug
 
 You are welcome to submit [bugs and feature requests](https://github.com/rikulo/dquery/issues). Or even better if you can fix or implement them!
 
-###Fork DQuery
+### Fork DQuery
 
 If you'd like to contribute back to the core, you can [fork this repository](https://help.github.com/articles/fork-a-repo) and send us a pull request, when it is ready.
 
@@ -79,6 +79,6 @@ Please be aware that one of Rikulo's design goals is to keep the sphere of API a
 
 If you are new to Git or GitHub, please read [this guide](https://help.github.com/) first.
 
-##Who Uses
+## Who Uses
 
 * [Quire](https://quire.io) - a simple, collaborative, multi-level task management tool.
