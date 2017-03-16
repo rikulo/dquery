@@ -2,36 +2,34 @@ part of dquery;
 
 class _Storage {
   
-  final String _name;
-  final Expando<Map> _cache;
+  final Expando<Map<String, dynamic>> _cache;
   
   _Storage(String name) :
-  _name = name,
-  _cache = new Expando<Map>(name);
+  _cache = new Expando<Map<String, dynamic>>(name);
   
   void set(owner, String key, value) {
     getSpace(owner)[key] = value;
   }
   
   void setAll(Node owner, Map<String, dynamic> props) {
-    final Map space = getSpace(owner);
+    final space = getSpace(owner);
     props.forEach((String key, value) => space[key] = value);
   }
   
   get(owner, String key) {
-    Map space = _cache[owner];
+    final space = _cache[owner];
     return space == null ? null : space[key];
   }
   
-  Map getSpace(owner, [bool autoCreate = true]) {
-    Map space = _cache[owner];
+  Map<String, dynamic> getSpace(owner, [bool autoCreate = true]) {
+    var space = _cache[owner];
     if (autoCreate && space == null)
-      space = _cache[owner] = {};
+      space = _cache[owner] = <String, dynamic>{};
     return space;
   }
   
   void remove(Node owner, String key) {
-    Map space = _cache[owner];
+    final space = _cache[owner];
     if (space != null) {
       space.remove(key);
       if (space.isEmpty)
@@ -40,7 +38,7 @@ class _Storage {
   }
   
   bool hasData(owner) {
-    Map space = _cache[owner];
+    final space = _cache[owner];
     return space != null && !space.isEmpty;
   }
   
@@ -63,7 +61,7 @@ class Data {
   
   /** Retrieve the entire space of element data.
    */
-  Map get space => _dq.isEmpty ? null : _dataUser.getSpace(_dq.first);
+  Map<String, dynamic> get space => _dq.isEmpty ? null : _dataUser.getSpace(_dq.first);
   
   /** Retrieve the data of the given [key].
    */

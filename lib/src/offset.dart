@@ -111,7 +111,7 @@ Point _parseCssPoint(Element elem, String nameX, String nameY, [num defaultX, nu
 num _parseCss(Element elem, String name, num defaultValue) =>
     _parseDouble(_getCss(elem, name), defaultValue); // TODO: double.parse() is different from parseFloat()
 
-num _parseDouble(String src, [num defaultValue = 0.0]) =>
+num _parseDouble(String src, [double defaultValue = 0.0]) =>
     double.parse(_trimSuffix(src, 'px'), (String source) => defaultValue);
 
 String _trimSuffix(String src, String suffix) =>

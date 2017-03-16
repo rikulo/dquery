@@ -498,7 +498,7 @@ class _ShadowRootQuery extends _Query<ShadowRoot> with ListMixin<ShadowRoot> {
 final DQuery _rootDQuery = $document();
 
 bool _nodeName(elem, String name) =>
-    elem is Element && (elem as Element).tagName.toLowerCase() == name.toLowerCase();
+    elem is Element && elem.tagName.toLowerCase() == name.toLowerCase();
 
 /*
 List _grep(List list, bool test(obj, index), [bool invert = false]) {

@@ -32,7 +32,7 @@ ElementQuery $(selector, [context]) {
   
   if (selector is String) {
     // html
-    if ((selector as String).startsWith('<')) {
+    if (selector.startsWith('<')) {
       return new ElementQuery([new Element.html(selector)]);
     }
     
@@ -40,7 +40,7 @@ ElementQuery $(selector, [context]) {
       return _rootDQuery.find(selector);
       
     } else if (context is DQuery) {
-      return (context as DQuery).find(selector);
+      return context.find(selector);
       
     } else if (context is Document) {
       return $document(context).find(selector);

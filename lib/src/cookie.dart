@@ -40,7 +40,8 @@ String _parseCookieValue(String value) {
   try {
     // Replace server-side written pluses with spaces.
     return _decode(value.replaceAll(_rePlus, ' '));
-  } catch(e) {
+  } catch (_) {
+    return null;
   }
 }
 final RegExp _reQuot = new RegExp(r'\\"'), _reBS = new RegExp(r'\\\\'),
