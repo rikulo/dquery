@@ -44,7 +44,7 @@ void _showHide(List<Element> elements, bool show) {
   for (Element elem in elements) {
     final String display = elem.style.display;
     if (!show || display == 'none' || display == '')
-      elem.style.display = show ? _fallback(values[elem], () => '') : 'none';
+      elem.style.display = show ? (values[elem] ?? '') : 'none';
   }
   
 }
@@ -91,7 +91,7 @@ String _actualDisplay(String name, HtmlDocument doc) {
 }
 
 String _getCurCss(Element elem, String name, CssStyleDeclaration computed) {
-  computed = _fallback(computed, () => elem.getComputedStyle());
+  computed = computed ?? elem.getComputedStyle();
   
   if (computed == null)
     return null;
@@ -101,8 +101,8 @@ String _getCurCss(Element elem, String name, CssStyleDeclaration computed) {
   // TODO: skipped, trust Dart handling for now but need to test against it
   // ret = computed ? computed.getPropertyValue( name ) || computed[ name ] : undefined,
   
-  return _fallback(computed.getPropertyValue(name), 
-      () => computed.getPropertyValue("${Device.cssPrefix}${name}"));
+  return computed.getPropertyValue(name)
+      ?? computed.getPropertyValue("${Device.cssPrefix}${name}");
   
   //if ( computed ) {
     /*

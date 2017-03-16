@@ -48,7 +48,7 @@ class _EventUtil {
       // jQuery: If event changes its type, use the special event handlers for the changed type
       _SpecialEventHandler special = _getSpecial(type);
       // jQuery: If selector defined, determine special event api type, otherwise given type
-      type = _fallback(hasSelector ? special.delegateType : special.bindType, () => type);
+      type = (hasSelector ? special.delegateType : special.bindType) ?? type;
       // jQuery: Update special based on newly reset type
       special = _getSpecial(type);
 
@@ -112,9 +112,9 @@ class _EventUtil {
       }
 
       _SpecialEventHandler special = _getSpecial(type);
-      type = _fallback(selector != null ? special.delegateType : special.bindType, () => type);
+      type = (selector != null ? special.delegateType : special.bindType) ?? type;
 
-      _HandleObjectContext handleObjCtx = _fallback(events[type], () => _HandleObjectContext.EMPTY);
+      _HandleObjectContext handleObjCtx = events[type] ?? _HandleObjectContext.EMPTY;
       List<_HandleObject> delegates = handleObjCtx.delegates;
       List<_HandleObject> handlers = handleObjCtx.handlers;
 
@@ -204,7 +204,7 @@ class _EventUtil {
   }
 
   static void triggerEvent(QueryEvent event, [bool onlyHandlers = false]) {
-    EventTarget elem = _fallback(event.target, () => document);
+    EventTarget elem = event.target ?? document;
 
     String type = event.type;
     List<String> namespaces = [];
@@ -239,7 +239,7 @@ class _EventUtil {
     _SpecialEventHandler special = _getSpecial(type);
     if (!onlyHandlers && !special.noBubble && elem is Node) {
       Node n = elem;
-      bubbleType = _fallback(special.delegateType, () => type);
+      bubbleType = special.delegateType ?? type;
       final bool focusMorph = _focusMorphMatch(bubbleType, type);
 
       for (Node cur = focusMorph ? n : n.parentNode; cur != null; cur = cur.parentNode) {
@@ -260,7 +260,7 @@ class _EventUtil {
     for (Node n in eventPath) {
       if (event.propagationStopped)
         break;
-      event._type = !first ? bubbleType : _fallback(special.bindType, () => type);
+      event._type = !first ? bubbleType : (special.bindType ?? type);
 
       // jQuery: jQuery handler
       if (_getEvents(n).containsKey(event.type)) {
@@ -350,7 +350,7 @@ class _EventUtil {
     if (delegates.isNotEmpty) {
       EventTarget cur = dqevent.target;
       if (cur is Node) {
-        for (; cur != elem; cur = _fallback(parentNode(cur), () => elem)) {
+        for (; cur != elem; cur = parentNode(cur) ?? elem) {
 
           // jQuery: Don't process clicks on disabled elements (#6911, #8165, #11382, #11764)
           // TODO: uncomment later
@@ -389,10 +389,10 @@ class _EventUtil {
       target is Node ? target.parentNode : null;
 
   static Map<String, _HandleObjectContext> _getEvents(EventTarget elem) =>
-      _fallback(_dataPriv.get(elem, 'events'), () => {});
+      _dataPriv.get(elem, 'events') ?? {};
 
   static _HandleObjectContext _getHandleObjCtx(EventTarget elem, String type) =>
-      _fallback(_getEvents(elem)[type], () => _HandleObjectContext.EMPTY);
+      _getEvents(elem)[type] ?? _HandleObjectContext.EMPTY;
 
   static void simulate(String type, EventTarget elem, event, bool bubble) {
     // jQuery: Piggyback on a donor event to simulate a different one.
@@ -482,7 +482,7 @@ class _SpecialEventHandler {
 
 }
 _SpecialEventHandler _getSpecial(String type) =>
-  _fallback(_SPECIAL_HANDLINGS[type], () => _SpecialEventHandler.EMPTY);
+  _SPECIAL_HANDLINGS[type] ?? _SpecialEventHandler.EMPTY;
 
 final Map<String, _SpecialEventHandler> _SPECIAL_HANDLINGS = <String, _SpecialEventHandler> {
   // jQuery: Prevent triggered image.load events from bubbling to window.load
@@ -514,11 +514,11 @@ final Map<String, _SpecialEventHandler> _SPECIAL_HANDLINGS = <String, _SpecialEv
     return true;
   }, delegateType: 'focusout'),
 
-  'focusin': _fallback(_focusinHandling, () => _focusinHandling = _initNotSupportFocusinBubbles('focus', 'focusin')),
-  'focusout': _fallback(_focusoutHandling, () => _focusoutHandling = _initNotSupportFocusinBubbles('blur', 'focusout')),
+  'focusin': _focusinHandling ?? (_focusinHandling = _initNotSupportFocusinBubbles('focus', 'focusin')),
+  'focusout': _focusoutHandling ?? (_focusoutHandling = _initNotSupportFocusinBubbles('blur', 'focusout')),
 
-  'mouseenter': _fallback(_mouseenterHandling, () => _mouseenterHandling = _initMouseenterleave('mouseenter', 'mouseover')),
-  'mouseleave': _fallback(_mouseleaveHandling, () => _mouseleaveHandling = _initMouseenterleave('mouseleave', 'mouseout')),
+  'mouseenter': _mouseenterHandling ?? (_mouseenterHandling = _initMouseenterleave('mouseenter', 'mouseover')),
+  'mouseleave': _mouseleaveHandling ?? (_mouseleaveHandling = _initMouseenterleave('mouseleave', 'mouseout')),
 };
 
 // jQuery: Create mouseenter/leave events using mouseover/out and event-time checks

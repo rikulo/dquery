@@ -41,11 +41,11 @@ abstract class _Query<T extends EventTarget> implements Query<T> {
       .._context = _context;
   
   @override
-  DQuery end() => _fallback(_prevObject, () => new ElementQuery([]));
+  DQuery end() => _prevObject ?? new ElementQuery([]);
   
   // data //
   @override
-  Data get data => _fallback(_data, () => (_data = new Data._(this)));
+  Data get data => _data ?? (_data = new Data._(this));
   Data _data;
   
   // event //
@@ -106,7 +106,7 @@ class _DocumentQuery extends _Query<HtmlDocument> with ListMixin<HtmlDocument>
   
   HtmlDocument _doc;
   
-  _DocumentQuery([HtmlDocument doc]) : this._doc = _fallback(doc, () => document);
+  _DocumentQuery([HtmlDocument doc]) : this._doc = doc ?? document;
   
   // DQuery //
   @override
@@ -182,7 +182,7 @@ class _WindowQuery extends _Query<Window> with ListMixin<Window>
   
   Window _win;
   
-  _WindowQuery([Window win]) : this._win = _fallback(win, () => window);
+  _WindowQuery([Window win]) : this._win = win ?? window;
   
   // DQuery //
   @override
@@ -318,7 +318,7 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   @override
   void toggle([bool state]) {
     for (Element elem in _elements)
-      _showHide([elem], _fallback(state, () => _isHidden(elem)));
+      _showHide([elem], state ?? _isHidden(elem));
   }
   
   @override
