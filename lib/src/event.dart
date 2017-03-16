@@ -249,10 +249,9 @@ class _EventUtil {
       // jQuery: Only add window if we got to document (e.g., not plain obj or detached DOM)
       // TODO
       /*
-      if (tmp == _fallback(elem.ownerDocument, () => document))
-        eventPathWindow = _fallback((tmp as Document).window, () => window);
+      if (tmp == (elem.ownerDocument ?? document))
+        eventPathWindow = (tmp as Document).window ?? window;
       */
-
     }
 
     // jQuery: Fire handlers on the event path
