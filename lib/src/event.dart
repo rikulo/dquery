@@ -216,7 +216,7 @@ class _EventUtil {
 
     final String ontype = type.indexOf(':') < 0 ? "on$type" : null; // TODO: check use
 
-    final List<Node> eventPath = [elem as Node];
+    final List<EventTarget> eventPath = [elem];
 
     // jQuery: Don't do events on text and comment nodes
     if (elem is CharacterData)
