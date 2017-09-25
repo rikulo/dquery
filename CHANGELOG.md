@@ -1,5 +1,8 @@
 # CHANGES
 
+**0.8.6**
+Fixed QueryEvent missing overrides
+
 **0.8.5**
 
 * QueryEvent.shiftKey introduced.

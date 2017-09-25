@@ -746,6 +746,10 @@ class QueryEvent implements Event {
   @override
   bool get cancelable => _safeOriginal((e) => e.cancelable, false);
   @override
+  bool get isTrusted => _safeOriginal((e) => e.isTrusted, false);
+  @override
+  bool get scoped => _safeOriginal((e) => e.scoped, false);
+  @override
   int get eventPhase => _safeOriginal((e) => e.eventPhase, 0);
   @override
   Element get matchingTarget {
@@ -755,7 +759,9 @@ class QueryEvent implements Event {
   @override
   List<Node> get path => _safeOriginal((e) => e.path);
   @override
-  int get timeStamp => _safeOriginal((e) => e.timeStamp, 0);
+  List<EventTarget> deepPath() => _safeOriginal((e) => e.deepPath());
+  @override
+  double get timeStamp => _safeOriginal((e) => e.timeStamp, 0);
 
   _safeOriginal(f(event), [defaultValue]) {
     if (originalEvent != null)
