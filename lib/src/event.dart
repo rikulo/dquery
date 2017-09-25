@@ -763,7 +763,7 @@ class QueryEvent implements Event {
   @override
   double get timeStamp => _safeOriginal((e) => e.timeStamp, 0.0);
 
-  T _safeOriginal<T>(f(event), [defaultValue]) {
+  T _safeOriginal<T>(T f(event), [T defaultValue]) {
     if (originalEvent != null)
       try {
         return f(originalEvent);
