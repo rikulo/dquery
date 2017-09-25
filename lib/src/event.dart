@@ -761,9 +761,9 @@ class QueryEvent implements Event {
   @override
   List<EventTarget> deepPath() => _safeOriginal((e) => e.deepPath());
   @override
-  double get timeStamp => _safeOriginal((e) => e.timeStamp, 0);
+  double get timeStamp => _safeOriginal((e) => e.timeStamp, 0.0);
 
-  _safeOriginal(f(event), [defaultValue]) {
+  T _safeOriginal<T>(f(event), [defaultValue]) {
     if (originalEvent != null)
       try {
         return f(originalEvent);
