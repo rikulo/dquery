@@ -2,9 +2,6 @@ part of dquery;
 
 // TODO: shall move to commons later
 
-final int _RAND_INT_MAX = 1000 * 1000 * 1000;
-Random _r;
-
 int _max(List<int> nums) {
   if (nums.isEmpty)
     return null;

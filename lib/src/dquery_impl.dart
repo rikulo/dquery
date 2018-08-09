@@ -510,5 +510,3 @@ List _grep(List list, bool test(obj, index), [bool invert = false]) {
 
 String _trim(String text) => text == null ? '' : text.trim();
 
-// jQuery: A global GUID counter for objects
-int _guid = 1;

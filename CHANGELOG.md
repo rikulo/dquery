@@ -1,7 +1,10 @@
 # CHANGES
 
+**1.0.0**
+* Dart 2 required
+
 **0.8.6**
-Fixed QueryEvent missing overrides
+* Fixed QueryEvent missing overrides
 
 **0.8.5**
 

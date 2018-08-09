@@ -235,7 +235,7 @@ class _EventUtil {
 
     // jQuery: Determine event propagation path in advance, per W3C events spec (#9951)
     //         Bubble up to document, then to window; watch for a global ownerDocument var (#9724)
-    String bubbleType = null;
+    String bubbleType;
     _SpecialEventHandler special = _getSpecial(type);
     if (!onlyHandlers && !special.noBubble && elem is Node) {
       Node n = elem;
@@ -588,6 +588,10 @@ class QueryEvent implements Event {
   String get type => _type ?? originalEvent?.type;
   String _type;
 
+  @override
+  List<EventTarget> composedPath()
+    => _safeOriginal((e) => e.composedPath(), const <EventTarget>[]);
+
   /** Custom event data. If user calls trigger method with data, it will show
    * up here.
    */
@@ -611,6 +615,7 @@ class QueryEvent implements Event {
 
   /** The current target of this event when bubbling up.
    */
+  @override
   EventTarget get currentTarget => _currentTarget;
   EventTarget _currentTarget;
 
@@ -748,7 +753,7 @@ class QueryEvent implements Event {
   @override
   bool get isTrusted => _safeOriginal((e) => e.isTrusted, false);
   @override
-  bool get scoped => _safeOriginal((e) => e.scoped, false);
+  bool get composed => _safeOriginal((e) => e.composed, false);
   @override
   int get eventPhase => _safeOriginal((e) => e.eventPhase, 0);
   @override
@@ -758,8 +763,6 @@ class QueryEvent implements Event {
   }
   @override
   List<Node> get path => _safeOriginal((e) => e.path);
-  @override
-  List<EventTarget> deepPath() => _safeOriginal((e) => e.deepPath());
   @override
   double get timeStamp => _safeOriginal((e) => e.timeStamp, 0.0);
 

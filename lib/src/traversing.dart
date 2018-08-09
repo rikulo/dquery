@@ -1,6 +1,5 @@
 part of dquery;
 
-final RegExp _isSimple = new RegExp(r'^.[^:#\[\.,]*$');
 /*
 var rneedsContext = jQuery.expr.match.needsContext,
 // methods guaranteed to produce a unique set when starting from a unique set

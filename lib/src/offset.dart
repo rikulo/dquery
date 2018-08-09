@@ -112,7 +112,7 @@ num _parseCss(Element elem, String name, num defaultValue) =>
     _parseDouble(_getCss(elem, name), defaultValue); // TODO: double.parse() is different from parseFloat()
 
 num _parseDouble(String src, [double defaultValue = 0.0]) =>
-    double.parse(_trimSuffix(src, 'px'), (String source) => defaultValue);
+    double.tryParse(_trimSuffix(src, 'px')) ?? defaultValue;
 
 String _trimSuffix(String src, String suffix) =>
     src == null ? null :

@@ -1,5 +1,5 @@
 name: dquery
-version: 0.8.6
+version: 1.0.0
 authors:
 - Simon Pai <simonpai@rikulo.org>
 - Jimmy Shiau <jimmyshiau@rikulo.org>
@@ -9,8 +9,7 @@ description: |
 homepage: https://github.com/rikulo/dquery
 documentation: http://blog.rikulo.org/posts/2013/May/General/bootjack-and-dquery/ 
 environment:
-  sdk: ">=1.2.0"
+  sdk: '>=2.0.0 <3.0.0'
 dependencies:
   intl: any
 dev_dependencies:
-  browser: any

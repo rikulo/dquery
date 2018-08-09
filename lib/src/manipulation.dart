@@ -122,8 +122,8 @@ void _cloneCopyEvent(Element src, Element dest, [bool deep = false]) {
   
   // jQuery: 1. Copy private data: events, handlers, etc.
   if (_dataPriv.hasData(src)) {
-    final Map pdataOld = _dataPriv.getSpace(src);
-    final Map pdataCur = _dataPriv.getSpace(dest);
+    final pdataOld = _dataPriv.getSpace(src);
+    final pdataCur = _dataPriv.getSpace(dest);
     pdataOld.forEach((String k, v) {
       if (k != 'events')
         pdataCur[k] = v;
