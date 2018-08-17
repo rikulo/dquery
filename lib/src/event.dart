@@ -19,14 +19,14 @@ class _EventUtil {
     if (eventTarget is CharacterData)
       return;
 
-    final Map space = _dataPriv.getSpace(eventTarget);
+    final space = _dataPriv.getSpace(eventTarget);
     // if (elemData == null) return;
 
     // jQuery: Init the element's event structure and main handler, if this is the first
-    final Map<String, _HandleObjectContext> events =
+    final events =
         space.putIfAbsent('events', () => {});
     // the joint proxy handler
-    final Map<String, EventListener> eventHandles =
+    final eventHandles =
         space.putIfAbsent('handles', () => {});
 
     // jQuery: Handle multiple events separated by a space
@@ -87,7 +87,7 @@ class _EventUtil {
   static void remove(EventTarget elem, String types, QueryEventListener handler,
                      String selector, [bool mappedTypes = false]) {
 
-    final Map<String, _HandleObjectContext> events = _dataPriv.get(elem, 'events');
+    final events = _dataPriv.get(elem, 'events');
     if (events == null)
       return;
 
@@ -145,8 +145,7 @@ class _EventUtil {
       //         (avoids potential for endless recursion during removal of special event handlers)
       if (delegates.isEmpty && handlers.isEmpty) {
         if (special.teardown == null || !special.teardown(elem)) {
-          final Map<String, EventListener> eventHandles =
-              _dataPriv.get(elem, 'handles');
+          final eventHandles = _dataPriv.get(elem, 'handles');
           if (eventHandles != null) {
             final eventHandle = eventHandles[type];
             if (eventHandle != null)
@@ -387,7 +386,7 @@ class _EventUtil {
   static EventTarget parentNode(EventTarget target) =>
       target is Node ? target.parentNode : null;
 
-  static Map<String, _HandleObjectContext> _getEvents(EventTarget elem) =>
+  static Map _getEvents(EventTarget elem) =>
       _dataPriv.get(elem, 'events') ?? {};
 
   static _HandleObjectContext _getHandleObjCtx(EventTarget elem, String type) =>
