@@ -5,6 +5,7 @@ import 'dart:html';
 import 'dart:html_common';
 import 'dart:collection';
 
+import 'dart:js_util';
 import "package:intl/intl.dart" show DateFormat;
 
 part 'src/util/util.dart';

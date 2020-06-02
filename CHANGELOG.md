@@ -2,6 +2,7 @@
 
 **1.0.1**
 * Fixed type errors for Dart 2
+* Fixed get css value by property name
 
 **1.0.0**
 * Dart 2 required

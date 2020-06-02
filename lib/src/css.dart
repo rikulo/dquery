@@ -101,7 +101,7 @@ String _getCurCss(Element elem, String name, CssStyleDeclaration computed) {
   // TODO: skipped, trust Dart handling for now but need to test against it
   // ret = computed ? computed.getPropertyValue( name ) || computed[ name ] : undefined,
   
-  return computed.getPropertyValue(name)
+  return getProperty(computed, name) ?? computed.getPropertyValue(name)
       ?? computed.getPropertyValue("${Device.cssPrefix}${name}");
   
   //if ( computed ) {
