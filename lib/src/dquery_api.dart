@@ -23,10 +23,10 @@ abstract class Query<T> implements List<T> {
    */
   get context;
   
-  String get selector;
+  String? get selector;
   
   /// Return the first matched element, or null if empty.
-  T get firstIfAny;
+  T? get firstIfAny;
   
   // moved from traversing to eliminate cyclic dependency
   // http://api.jquery.com/find/
@@ -62,7 +62,7 @@ abstract class Query<T> implements List<T> {
    * be triggered.
    * + If [data] is provided, you can retrieve it in [event.data] in the handler.
    */
-  void on(String types, QueryEventListener handler, {String selector});
+  void on(String types, QueryEventListener handler, {String? selector});
   
   /** Register a one-time [handler] for events of given [types]. Once called, 
    * the handler will be unregistered.
@@ -71,12 +71,12 @@ abstract class Query<T> implements List<T> {
    * be triggered.
    * + If [data] is provided, you can retrieve it in [event.data] in the handler.
    */
-  void one(String types, QueryEventListener handler, {String selector});
+  void one(String types, QueryEventListener handler, {String? selector});
 
   /** Unregister a [handler] for events of given types.
    * // TODO
    */
-  void off(String types, {String selector, QueryEventListener handler});
+  void off(String types, {String? selector, QueryEventListener? handler});
   
   /** Trigger an event of given [type] on all matched elements, with given 
    * [data] if provided.
@@ -104,30 +104,30 @@ abstract class DQuery<T> extends Query<T> {
   /** Get the current horizontal position of the scroll bar for the first element
    * in this collection.
    */
-  int get scrollLeft;
+  int? get scrollLeft;
   
   /** Get the current vertical position of the scroll bar for the first element
    * in this collection.
    */
-  int get scrollTop;
+  int? get scrollTop;
   
   /** Set the current horizontal position of the scroll bar for all elements
    * in this collection.
    */
-  void set scrollLeft(int value);
+  void set scrollLeft(int? value);
   
   /** Set the current vertical position of the scroll bar for all elements
    * in this collection.
    */
-  void set scrollTop(int value);
+  void set scrollTop(int? value);
   
   /** Retrieve the width of the first element of this collection.
    */
-  int get width;
+  int? get width;
   
   /** Retrieve the height of the first element of this collection.
    */
-  int get height;
+  int? get height;
 
 }
 
@@ -294,21 +294,21 @@ abstract class ElementQuery extends DQuery<Element> {
   
   /** Get the inner HTML contents of the first element.
    */
-  String get html;
+  String? get html;
   
   /** Set the inner HTML contents for all elements in this collection.
    */
-  void set html(String value);
+  void set html(String? value);
   
   // offset //
   /** Get the current coordinates of the first element, relative to the document.
    */
-  Point get offset;
+  Point? get offset;
   
   /** Set the coordinates of every element in this collection, relative to the
    * document.
    */
-  void set offset(Point offset);
+  void set offset(Point? offset);
   
   /** Set the x coordinate of every element in this collection, relative to the
    * document.
@@ -323,7 +323,7 @@ abstract class ElementQuery extends DQuery<Element> {
   /** Get the current coordinates of the first element in the set of matched 
    * elements, relative to the offset parent.
    */
-  Point get position;
+  Point? get position;
   
   /** Get the closest ancestor element that is positioned.
    */
@@ -364,7 +364,7 @@ abstract class DocumentQuery extends DQuery<HtmlDocument> {
    * 
    * [expires] and [path] are ignored if [value] is null.
    */
-  String cookie(String name, {String value, Duration expires, String path, bool secure});
+  String? cookie(String name, {String value, Duration expires, String path, bool secure});
   /** Returns all cookies.
    */
   Map<String, String> get cookies;

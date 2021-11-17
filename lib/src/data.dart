@@ -5,7 +5,7 @@ class _Storage {
   final Expando<Map<String, dynamic>> _cache;
   
   _Storage(String name) :
-  _cache = new Expando<Map<String, dynamic>>(name);
+  _cache = Expando<Map<String, dynamic>>(name);
   
   void set(owner, String key, value) {
     getSpace(owner)[key] = value;
@@ -21,9 +21,9 @@ class _Storage {
     return space == null ? null : space[key];
   }
   
-  Map<String, dynamic> getSpace(owner, [bool autoCreate = true]) {
+  Map<String, dynamic> getSpace(owner) {
     var space = _cache[owner];
-    if (autoCreate && space == null)
+    if (space == null)
       space = _cache[owner] = <String, dynamic>{};
     return space;
   }
@@ -48,8 +48,8 @@ class _Storage {
   
 }
 
-final _Storage _dataUser = new _Storage('dquery-data-user');
-final _Storage _dataPriv = new _Storage('dquery-data-priv');
+final _dataUser = _Storage('dquery-data-user');
+final _dataPriv = _Storage('dquery-data-priv');
 
 /** The interface for accessing element data.
  */
@@ -61,11 +61,11 @@ class Data {
   
   /** Retrieve the entire space of element data.
    */
-  Map<String, dynamic> get space => _dq.isEmpty ? null : _dataUser.getSpace(_dq.first);
+  Map<String, dynamic>? get space => _dq.isEmpty ? null : _dataUser.getSpace(_dq.first);
   
   /** Retrieve the data of the given [key].
    */
-  get(String key) => _dq.isEmpty ? null : space[key];
+  get(String key) => _dq.isEmpty ? null: space![key];
   
   /** Set the data of the given [key].
    */
@@ -75,7 +75,7 @@ class Data {
   /** Delete the data of the given [key].
    */
   void remove(String key) =>
-      _dq.forEach((t) => _dataUser.remove(t, key));
+      _dq.forEach((t) => _dataUser.remove(t as Node, key));
   
 }
 

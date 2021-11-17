@@ -26,3 +26,5 @@ packages
 packages/
 pubspec.lock
 .pub
+dquery.iml
+.dart_tool

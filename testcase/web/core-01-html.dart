@@ -1,5 +1,5 @@
 import 'package:dquery/dquery.dart';
 
 void main() {
-  $('<button>Button</button>');
+  $('#div').append($('<button>Button</button>'));
 }

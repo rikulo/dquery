@@ -2,24 +2,26 @@ part of dquery;
 
 // TODO: shall move to commons later
 
-int _max(List<int> nums) {
+int? _max(List<int?> nums) {
   if (nums.isEmpty)
     return null;
-  num m;
-  for (int n in nums)
-    m = m == null ? n : n > m ? n : m;
+  int? m;
+  for (final n in nums)
+    m = m == null ? n: n == null ? m: max(m, n);
   return m;
 }
+
+Map<K, V> _createMap<K, V>() => <K, V>{};
 
 
 
 // html //
 
-bool _hasAction(Node node, String name) {
+bool _hasAction(node, String name) {
   // TODO
   return false;
 }
 
-void _performAction(Node node, String name) {
+void _performAction(node, String name) {
   // TODO
 }

@@ -3,7 +3,7 @@ import 'package:dquery/dquery.dart';
 
 void main() {
   $('#addBtn').on('click', (QueryEvent e) {
-    $('#e').data.set('time', new DateTime.now());
+    $('#e').data.set('time', DateTime.now());
   });
   $('#rmBtn').on('click', (QueryEvent e) {
     $('#e').data.remove('time');

@@ -29,12 +29,12 @@ ElementQuery $(selector, [context]) {
     selector = selector.trim();
   
   if (selector == null || selector == '')
-    return new ElementQuery([]);
+    return ElementQuery([]);
   
   if (selector is String) {
     // html
     if (selector.startsWith('<')) {
-      return new ElementQuery([new Element.html(selector)]);
+      return ElementQuery([Element.html(selector)]);
     }
     
     if (context == null) {
@@ -43,22 +43,21 @@ ElementQuery $(selector, [context]) {
     } else if (context is DQuery) {
       return context.find(selector);
       
-    } else if (context is Document) {
+    } else if (context is HtmlDocument) {
       return $document(context).find(selector);
       
     } else if (context is Element) {
       return new ElementQuery([context]).find(selector);
-      
     }
     
     throw new ArgumentError("Context type should be Document, Element, or DQuery: $context");
   }
   
   if (selector is Element)
-    return new ElementQuery([selector]);
+    return ElementQuery([selector]);
   
   if (selector is List<Element>)
-    return new ElementQuery(selector);
+    return ElementQuery(selector);
   
   throw new ArgumentError("Selector type should be String, Element, or List<Element>: $selector");  
 }
@@ -66,12 +65,12 @@ ElementQuery $(selector, [context]) {
 /** Return a [DocumentQuery] wrapping the given [document]. If [document] is 
  * omitted, the default document instance is assumed.
  */
-DocumentQuery $document([Document document]) => new _DocumentQuery(document);
+DocumentQuery $document([HtmlDocument? document]) => _DocumentQuery(document);
 
 /** Return a [WindowQuery] wrapping the given [window]. If [window] is omitted,
  * the default window instance is used.
  */
-DQuery $window([Window window]) => new _WindowQuery(window);
+DQuery $window([Window? window]) => new _WindowQuery(window);
 
 /** Return a [WindowQuery] wrapping the given [window]. If [window] is omitted,
  * the default window instance is used.

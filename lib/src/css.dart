@@ -7,16 +7,17 @@ final Map<String, String> _elemDisplay = {
 bool _isHidden(Element elem) =>
     elem.style.display == 'none' || 
     elem.getComputedStyle().display == 'none' ||
-    !elem.ownerDocument.contains(elem); // TODO: do experiment
+        elem.ownerDocument?.contains(elem) != true; // TODO: do experiment
 
 void _showHide(List<Element> elements, bool show) {
   
-  final Map<Element, String> values = {};
+  final values = <Element, String>{};
   
-  for (Element elem in elements) {
-    String oldDisplay = _dataPriv.get(elem, 'olddisplay');
-    values[elem] = oldDisplay;
-    String display = elem.style.display;
+  for (final elem in elements) {
+    final oldDisplay = _dataPriv.get(elem, 'olddisplay');
+    if (oldDisplay != null)
+      values[elem] = oldDisplay;
+    final display = elem.style.display;
     
     if (show) {
       // jQuery: Reset the inline display of this element to learn if it is
@@ -31,8 +32,8 @@ void _showHide(List<Element> elements, bool show) {
         _dataPriv.set(elem, 'olddisplay', values[elem] = _cssDefaultDisplay(elem.tagName));
       
     } else if (!values.containsKey(elem)) {
-      final bool hidden = _isHidden(elem);
-      if (display != null && !display.isEmpty && display != 'none' || !hidden)
+      final hidden = _isHidden(elem);
+      if (display.isNotEmpty && display != 'none' || !hidden)
         _dataPriv.set(elem, 'olddisplay', hidden ? display : elem.style.display);
       
     }
@@ -41,7 +42,7 @@ void _showHide(List<Element> elements, bool show) {
   
   // Set the display of most of the elements in a second loop
   // to avoid the constant reflow
-  for (Element elem in elements) {
+  for (final elem in elements) {
     final String display = elem.style.display;
     if (!show || display == 'none' || display == '')
       elem.style.display = show ? (values[elem] ?? '') : 'none';
@@ -51,7 +52,7 @@ void _showHide(List<Element> elements, bool show) {
 
 // Try to determine the default display value of an element
 String _cssDefaultDisplay(String nodeName) {
-  String display = _elemDisplay[nodeName];
+  var display = _elemDisplay[nodeName];
   if (display == null) {
     display = _actualDisplay(nodeName, document);
     
@@ -83,18 +84,15 @@ String _cssDefaultDisplay(String nodeName) {
 
 // jQuery: Called ONLY from within css_defaultDisplay
 String _actualDisplay(String name, HtmlDocument doc) {
-  Element e = new Element.tag(name);
-  doc.body.append(e);
-  String display = e.getComputedStyle().display;
+  Element e = Element.tag(name);
+  doc.body?.append(e);
+  final display = e.getComputedStyle().display;
   e.remove();
   return display;
 }
 
-String _getCurCss(Element elem, String name, CssStyleDeclaration computed) {
+String? _getCurCss(Element elem, String name, CssStyleDeclaration? computed) {
   computed = computed ?? elem.getComputedStyle();
-  
-  if (computed == null)
-    return null;
   
   // Support: IE9
   // getPropertyValue is only needed for .css('filter') in IE9, see #12537
@@ -121,7 +119,7 @@ String _getCurCss(Element elem, String name, CssStyleDeclaration computed) {
   //}
 }
 
-String _getCss(Element elem, String name, [CssStyleDeclaration computed]) {
+String? _getCss(Element elem, String name, [CssStyleDeclaration? computed]) {
   // jQuery: Make sure that we're working with the right name
   // skipped, for there is no easy way to check property name in Dart
   // name = jQuery.cssProps[ origName ] || ( jQuery.cssProps[ origName ] = vendorPropName( elem.style, origName ) );
@@ -139,7 +137,7 @@ String _getCss(Element elem, String name, [CssStyleDeclaration computed]) {
   */
   
   // jQuery: Otherwise, if a way to get the computed value exists, use that
-  String value = _getCurCss(elem, name, computed);
+  var value = _getCurCss(elem, name, computed);
   
   // normalization 1: skipped for now
   /*

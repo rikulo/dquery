@@ -3,8 +3,8 @@ import 'package:dquery/dquery.dart';
 
 void main() {
   
-  final ButtonElement on = querySelector('#on');
-  final ButtonElement off = querySelector('#off');
+  final on = querySelector('#on') as ButtonElement;
+  final off = querySelector('#off') as ButtonElement;
   
   $(on).on('click', (_) {
     $('#btn').on('click', f);

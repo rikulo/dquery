@@ -16,16 +16,16 @@ abstract class _Query<T extends EventTarget> implements Query<T> {
   get context => _context;
   var _context;
 
-  _Query _prevObject;
+  _Query? _prevObject;
   
   // DQuery //
   List<Element> _queryAll(String selector);
   
   @override
-  T get firstIfAny => isEmpty ? null : first;
+  T? get firstIfAny => isEmpty ? null : first;
   
   @override
-  String get selector => null;
+  String? get selector => null;
   
   @override
   ElementQuery find(String selector) {
@@ -35,31 +35,31 @@ abstract class _Query<T extends EventTarget> implements Query<T> {
   }
   
   @override
-  ElementQuery pushStack(List<Element> elems) => 
-      new _ElementQuery(elems) // TODO: copy? no copy?
+  ElementQuery pushStack(List<Element> elems) =>
+      _ElementQuery(elems) // TODO: copy? no copy?
       .._prevObject = this
       .._context = _context;
   
   @override
-  DQuery end() => _prevObject ?? new ElementQuery([]);
+  DQuery<T> end() => (_prevObject ?? ElementQuery([])) as DQuery<T>;
   
   // data //
   @override
-  Data get data => _data ?? (_data = new Data._(this));
-  Data _data;
+  Data get data => _data ??= Data._(this);
+  Data? _data;
   
   // event //
   @override
-  void on(String types, QueryEventListener handler, {String selector}) {
+  void on(String types, QueryEventListener handler, {String? selector}) {
     _on(types, handler, selector, false);
   }
   
   @override
-  void one(String types, QueryEventListener handler, {String selector}) {
+  void one(String types, QueryEventListener handler, {String? selector}) {
     _on(types, handler, selector, true);
   }
   
-  void _on(String types, QueryEventListener handler, String selector, bool one) {
+  void _on(String types, QueryEventListener? handler, String? selector, bool one) {
     if (handler == null)
       return;
     
@@ -74,16 +74,18 @@ abstract class _Query<T extends EventTarget> implements Query<T> {
   }
   
   @override
-  void off(String types, {String selector, QueryEventListener handler}) =>
+  void off(String types, {String? selector, QueryEventListener? handler}) =>
       forEach((EventTarget t) => _EventUtil.remove(t, types, handler, selector));
   
   // utility refactored from off() to make type clearer
   static void _offEvent(QueryEvent dqevent) {
-    final _HandleObject handleObj = dqevent._handleObj;
-    final String namespace = handleObj.namespace;
-    final String type = namespace != null && !namespace.isEmpty ? 
-        "${handleObj.origType}.${namespace}" : handleObj.origType;
-    $(dqevent.delegateTarget).off(type, handler: handleObj.handler, selector: handleObj.selector);
+    final handleObj = dqevent._handleObj,
+      namespace = handleObj?.namespace,
+      type = (namespace?.isNotEmpty ?? false) ?
+        "${handleObj!.origType}.${namespace}" : handleObj!.origType;
+    $(dqevent.delegateTarget).off(type!,
+      handler: handleObj.handler,
+      selector: handleObj.selector);
   }
   
   @override
@@ -106,14 +108,14 @@ class _DocumentQuery extends _Query<HtmlDocument> with ListMixin<HtmlDocument>
   
   HtmlDocument _doc;
   
-  _DocumentQuery([HtmlDocument doc]) : this._doc = doc ?? document;
+  _DocumentQuery([HtmlDocument? doc]) : this._doc = doc ?? document;
   
   // DQuery //
   @override
   HtmlDocument operator [](int index) => _doc;
   
   @override
-  void operator []=(int index, HtmlDocument value) {
+  void operator []=(int index, HtmlDocument? value) {
     if (index != 0 || value == null)
       throw new ArgumentError("$index: $value");
     _doc = value;
@@ -130,39 +132,37 @@ class _DocumentQuery extends _Query<HtmlDocument> with ListMixin<HtmlDocument>
   
   @override
   List<Element> _queryAll(String selector) => _doc.querySelectorAll(selector);
-  
-  Window get _win => _doc.window;
+
+  Window? get _win => _doc.window is Window ? _doc.window as Window: null;
 
  @override
-  int get scrollLeft => _win.pageXOffset;
+  int? get scrollLeft => _win?.pageXOffset;
   
   @override
-  int get scrollTop => _win.pageYOffset;
+  int? get scrollTop => _win?.pageYOffset;
   
   @override
-  void set scrollLeft(int value) => 
-      _win.scrollTo(value, _win.pageYOffset);
+  void set scrollLeft(int? value) =>
+      _win?.scrollTo(value, _win?.pageYOffset);
   
   @override
-  void set scrollTop(int value) => 
-      _win.scrollTo(_win.pageXOffset, value);
+  void set scrollTop(int? value) =>
+      _win?.scrollTo(_win?.pageXOffset, value);
   
   @override
-  int get width =>
-      _max([_doc.body.scrollWidth, _doc.documentElement.scrollWidth,
-            _doc.body.offsetWidth, _doc.documentElement.offsetWidth,
-            _doc.documentElement.clientWidth]);
+  int? get width =>
+      _max([_doc.body?.scrollWidth, _doc.documentElement?.scrollWidth,
+            _doc.body?.offsetWidth, _doc.documentElement?.offsetWidth,
+            _doc.documentElement?.clientWidth]);
   
   @override
-  int get height =>
-      _max([_doc.body.scrollHeight, _doc.documentElement.scrollHeight,
-            _doc.body.offsetHeight, _doc.documentElement.offsetHeight,
-            _doc.documentElement.clientHeight]);
+  int? get height =>
+      _max([_doc.body?.scrollHeight, _doc.documentElement?.scrollHeight,
+            _doc.body?.offsetHeight, _doc.documentElement?.offsetHeight,
+            _doc.documentElement?.clientHeight]);
 
   @override
-  String cookie(String name, {String value, Duration expires, String path, bool secure}) {
-    assert(name != null);
-
+  String? cookie(String name, {String? value, Duration? expires, String? path, bool? secure}) {
     if (value != null) {
       _setCookie(_doc, name, value, expires, path, secure);
       return null;
@@ -182,14 +182,14 @@ class _WindowQuery extends _Query<Window> with ListMixin<Window>
   
   Window _win;
   
-  _WindowQuery([Window win]) : this._win = win ?? window;
+  _WindowQuery([Window? win]) : this._win = win ?? window;
   
   // DQuery //
   @override
   Window operator [](int index) => _win;
   
   @override
-  void operator []=(int index, Window value) {
+  void operator []=(int index, Window? value) {
     if (index != 0 || value == null)
       throw new ArgumentError("$index: $value");
     _win = value;
@@ -214,21 +214,21 @@ class _WindowQuery extends _Query<Window> with ListMixin<Window>
   int get scrollTop => _win.pageYOffset;
   
   @override
-  void set scrollLeft(int value) => 
+  void set scrollLeft(int? value) =>
       _win.scrollTo(value, _win.pageYOffset);
   
   @override
-  void set scrollTop(int value) => 
+  void set scrollTop(int? value) =>
       _win.scrollTo(_win.pageXOffset, value);
   
   // jQuery: As of 5/8/2012 this will yield incorrect results for Mobile Safari, but there
   //         isn't a whole lot we can do. See pull request at this URL for discussion:
   //         https://github.com/jquery/jquery/pull/764
   @override
-  int get width => _win.document.documentElement.clientWidth;
+  int? get width => _win.document.documentElement?.clientWidth;
   
   @override
-  int get height => _win.document.documentElement.clientHeight;
+  int? get height => _win.document.documentElement?.clientHeight;
   
 }
 
@@ -240,8 +240,8 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   _ElementQuery(this._elements);
   
   @override
-  String get selector => _selector;
-  String _selector;
+  String? get selector => _selector;
+  String? _selector;
   
   // List //
   @override
@@ -271,8 +271,8 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
       case 1:
         return first.querySelectorAll(selector);
       default:
-        final List<Element> matched = new List<Element>();
-        for (Element elem in _elements)
+        final matched = <Element>[];
+        for (final elem in _elements)
           matched.addAll(elem.querySelectorAll(selector));
         return Query.unique(matched);
     }
@@ -281,29 +281,29 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   // ElementQuery //
   @override
   ElementQuery closest(String selector) {
-    final Set<Element> results = new LinkedHashSet<Element>();
-    Element c;
-    for (Element e in _elements)
+    final results = LinkedHashSet<Element>();
+    Element? c;
+    for (final e in _elements)
       if ((c = _closest(e, selector)) != null)
-        results.add(c);
+        results.add(c!);
     return pushStack(results.toList(growable: true));
   }
   
   @override
-  ElementQuery parent([String selector]) {
-    final Set<Element> results = new LinkedHashSet<Element>();
-    Element p;
-    for (Element e in _elements)
-      if ((p = e.parent) != null && (selector == null || p.matches(selector)))
-        results.add(p);
+  ElementQuery parent([String? selector]) {
+    final results = LinkedHashSet<Element>();
+    Element? p;
+    for (final e in _elements)
+      if ((p = e.parent) != null && (selector == null || p!.matches(selector)))
+        results.add(p!);
     return pushStack(results.toList(growable: true));
   }
   
   @override
-  ElementQuery children([String selector]) {
-    final List<Element> results = new List<Element>();
-    for (Element e in _elements)
-      for (Element c in e.children)
+  ElementQuery children([String? selector]) {
+    final results = <Element>[];
+    for (final e in _elements)
+      for (final c in e.children)
         if (selector == null || c.matches(selector))
           results.add(c);
     return pushStack(results);
@@ -316,32 +316,38 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   void hide() => _showHide(_elements, false);
   
   @override
-  void toggle([bool state]) {
-    for (Element elem in _elements)
+  void toggle([bool? state]) {
+    for (final elem in _elements)
       _showHide([elem], state ?? _isHidden(elem));
   }
   
   @override
-  css(String name, [String value]) =>
+  css(String name, [String? value]) =>
       value != null ? _elements.forEach((Element e) => _setCss(e, name, value)) :
           _elements.isEmpty ? null : _getCss(_elements.first, name);
   
   @override
   bool hasClass(String name) =>
-      _elements.any((Element e) => e.classes.contains(name));
+      _elements.any((final e) => e.classes.contains(name));
   
   @override
-  void addClass(String name) =>
-      _elements.forEach((Element e) => e.classes.add(name));
+  void addClass(String name) {
+    for (final elem in _elements)
+      elem.classes.add(name);
+  }
+
+  @override
+  void removeClass(String name) {
+    for (final elem in _elements)
+      elem.classes.remove(name);
+  }
   
   @override
-  void removeClass(String name) =>
-      _elements.forEach((Element e) => e.classes.remove(name));
-  
-  @override
-  void toggleClass(String name) =>
-      _elements.forEach((Element e) => e.classes.toggle(name));
-  
+  void toggleClass(String name) {
+    for (final elem in _elements)
+      elem.classes.toggle(name);
+  }
+
   @override
   void appendTo(target) =>
       _domManip(_resolveManipTarget(target), this, _appendFunc);
@@ -363,13 +369,13 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   void after(content) => _domManip(this, content, _afterFunc);
   
   @override
-  ElementQuery clone([bool withDataAndEvents, bool deepWithDataAndEvents]) =>
-      pushStack(_elements.map((Element e) => _clone(e)));
+  ElementQuery clone([bool? withDataAndEvents, bool? deepWithDataAndEvents]) =>
+      pushStack(_elements.map((Element e) => _clone(e)).toList());
   
   @override
-  void detach({String selector, bool data: true}) => 
+  void detach({String? selector, bool data: true}) =>
       (selector != null && !(selector = selector.trim()).isEmpty ? 
-          _filter(selector, _elements) : new List<Element>.from(_elements))
+          _filter(selector, _elements) : List<Element>.from(_elements))
           .forEach((Element e) => _detach(e, data));
   
   @override
@@ -385,19 +391,19 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
       _elements.forEach((Element e) => _setText(e, value));
   
   @override
-  String get html =>
+  String? get html =>
       isEmpty ? null : _elements.first.innerHtml;
   
   @override
-  void set html(String value) =>
+  void set html(String? value) =>
       _elements.forEach((Element e) => e.innerHtml = value);
   
   @override
-  Point get offset => isEmpty ? null : _getOffset(_elements.first);
+  Point? get offset => isEmpty ? null : _getOffset(_elements.first);
   
   @override
-  void set offset(Point value) =>
-      _elements.forEach((Element e) => _setOffset(e, left: value.x, top: value.y));
+  void set offset(Point? value) =>
+      _elements.forEach((Element e) => _setOffset(e, left: value?.x, top: value?.y));
   
   @override
   void set offsetLeft(int left) =>
@@ -408,49 +414,63 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
       _elements.forEach((Element e) => _setOffset(e, top: top));
   
   @override
-  Point get position => isEmpty ? null : _getPosition(_elements.first);
+  Point? get position => isEmpty ? null : _getPosition(_elements.first);
   
   @override
   ElementQuery get offsetParent {
-    final Set<Element> results = new LinkedHashSet<Element>();
-    for (Element e in _elements)
-      results.add(_getOffsetParent(e));
+    final results = LinkedHashSet<Element>();
+    for (final elem in _elements) {
+      final parent = _getOffsetParent(elem);
+      if (parent != null)
+        results.add(parent);
+    }
+
     return pushStack(results.toList(growable: true));
   }
   
   @override
-  int get scrollLeft => isEmpty ? null : _elements.first.scrollLeft;
+  int? get scrollLeft => isEmpty ? null : _elements.first.scrollLeft;
   
   @override
-  int get scrollTop => isEmpty ? null : _elements.first.scrollTop;
+  int? get scrollTop => isEmpty ? null : _elements.first.scrollTop;
   
   @override
-  void set scrollLeft(int value) =>
-      _elements.forEach((Element e) => e.scrollLeft = value);
+  void set scrollLeft(int? value) {
+    if (value == null)
+      return;
+
+    for (final elem in _elements)
+      elem.scrollLeft = value;
+  }
+
+  @override
+  void set scrollTop(int? value) {
+    if (value == null)
+      return;
+
+    for (final elem in _elements)
+      elem.scrollTop = value;
+  }
+
+  @override
+  int? get width => _elements.isEmpty ? null : _getElementWidth(_elements.first);
   
   @override
-  void set scrollTop(int value) =>
-      _elements.forEach((Element e) => e.scrollTop = value);
-  
-  @override
-  int get width => _elements.isEmpty ? null : _getElementWidth(_elements.first);
-  
-  @override
-  int get height => _elements.isEmpty ? null : _getElementHeight(_elements.first);
+  int? get height => _elements.isEmpty ? null : _getElementHeight(_elements.first);
   
   @override
   void reflow() {
     _elements.forEach(_reflow);
   }
   @override
-  void click([QueryEventListener handler]){
+  void click([QueryEventListener? handler]){
     if (handler != null)
       on('click', handler);
     else
       trigger('click');
   }
   @override
-  void change([QueryEventListener handler]){
+  void change([QueryEventListener? handler]){
     if (handler != null)
       on('change', handler);
     else
@@ -458,9 +478,9 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   }
 }
 
-void _reflow(Element e) {
+void _reflow(Element? e) {
   //TODO: If Issue 17366 fixed, we don't need it.
-  if (e != null && e.offsetWidth == null) //avoid being optimized
+  if (e?.offsetWidth != null) //avoid being optimized
     _reflow(null);
 }
 
@@ -475,7 +495,7 @@ class _ShadowRootQuery extends _Query<ShadowRoot> with ListMixin<ShadowRoot> {
   ShadowRoot operator [](int index) => _shadowRoot;
   
   @override
-  void operator []=(int index, ShadowRoot value) {
+  void operator []=(int index, ShadowRoot? value) {
     if (index != 0 || value == null)
       throw new ArgumentError("$index: $value");
     _shadowRoot = value;
@@ -508,5 +528,5 @@ List _grep(List list, bool test(obj, index), [bool invert = false]) {
 }
 */
 
-String _trim(String text) => text == null ? '' : text.trim();
+String _trim(String? text) => text == null ? '' : text.trim();
 

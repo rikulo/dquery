@@ -5,7 +5,7 @@ import 'package:dquery/dquery.dart';
 void main() {
   
   //blur
-  final Element blurSec = querySelector('.blur');
+  final blurSec = querySelector('.blur')!;
   
   $document().on('blur', (QueryEvent e) {
     printDoc(blurSec);
@@ -17,7 +17,7 @@ void main() {
   
   
   //focus
-  final Element focusSec = querySelector('.focus');
+  final focusSec = querySelector('.focus')!;
   
   $document().on('focus', (QueryEvent e) {
     printDoc(focusSec);
@@ -28,7 +28,7 @@ void main() {
   });
   
   //click
-  final Element clickSec = querySelector('.click');
+  final clickSec = querySelector('.click')!;
   
   $document().on('click', (QueryEvent e) {
     printDoc(clickSec);
@@ -39,7 +39,7 @@ void main() {
   });
   
   //click
-  final Element enterSec = querySelector('.mouseenter');
+  final enterSec = querySelector('.mouseenter')!;
   
   $document().on('mouseenter', (QueryEvent e) {
     printDoc(enterSec);
@@ -54,19 +54,19 @@ String NUM_DOC = 'num_doc';
 String NUM_ELEM = 'num_elem';
 
 void printDoc(Element sec) {
-  int n = $(sec).data.get(NUM_DOC);
+  var n = $(sec).data.get(NUM_DOC);
   if (n == null)
     n = 0;
   
   $(sec).data.set(NUM_DOC, ++n);
-  sec.querySelector('.doc-result').text = 'doc: $n';
+  sec.querySelector('.doc-result')!.text = 'doc: $n';
 }
 
 void printElem(Element sec) {
-  int n = $(sec).data.get(NUM_ELEM);
+var n = $(sec).data.get(NUM_ELEM);
   if (n == null)
     n = 0;
   
   $(sec).data.set(NUM_ELEM, ++n);
-  sec.querySelector('.elem-result').text = 'elem: $n';
+  sec.querySelector('.elem-result')!.text = 'elem: $n';
 }

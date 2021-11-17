@@ -11,9 +11,10 @@ class _EventUtil {
 
   //static Set<String> _global = new HashSet<String>();
 
-  static void add(EventTarget eventTarget, String types, QueryEventListener handler, String selector) {
+  static void add(EventTarget eventTarget, String types,
+      QueryEventListener handler, String? selector) {
 
-    final bool hasSelector = selector != null && !selector.isEmpty;
+    final hasSelector = selector != null && !selector.isEmpty;
 
     // jQuery: Don't attach events to noData or text/comment nodes (but allow plain objects)
     if (eventTarget is CharacterData)
@@ -24,16 +25,16 @@ class _EventUtil {
 
     // jQuery: Init the element's event structure and main handler, if this is the first
     final events =
-        space.putIfAbsent('events', () => {});
+        space.putIfAbsent('events', _createMap);
     // the joint proxy handler
     final eventHandles =
-        space.putIfAbsent('handles', () => {});
+        space.putIfAbsent('handles', _createMap);
 
     // jQuery: Handle multiple events separated by a space
-    for (String type in _splitTypes(types)) {
+    for (var type in _splitTypes(types)) {
 
       // calculate namespaces
-      List<String> namespaces = [];
+      var namespaces = <String>[];
       if (type.indexOf('.') >= 0) {
         namespaces = type.split('.');
         type = namespaces.removeAt(0);
@@ -46,15 +47,15 @@ class _EventUtil {
         continue;
 
       // jQuery: If event changes its type, use the special event handlers for the changed type
-      _SpecialEventHandler special = _getSpecial(type);
+      var special = _getSpecial(type);
       // jQuery: If selector defined, determine special event api type, otherwise given type
       type = (hasSelector ? special.delegateType : special.bindType) ?? type;
       // jQuery: Update special based on newly reset type
       special = _getSpecial(type);
 
       // jQuery: handleObj is passed to all event handlers
-      final bool needsContext = hasSelector && _EventUtil._NEEDS_CONTEXT.hasMatch(selector);
-      _HandleObject handleObj = new _HandleObject(selector, type, origType,
+      final needsContext = hasSelector && _EventUtil._NEEDS_CONTEXT.hasMatch(selector!);
+      _HandleObject handleObj = _HandleObject(selector, type, origType,
           namespaces.join('.'), needsContext, handler);
 
     final EventListener eventHandle = eventHandles.putIfAbsent(type, 
@@ -62,13 +63,13 @@ class _EventUtil {
         // jQuery: Discard the second event of a jQuery.event.trigger() and
         //         when an event is called after a page has unloaded
         if (e == null || _EventUtil._triggered != type)
-          dispatch(eventTarget, new QueryEvent.from(e), type: type);
+          dispatch(eventTarget, QueryEvent.from(e), type: type);
       });
 
       // jQuery: Init the event handler queue if we're the first
       _HandleObjectContext handleObjCtx = events.putIfAbsent(type, () {
         // jQuery: Only use addEventListener/attachEvent if the special events handler returns false
-        if (special.setup == null || !special.setup(eventTarget))
+        if (special.setup == null || !special.setup!(eventTarget))
           eventTarget.addEventListener(type, eventHandle, false);
         return new _HandleObjectContext();
       });
@@ -80,48 +81,47 @@ class _EventUtil {
       //_global.add(type); // TODO: check use
 
     }
-
   }
 
   // jQuery: Detach an event or set of events from an element
-  static void remove(EventTarget elem, String types, QueryEventListener handler,
-                     String selector, [bool mappedTypes = false]) {
+  static void remove(EventTarget elem, String types, QueryEventListener? handler,
+       String? selector, [bool mappedTypes = false]) {
 
     final events = _dataPriv.get(elem, 'events');
     if (events == null)
       return;
 
     // jQuery: Once for each type.namespace in types; type may be omitted
-    for (String type in _splitTypes(types)) {
+    for (var type in _splitTypes(types)) {
 
       // caculate namespaces
-      List<String> namespaces = [];
+      var namespaces = <String>[];
       if (type.indexOf('.') >= 0) {
         namespaces = type.split('.');
         type = namespaces.removeAt(0);
         namespaces.sort();
       }
-      final String origType = type;
+      final origType = type;
 
       // jQuery: Unbind all events (on this namespace, if provided) for the element
       if (type.isEmpty) {
-        final String ns = namespaces.join('.');
-        for (String t in events.keys.toList())
+        final ns = namespaces.join('.');
+        for (final t in events.keys.toList())
           remove(elem, "$t.$ns", handler, selector, true);
         continue;
       }
 
-      _SpecialEventHandler special = _getSpecial(type);
+      final special = _getSpecial(type);
       type = (selector != null ? special.delegateType : special.bindType) ?? type;
 
-      _HandleObjectContext handleObjCtx = events[type] ?? _HandleObjectContext.EMPTY;
-      List<_HandleObject> delegates = handleObjCtx.delegates;
-      List<_HandleObject> handlers = handleObjCtx.handlers;
+      final handleObjCtx = events[type] ?? _HandleObjectContext.EMPTY,
+        delegates = handleObjCtx.delegates,
+        handlers = handleObjCtx.handlers;
 
       // jQuery: Remove matching events
       final filter = (_HandleObject handleObj) {
         bool matchNamespaces() {
-          for (final ns in handleObj.namespace.split('.')) {
+          for (final ns in handleObj.namespace!.split('.')) {
             if (namespaces.contains(ns))
               return true;
           }
@@ -144,7 +144,7 @@ class _EventUtil {
       // jQuery: Remove generic event handler if we removed something and no more handlers exist
       //         (avoids potential for endless recursion during removal of special event handlers)
       if (delegates.isEmpty && handlers.isEmpty) {
-        if (special.teardown == null || !special.teardown(elem)) {
+        if (special.teardown == null || !special.teardown!(elem)) {
           final eventHandles = _dataPriv.get(elem, 'handles');
           if (eventHandles != null) {
             final eventHandle = eventHandles[type];
@@ -160,7 +160,7 @@ class _EventUtil {
 
     // jQuery: Remove the expando if it's no longer used
     if (events.isEmpty) {
-      _dataPriv.remove(elem, 'handles');
+      _dataPriv.remove(elem as Node, 'handles');
 
        // jQuery: removeData also checks for emptiness and clears the expando if empty
        //         so use it instead of delete
@@ -169,16 +169,15 @@ class _EventUtil {
 
   }
 
-  static final RegExp _NEEDS_CONTEXT = new RegExp(r'^[\x20\t\r\n\f]*[>+~]');
+  static final _NEEDS_CONTEXT = RegExp(r'^[\x20\t\r\n\f]*[>+~]');
 
   static bool _subsetOf(List<String> a, List<String> b) {
     // assume a and b are sorted
-    Iterator<String> ia = a.iterator;
-    for (String sb in b) {
-      String sa = ia.current;
-      if (sa == null)
+    final ia = a.iterator;
+    for (final sb in b) {
+      if (!ia.moveNext())
         return true;
-      int c = sa.compareTo(sb);
+      final c = ia.current.compareTo(sb!);
       if (c < 0)
         return false;
       if (c == 0)
@@ -187,35 +186,34 @@ class _EventUtil {
     return true;
   }
 
-  static final RegExp _SPACES = new RegExp(r'\s+');
+  static final _SPACES = RegExp(r'\s+');
 
-  static List<String> _splitTypes(String types) {
+  static List<String> _splitTypes(String? types) {
     return types == null ? [] : types.split(_SPACES);
   }
 
-  static bool _focusMorphMatch(String type1, String type2) =>
+  static bool _focusMorphMatch(String? type1, String? type2) =>
       (type1 == 'focusin' && type2 == 'focus') || (type1 == 'focusout' && type2 == 'blur');
 
-  static String _triggered;
+  static String? _triggered;
 
-  static void trigger(String type, data, EventTarget elem, [bool onlyHandlers = false]) {
-    _EventUtil.triggerEvent(new QueryEvent(type, target: elem, data: data), onlyHandlers);
+  static void trigger(String type, data, EventTarget? elem, [bool onlyHandlers = false]) {
+    _EventUtil.triggerEvent(QueryEvent(type, target: elem, data: data), onlyHandlers);
   }
 
   static void triggerEvent(QueryEvent event, [bool onlyHandlers = false]) {
-    EventTarget elem = event.target ?? document;
+    final elem = event.target ?? document;
+    var type = event.type,
+      namespaces = <String>[];
 
-    String type = event.type;
-    List<String> namespaces = [];
     if (type.indexOf('.') >= 0) {
       namespaces = type.split('.');
       type = namespaces.removeAt(0);
       namespaces.sort();
     }
 
-    final String ontype = type.indexOf(':') < 0 ? "on$type" : null; // TODO: check use
-
-    final List<EventTarget> eventPath = [elem];
+    final ontype = type.indexOf(':') < 0 ? "on$type" : null, // TODO: check use
+      eventPath = <EventTarget>[elem];
 
     // jQuery: Don't do events on text and comment nodes
     if (elem is CharacterData)
@@ -230,18 +228,18 @@ class _EventUtil {
     if (!namespaces.isEmpty)
       event._namespace = namespaces.join('.');
     event._reNamespace = event.namespace != null ?
-        new RegExp( '(^|\\.)${namespaces.join("\\.(?:.*\\.|)")}(\\.|\$)') : null;
+        RegExp( '(^|\\.)${namespaces.join("\\.(?:.*\\.|)")}(\\.|\$)') : null;
 
     // jQuery: Determine event propagation path in advance, per W3C events spec (#9951)
     //         Bubble up to document, then to window; watch for a global ownerDocument var (#9724)
-    String bubbleType;
-    _SpecialEventHandler special = _getSpecial(type);
+    String? bubbleType;
+    final special = _getSpecial(type);
     if (!onlyHandlers && !special.noBubble && elem is Node) {
-      Node n = elem;
+      final n = elem;
       bubbleType = special.delegateType ?? type;
-      final bool focusMorph = _focusMorphMatch(bubbleType, type);
+      final focusMorph = _focusMorphMatch(bubbleType, type);
 
-      for (Node cur = focusMorph ? n : n.parentNode; cur != null; cur = cur.parentNode) {
+      for (var cur = focusMorph ? n : n.parentNode; cur != null; cur = cur.parentNode) {
         eventPath.add(cur);
       }
 
@@ -254,8 +252,8 @@ class _EventUtil {
     }
 
     // jQuery: Fire handlers on the event path
-    bool first = true;
-    for (Node n in eventPath) {
+    var first = true;
+    for (final n in eventPath) {
       if (event.propagationStopped)
         break;
       event._type = !first ? bubbleType : (special.bindType ?? type);
@@ -293,35 +291,36 @@ class _EventUtil {
     }
   }
 
-  static void dispatch(EventTarget elem, QueryEvent dqevent, {String type}) {
+  static void dispatch(EventTarget? elem, QueryEvent dqevent, {String? type}) {
     if (type == null) type = dqevent.type;
-    final _HandleObjectContext handleObjCtx = _getHandleObjCtx(elem, type);
+    final handleObjCtx = _getHandleObjCtx(elem, type);
 
     dqevent._delegateTarget = elem;
 
     // jQuery: Determine handlers
-    final List<_HandlerQueueEntry> handlerQueue = _EventUtil.handlers(elem, dqevent, handleObjCtx);
+    final handlerQueue = _EventUtil.handlers(elem, dqevent, handleObjCtx);
 
-    for (_HandlerQueueEntry matched in handlerQueue) {
+    for (final matched in handlerQueue) {
       if (dqevent.propagationStopped) break;
       dqevent._currentTarget = matched.elem;
       // copy to avoid concurrent modification
-      for (_HandleObject handleObj in new List<_HandleObject>.from(matched.handlers)) {
+      for (final handleObj in [...matched.handlers]) {
         if (dqevent.immediatePropagationStopped) break;
         // jQuery: Triggered event must either 1) have no namespace, or
         //         2) have namespace(s) a subset or equal to those in the bound event (both can have no namespace).
-        if (dqevent._reNamespace == null || dqevent._reNamespace.hasMatch(handleObj.namespace)) {
-          final List<String> eventns = dqevent.namespace == null ? [] : dqevent.namespace.split('.');
-          final List<String> hobjns = handleObj.namespace == null ? [] : handleObj.namespace.split('.');
+        if (dqevent._reNamespace?.hasMatch(handleObj.namespace!) ?? true) {
+          final eventns = dqevent.namespace?.split('.') ?? <String>[],
+            hobjns = handleObj.namespace?.split('.') ?? <String>[];
           if (_subsetOf(eventns, hobjns)) {
             dqevent._handleObj = handleObj;
 
-            _SpecialEventHandler special = _getSpecial(handleObj.origType);
+            final special = _getSpecial(handleObj.origType),
+              fn = special.handle ?? handleObj.handler;
 
-            (special != null && special.handle != null ? special.handle: handleObj.handler)(dqevent);
+            fn(dqevent);
 
-            bool ret = dqevent.ret;
-            if ( ret != null ) {
+            final ret = dqevent.ret;
+            if (ret != null ) {
               if ((dqevent.result = ret) == false) {
                 dqevent.preventDefault();
                 dqevent.stopPropagation();
@@ -331,22 +330,21 @@ class _EventUtil {
         }
       }
     }
-
   }
 
-  static List<_HandlerQueueEntry> handlers(EventTarget elem, QueryEvent dqevent,
+  static List<_HandlerQueueEntry> handlers(EventTarget? elem, QueryEvent dqevent,
       _HandleObjectContext handleObjCtx) {
 
-    final List<_HandlerQueueEntry> handlerQueue = new List<_HandlerQueueEntry>();
-    final List<_HandleObject> delegates = handleObjCtx.delegates;
-    final List<_HandleObject> handlers = handleObjCtx.handlers;
+    final handlerQueue = <_HandlerQueueEntry>[],
+      delegates = handleObjCtx.delegates,
+      handlers = handleObjCtx.handlers;
 
     // jQuery: Find delegate handlers
     //         Black-hole SVG <use> instance trees (#13180)
     //         Avoid non-left-click bubbling in Firefox (#3861)
     // src: if ( delegateCount && cur.nodeType && (!event.button || event.type !== "click") ) {
     if (delegates.isNotEmpty) {
-      EventTarget cur = dqevent.target;
+      var cur = dqevent.target;
       if (cur is Node) {
         for (; cur != elem; cur = parentNode(cur) ?? elem) {
 
@@ -357,10 +355,11 @@ class _EventUtil {
             continue;
           */
 
-          final Map<String, bool> matches = {};
-          final List<_HandleObject> matched = new List<_HandleObject>();
-          for (_HandleObject handleObj in delegates) {
-            final String sel = "${_trim(handleObj.selector)} ";
+          final matches = <String, bool>{},
+            matched = <_HandleObject>[];
+
+          for (final handleObj in delegates) {
+            final sel = "${_trim(handleObj.selector)} ";
             if (matches.putIfAbsent(sel, () => (cur is Element) &&
                 (handleObj.needsContext ? $(sel, elem).contains(cur) :
                 cur.matches(sel)))) {
@@ -369,35 +368,34 @@ class _EventUtil {
           }
 
           if (!matched.isEmpty) {
-            handlerQueue.add(new _HandlerQueueEntry(cur, matched));
+            handlerQueue.add(_HandlerQueueEntry(cur as Node, matched));
           }
         }
       }
     }
 
     // jQuery: Add the remaining (directly-bound) handlers
-    if (!handlers.isEmpty) {
-      handlerQueue.add(new _HandlerQueueEntry(elem, handlers));
-    }
+    if (handlers.isNotEmpty)
+      handlerQueue.add(_HandlerQueueEntry(elem, handlers));
 
     return handlerQueue;
   }
 
-  static EventTarget parentNode(EventTarget target) =>
+  static EventTarget? parentNode(EventTarget? target) =>
       target is Node ? target.parentNode : null;
 
-  static Map _getEvents(EventTarget elem) =>
+  static Map _getEvents(EventTarget? elem) =>
       _dataPriv.get(elem, 'events') ?? {};
 
-  static _HandleObjectContext _getHandleObjCtx(EventTarget elem, String type) =>
+  static _HandleObjectContext _getHandleObjCtx(EventTarget? elem, String type) =>
       _getEvents(elem)[type] ?? _HandleObjectContext.EMPTY;
 
-  static void simulate(String type, EventTarget elem, event, bool bubble) {
+  static void simulate(String type, EventTarget? elem, event, bool bubble) {
     // jQuery: Piggyback on a donor event to simulate a different one.
     //         Fake originalEvent to avoid donor's stopPropagation, but if the
     //         simulated event prevents default then we do the same on the donor.
 
-    QueryEvent e = new QueryEvent(type).._simulated = true;
+    QueryEvent e = QueryEvent(type).._simulated = true;
 
     if (bubble)
       _EventUtil.triggerEvent(e.._target = elem);
@@ -409,7 +407,7 @@ class _EventUtil {
   }
 }
 
-Element _activeElement() {
+Element? _activeElement() {
   try {
     return document.activeElement;
   } catch (_) {
@@ -419,16 +417,16 @@ Element _activeElement() {
 
 class _HandleObjectContext {
 
-  final List<_HandleObject> delegates = new List<_HandleObject>();
-  final List<_HandleObject> handlers = new List<_HandleObject>();
+  final delegates = <_HandleObject>[];
+  final handlers = <_HandleObject>[];
 
-  static final _HandleObjectContext EMPTY = new _HandleObjectContext();
+  static final EMPTY = _HandleObjectContext();
 
 }
 
 class _HandlerQueueEntry {
 
-  final EventTarget elem;
+  final EventTarget? elem;
   final List<_HandleObject> handlers;
 
   _HandlerQueueEntry(this.elem, this.handlers);
@@ -440,21 +438,22 @@ class _HandleObject {
   _HandleObject(this.selector, this.type, this.origType, this.namespace,
       this.needsContext, this.handler);
 
-  final String selector, type, origType, namespace;
+  final String? selector, origType, namespace;
+  final String type;
   final bool needsContext;
   final QueryEventListener handler;
 
 }
 
-typedef bool SetupSupplier<bool>(EventTarget eventTarget);
-typedef bool TeardownSupplier<bool>(EventTarget eventTarget);
+typedef bool SetupSupplier(EventTarget? eventTarget);
+typedef bool TeardownSupplier(EventTarget? eventTarget);
 
 class _SpecialEventHandler {
 
-  _SpecialEventHandler({bool noBubble: false, String delegateType,
-    String bindType, bool trigger(EventTarget t, data),
-    SetupSupplier setup, TeardownSupplier teardown,
-    QueryEventListener handle}) :
+  _SpecialEventHandler({bool noBubble: false, String? delegateType,
+    String? bindType, bool trigger(EventTarget t, data)?,
+    SetupSupplier? setup, TeardownSupplier? teardown,
+    QueryEventListener? handle}) :
   this.noBubble = noBubble,
   this.delegateType = delegateType,
   this.bindType = bindType,
@@ -466,20 +465,20 @@ class _SpecialEventHandler {
   final bool noBubble;
   //Function setup, add, remove, teardown; // void f(Element elem, _HandleObject handleObj)
 
-  final SetupSupplier setup;
-  final TeardownSupplier teardown;
+  final SetupSupplier? setup;
+  final TeardownSupplier? teardown;
 
-  final Function trigger; // bool f(Element elem, data)
+  final Function? trigger; // bool f(Element elem, data)
   //Function _default; // bool f(Document document, data)
-  final String delegateType, bindType;
+  final String? delegateType, bindType;
   //QueryEventListener postDispatch, handle;
 
-  QueryEventListener handle;
+  QueryEventListener? handle;
 
-  static final _SpecialEventHandler EMPTY = new _SpecialEventHandler();
+  static final EMPTY = _SpecialEventHandler();
 
 }
-_SpecialEventHandler _getSpecial(String type) =>
+_SpecialEventHandler _getSpecial(String? type) =>
   _SPECIAL_HANDLINGS[type] ?? _SpecialEventHandler.EMPTY;
 
 final Map<String, _SpecialEventHandler> _SPECIAL_HANDLINGS = <String, _SpecialEventHandler> {
@@ -520,17 +519,17 @@ final Map<String, _SpecialEventHandler> _SPECIAL_HANDLINGS = <String, _SpecialEv
 };
 
 // jQuery: Create mouseenter/leave events using mouseover/out and event-time checks
-_SpecialEventHandler _mouseenterHandling, _mouseleaveHandling;
+_SpecialEventHandler? _mouseenterHandling, _mouseleaveHandling;
 _SpecialEventHandler _initMouseenterleave(String orig, String fix) {
-  return new _SpecialEventHandler(handle: (QueryEvent event) {
-    Node target = event._currentTarget as Node,
-         related = event.relatedTarget as Node;
-    _HandleObject handleObj = event._handleObj;
+  return _SpecialEventHandler(handle: (QueryEvent event) {
+    final target = event._currentTarget as Node,
+      related = event.relatedTarget as Node,
+      handleObj = event._handleObj;
 
     // For mousenter/leave call the handler if related is outside the target.
     // NB: No relatedTarget if the mouse left/entered the browser window
-    if (related == null || (related != target && !target.contains(related))) {
-      event._type = handleObj.origType;
+    if (related != target && !target.contains(related)) {
+      event._type = handleObj!.origType;
       handleObj.handler(event);
       event._type = fix;
     }
@@ -542,13 +541,13 @@ _SpecialEventHandler _initMouseenterleave(String orig, String fix) {
 // Support: Firefox, Chrome, Safari
 //if ( !jQuery.support.focusinBubbles ) {
 
-_SpecialEventHandler _focusinHandling, _focusoutHandling;
+_SpecialEventHandler? _focusinHandling, _focusoutHandling;
 _SpecialEventHandler _initNotSupportFocusinBubbles(String orig, String fix) {
 
   // Attach a single capturing handler while someone wants focusin/focusout
   var attaches = 0,
       handler = (Event event) =>
-        _EventUtil.simulate(fix, event.target, new QueryEvent.from(event), true);
+        _EventUtil.simulate(fix, event.target, QueryEvent.from(event), true);
 
   return new _SpecialEventHandler(
     setup: (_) {
@@ -578,14 +577,14 @@ class QueryEvent implements Event {
    * it will contain an original event; if triggered by API, this property will
    * be null.
    */
-  final Event originalEvent;
+  final Event? originalEvent;
 
   /** The type of event. If the event is constructed from a native DOM [Event],
    * it uses the type of that event.
    */
   @override
-  String get type => _type ?? originalEvent?.type;
-  String _type;
+  String get type => _type ?? originalEvent!.type;
+  String? _type;
 
   @override
   List<EventTarget> composedPath()
@@ -609,22 +608,22 @@ class QueryEvent implements Event {
   /** The delegate target of this event. i.e. The event target on which the
    * handler is registered.
    */
-  EventTarget get delegateTarget => _delegateTarget;
-  EventTarget _delegateTarget;
+  EventTarget? get delegateTarget => _delegateTarget;
+  EventTarget? _delegateTarget;
 
   /** The current target of this event when bubbling up.
    */
   @override
-  EventTarget get currentTarget => _currentTarget;
-  EventTarget _currentTarget;
+  EventTarget? get currentTarget => _currentTarget;
+  EventTarget? _currentTarget;
 
   /** The original target of this event. i.e. The real event target where the
    * event occurs.
    */
   @override
-  EventTarget get target {
+  EventTarget? get target {
     if (_target == null && originalEvent != null) {
-      _target = originalEvent.target;
+      _target = originalEvent!.target;
 
     // jQuery: Support: Chrome 23+, Safari?
     //         Target should not be a text node (#504, #13143)
@@ -633,7 +632,7 @@ class QueryEvent implements Event {
     }
     return _target;
   }
-  EventTarget _target;
+  EventTarget? _target;
 
   /** The other DOM element involved in the event, if any.
    */
@@ -642,50 +641,48 @@ class QueryEvent implements Event {
   /** The namespace of this event. For example, if the event is triggered by
    * API with name `click.a.b.c`, it will have type `click` with namespace `a.b.c`
    */
-  String get namespace => _namespace;
-  String _namespace; // TODO: maybe should be List<String> ?
+  String? get namespace => _namespace;
+  String? _namespace; // TODO: maybe should be List<String> ?
 
   /** The mouse position relative to the left edge of the document.
    */
   int get pageX {
     _initPageXY();
-    return _pageX;
+    return _pageX!;
   }
-  int _pageX;
+  int? _pageX;
 
   /** The mouse position relative to the top edge of the document.
    */
   int get pageY {
     _initPageXY();
-    return _pageY;
+    return _pageY!;
   }
-  int _pageY;
+  int? _pageY;
 
   void _initPageXY() {
     if (_pageX != null || originalEvent is! MouseEvent)
       return;
 
     // jQuery: Calculate pageX/Y if missing and clientX/Y available
-    final MouseEvent original = originalEvent;
-    final Point client = original.client;
-    if (client.x != null ) {
-      final Document eventDoc = target is Element ? (target as Element).ownerDocument:
-        target is Document ? target as Document: document;
-      final Element doc = eventDoc.documentElement,
-              body = document.body;
+    final original = originalEvent as MouseEvent;
+    final client = original.client;
+    final eventDoc = target is Element ? (target as Element).ownerDocument:
+      target is Document ? target as Document: document;
+    final doc = eventDoc?.documentElement,
+      body = document.body;
 
-      _pageX = client.x + _left(doc, body);
-      _pageY = client.y + _top(doc, body);
-    }
+    _pageX = client.x.toInt() + _left(doc, body);
+    _pageY = client.y.toInt() + _top(doc, body);
   }
 
-  static int _left(Element doc, Element body)
-  => doc != null ? doc.scrollLeft - doc.clientLeft:
-     body != null ? body.scrollLeft - body.clientLeft: 0;
+  static int _left(Element? doc, Element? body)
+  => doc != null ? doc.scrollLeft - doc.clientLeft!:
+     body != null ? body.scrollLeft - body.clientLeft!: 0;
 
-  static int _top(Element doc, Element body)
-  => doc != null ? doc.scrollTop - doc.clientTop:
-     body != null ? body.scrollTop - body.clientTop: 0;
+  static int _top(Element? doc, Element? body)
+  => doc != null ? doc.scrollTop - doc.clientTop!:
+     body != null ? body.scrollTop - body.clientTop!: 0;
 
   /** For key or mouse events, this property indicates the specific key
    * or button that was pressed.
@@ -698,12 +695,12 @@ class QueryEvent implements Event {
    * Use event.which instead of event.button.
    */
   @deprecated
-  int get which {
+  int? get which {
     if (_which == null) {
       final event = originalEvent;
       if (event is KeyboardEvent) { //including KeyEvent
     //jQuery: Add which for key events
-        _which = event.charCode ?? event.keyCode;
+        _which = event.charCode;
 
       } else if (event is MouseEvent) {
     // jQuery: Add which for click: 1 === left; 2 === middle; 3 === right
@@ -719,7 +716,7 @@ class QueryEvent implements Event {
     }
     return _which;
   }
-  int _which;
+  int? _which;
 
   ///Returns the key code if it is a keyboard event, or null if not.
   int get keyCode => _safeOriginal((e) => e.keyCode);
@@ -757,15 +754,16 @@ class QueryEvent implements Event {
   int get eventPhase => _safeOriginal((e) => e.eventPhase, 0);
   @override
   Element get matchingTarget {
-    if (originalEvent != null) return originalEvent.matchingTarget;
-    throw new UnsupportedError(''); //follow SDK spec
+    if (originalEvent != null) return originalEvent!.matchingTarget;
+    throw new UnsupportedError('Cannot call matchingTarget if this Event did'
+      ' not arise as a result of event delegation.'); //follow SDK spec
   }
   @override
-  List<Node> get path => _safeOriginal((e) => e.path);
+  List<Node> get path => _safeOriginal((e) => e.path, []);
   @override
   double get timeStamp => _safeOriginal((e) => e.timeStamp, 0.0);
 
-  T _safeOriginal<T>(T f(event), [T defaultValue]) {
+  T? _safeOriginal<T>(T f(event), [T? defaultValue]) {
     if (originalEvent != null)
       try {
         return f(originalEvent);
@@ -774,9 +772,9 @@ class QueryEvent implements Event {
     return defaultValue;
   }
 
-  RegExp _reNamespace;
+  RegExp? _reNamespace;
 
-  _HandleObject _handleObj;
+  _HandleObject? _handleObj;
 
   //int _isTrigger; // TODO: check usage
 
@@ -784,19 +782,19 @@ class QueryEvent implements Event {
 
   /** Construct a QueryEvent from a native DOM [event].
    */
-  QueryEvent.from(Event this.originalEvent, {String type}) :
+  QueryEvent.from(this.originalEvent, {String? type}) :
   _type = type;
 
   /** Construct a QueryEvent with given [type].
    */
-  QueryEvent(String type, {EventTarget target, this.data}) :
+  QueryEvent(String type, {EventTarget? target, this.data}) :
   _type = type, _target = target, originalEvent = null;
 
   /// Return true if [preventDefault] was ever called in this event.
   @override
   bool get defaultPrevented
   => _defaultPrevented ?? _safeOriginal((e) => e.defaultPrevented, false);
-  bool _defaultPrevented;
+  bool? _defaultPrevented;
 
   /// Return true if [stopPropagation] was ever called in this event.
   bool get propagationStopped => _propagationStopped;

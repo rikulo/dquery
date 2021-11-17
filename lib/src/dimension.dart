@@ -109,14 +109,10 @@ function augmentWidthOrHeight( elem, name, extra, isBorderBox, styles ) {
 }
 */
 
-int _getElementWidth(Element elem, [extra]) {
-  // TODO: box-sizing
-  // TODO: extra: content, padding, border, margin
-  return elem.offsetWidth;
+int _getElementWidth(Element elem) {
+  return elem.getBoundingClientRect().width.ceil();
 }
 
-int _getElementHeight(Element elem, [extra]) {
-  // TODO: box-sizing
-  // TODO: extra: content, padding, border, margin
-  return elem.offsetHeight;
+int _getElementHeight(Element elem) {
+  return elem.getBoundingClientRect().height.ceil();
 }

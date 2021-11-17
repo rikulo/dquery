@@ -35,28 +35,26 @@ void _empty(Element elem) {
   elem.nodes.clear();
 }
 
-ElementQuery _resolveManipTarget(target) =>
+ElementQuery? _resolveManipTarget(target) =>
     target is ElementQuery ? target :
     target is String || target is Element ? $(target) : null;
 
-ElementQuery _resolveManipContent(value) =>
+ElementQuery? _resolveManipContent(value) =>
     value is ElementQuery ? value : 
     value is Element ? $(value) :
     value is String && value.startsWith('<') ? $(value) : null; // TODO: function later
 
-void _domManip(ElementQuery refs, content, void f(Element ref, ElementQuery obj)) {
-  
-  if (refs == null || refs.isEmpty)
+void _domManip(ElementQuery? refs, content, void f(Element ref, ElementQuery obj)) {
+  if (refs?.isEmpty ?? true)
     return;
   
-  final ElementQuery objs = _resolveManipContent(content);
-  
-  if (objs == null || objs.isEmpty)
+  final objs = _resolveManipContent(content);
+  if (objs?.isEmpty ?? true)
     return;
   
-  final Element last = refs.last;
-  for (Element n in refs)
-    f(n, n == last ? objs : objs.clone());
+  final last = refs!.last;
+  for (final n in refs)
+    f(n, n == last ? objs! : objs!.clone());
   
 }
 
@@ -64,26 +62,26 @@ void _appendFunc(Element ref, ElementQuery obj) =>
     obj.forEach((Element elem) => ref.append(elem));
 
 void _prependFunc(Element ref, ElementQuery obj) {
-  final Node before = ref.hasChildNodes() ? ref.nodes.first : null;
+  final before = ref.hasChildNodes() ? ref.nodes.first : null;
   obj.forEach((Element elem) => ref.insertBefore(elem, before));
 }
 
 void _afterFunc(Element ref, ElementQuery obj) {
-  final Node parent = ref.parentNode;
-  final Node before = ref.nextNode;
+  final parent = ref.parentNode as Node,
+    before = ref.nextNode;
   obj.forEach((Element elem) => parent.insertBefore(elem, before));
 }
 
 void _beforeFunc(Element ref, ElementQuery obj) {
-  final Node parent = ref.parentNode;
+  final parent = ref.parentNode as Node;
   obj.forEach((Element elem) => parent.insertBefore(elem, ref));
 }
 
-Element _clone(Element elem, [bool dataAndEvents = false, bool deepDataAndEvents]) {
+Element _clone(Element elem, [bool dataAndEvents = false, bool? deepDataAndEvents]) {
   if (deepDataAndEvents == null)
     deepDataAndEvents = dataAndEvents;
   
-  final Element clone = elem.clone(true); // deep
+  final clone = elem.clone(true) as Element; // deep
   
   //inPage = jQuery.contains( elem.ownerDocument, elem );
   
@@ -129,8 +127,7 @@ void _cloneCopyEvent(Element src, Element dest, [bool deep = false]) {
         pdataCur[k] = v;
     });
     
-    final Map<String, _HandleObjectContext> events = pdataOld['events'];
-    
+    final events = pdataOld['events'];
     if (events != null && !events.isEmpty) {
       events.forEach((String type, _HandleObjectContext hoc) {
         for (_HandleObject h in hoc.handlers)

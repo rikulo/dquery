@@ -8,20 +8,20 @@ part of dquery;
 String _encode(String s) => Uri.encodeComponent(s);
 String _decode(String s) => Uri.decodeComponent(s);
 
-_getCookie(Document doc, [String key]) {
-  final Map<String, String> cookies = key != null ? null: {};
-  String value = doc.cookie;
+_getCookie(Document doc, [String? key]) {
+  final cookies = key != null ? null: <String, String>{};
+  var value = doc.cookie;
   if (value != null) {
-    for (final String cookie in value.split('; ')) {
-      final int i = cookie.indexOf('=');
+    for (final cookie in value.split('; ')) {
+      final i = cookie.indexOf('=');
       if (i < 0) continue; //just in case
 
-      final String name = _decode(cookie.substring(0, i));
+      final name = _decode(cookie.substring(0, i));
       value = _parseCookieValue(cookie.substring(i + 1));
 
       if (key == null) {
         if (value != null)
-          cookies[name] = value;
+          cookies![name] = value;
       } else if (key == name) {
         return value;
       }
@@ -30,7 +30,7 @@ _getCookie(Document doc, [String key]) {
   return cookies;
 }
 
-String _parseCookieValue(String value) {
+String? _parseCookieValue(String value) {
   if (value.startsWith('"')) {
     // This is a quoted cookie as according to RFC2068, unescape...
     value = value.substring(1, value.length - 1)
@@ -48,9 +48,9 @@ final RegExp _reQuot = new RegExp(r'\\"'), _reBS = new RegExp(r'\\\\'),
   _rePlus = new RegExp(r'\+');
 
 
-void _setCookie(Document doc, String name, String value, Duration expires,
-    String path, bool secure) {
-  final List<String> buf = [_encode(name), '=', _encode(value)];
+void _setCookie(Document doc, String name, String value, Duration? expires,
+    String? path, bool? secure) {
+  final buf = <String>[_encode(name), '=', _encode(value)];
 
   if (expires != null)
     buf..add("; expires=")
@@ -63,4 +63,4 @@ void _setCookie(Document doc, String name, String value, Duration expires,
 
   document.cookie = buf.join("");
 }
-final DateFormat _utcfmt = new DateFormat("E dd MMM yyyy kk:mm:ss", "en_US");
+final _utcfmt = new DateFormat("E dd MMM yyyy kk:mm:ss", "en_US");
