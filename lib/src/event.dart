@@ -177,7 +177,7 @@ class _EventUtil {
     for (final sb in b) {
       if (!ia.moveNext())
         return true;
-      final c = ia.current.compareTo(sb!);
+      final c = ia.current.compareTo(sb);
       if (c < 0)
         return false;
       if (c == 0)
