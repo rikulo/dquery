@@ -68,9 +68,9 @@ void _setOffset(Element elem, {num? left, num? top}) {
     elem.style.left = "${left - curOffset!.x + curLeft}px";
   }
   
-  if (top != null && curOffset != null && curPosition != null) {
-    final curTop = calculatePosition ? curPosition.y : _parseDouble(curCSSTop);
-    elem.style.top = "${top - curOffset.y + curTop}px";
+  if (top != null) {
+    final curTop = calculatePosition ? curPosition!.y : _parseDouble(curCSSTop);
+    elem.style.top = "${top - curOffset!.y + curTop}px";
   }
   
 }

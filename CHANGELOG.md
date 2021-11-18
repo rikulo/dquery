@@ -1,5 +1,8 @@
 # CHANGES
 
+**2.0.1**
+* Fixed set a wrong offsetTop
+
 **2.0.0**
 * Migrate to null safety
 
