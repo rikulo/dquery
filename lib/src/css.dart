@@ -98,10 +98,16 @@ String? _getCurCss(Element elem, String name, CssStyleDeclaration? computed) {
   // getPropertyValue is only needed for .css('filter') in IE9, see #12537
   // TODO: skipped, trust Dart handling for now but need to test against it
   // ret = computed ? computed.getPropertyValue( name ) || computed[ name ] : undefined,
+  String? value = getProperty(computed, name);
+  if (value?.isNotEmpty ?? false)
+    return value;
+
+  value = computed.getPropertyValue(name);
+  if (value.isNotEmpty)
+    return value;
+
   
-  return getProperty(computed, name) ?? computed.getPropertyValue(name)
-      ?? computed.getPropertyValue("${Device.cssPrefix}${name}");
-  
+  return computed.getPropertyValue("${Device.cssPrefix}${name}");
   //if ( computed ) {
     /*
     if ( ret === "" && !jQuery.contains( elem.ownerDocument, elem ) ) {
