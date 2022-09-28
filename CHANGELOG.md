@@ -2,6 +2,7 @@
 
 **2.0.1**
 * Fixed set a wrong offsetTop
+* Fixed relatedTarget cast error
 
 **2.0.0**
 * Migrate to null safety

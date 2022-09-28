@@ -636,7 +636,7 @@ class QueryEvent implements Event {
 
   /** The other DOM element involved in the event, if any.
    */
-  EventTarget get relatedTarget => _safeOriginal((e) => e.relatedTarget);
+  EventTarget? get relatedTarget => _safeOriginal((e) => e.relatedTarget);
 
   /** The namespace of this event. For example, if the event is triggered by
    * API with name `click.a.b.c`, it will have type `click` with namespace `a.b.c`
