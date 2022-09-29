@@ -523,7 +523,7 @@ _SpecialEventHandler? _mouseenterHandling, _mouseleaveHandling;
 _SpecialEventHandler _initMouseenterleave(String orig, String fix) {
   return _SpecialEventHandler(handle: (QueryEvent event) {
     final target = event._currentTarget as Node,
-      related = event.relatedTarget as Node,
+      related = event.relatedTarget as Node?,
       handleObj = event._handleObj;
 
     // For mousenter/leave call the handler if related is outside the target.
