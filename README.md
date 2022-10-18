@@ -1,9 +1,8 @@
 # DQuery
 
-[DQuery](http://rikulo.org) is a porting of [jQuery](http://jquery.com/) in Dart.
+DQuery is a porting of [jQuery](http://jquery.com/) in Dart.
 
-* [Home](http://rikulo.org)
-* [Tutorial](http://blog.rikulo.org/posts/2013/May/General/bootjack-and-dquery/)
+
 * [API Reference](https://pub.dev/documentation/dquery/latest/)
 * [Git Repository](https://github.com/rikulo/dquery)
 * [Discussion](http://stackoverflow.com/questions/tagged/rikulo)
@@ -37,7 +36,7 @@ It implements List<Element>.
 	$('.active').isEmpty;
 	for (Element e in $('.active')) { ... }
 
-Create another query object with traversing API, including [find](http://api.rikulo.org/dquery/latest/dquery/DQuery.html#find), [closest](http://api.rikulo.org/dquery/latest/dquery/ElementQuery.html#closest), [parent](http://api.rikulo.org/dquery/latest/dquery/ElementQuery.html#parent), [children](http://api.rikulo.org/dquery/latest/dquery/ElementQuery.html#children).
+Create another query object with traversing API, including [find](https://pub.dev/documentation/dquery/latest/dquery/Query/find.html), [closest](https://pub.dev/documentation/dquery/latest/dquery/ElementQuery/closest.html), [parent](https://pub.dev/documentation/dquery/latest/dquery/ElementQuery/parent.html), [children](https://pub.dev/documentation/dquery/latest/dquery/ElementQuery/children.html).
 
 	$('.active').closest('ul');
 	$('#myDiv').find('a.btn');
@@ -59,7 +58,7 @@ There are query objects of `Document` and `Window` too.
 	Query $doc = $document();
 	Query $win = $window();
 
-Check the [API reference](http://api.rikulo.org/dquery/latest/dquery.html) for more features.
+Check the [API reference](https://pub.dev/documentation/dquery/latest/dquery/dquery-library.html) for more features.
 
 ## Comparison to jQuery
 
