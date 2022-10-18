@@ -1,5 +1,8 @@
 # CHANGES
 
+**2.0.2**
+Remove dart:html_common package
+
 **2.0.1**
 * Fixed set a wrong offsetTop
 * Fixed relatedTarget cast error

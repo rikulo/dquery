@@ -2,7 +2,6 @@ library dquery;
 
 import 'dart:math';
 import 'dart:html';
-import 'dart:html_common';
 import 'dart:collection';
 
 import 'dart:js_util';

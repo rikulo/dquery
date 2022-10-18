@@ -102,12 +102,10 @@ String? _getCurCss(Element elem, String name, CssStyleDeclaration? computed) {
   if (value?.isNotEmpty ?? false)
     return value;
 
-  value = computed.getPropertyValue(name);
-  if (value.isNotEmpty)
-    return value;
-
+  //already handle by getPropertyValue
+  //return computed.getPropertyValue("${Device.cssPrefix}${name}");
+  return computed.getPropertyValue(name);
   
-  return computed.getPropertyValue("${Device.cssPrefix}${name}");
   //if ( computed ) {
     /*
     if ( ret === "" && !jQuery.contains( elem.ownerDocument, elem ) ) {
@@ -209,6 +207,6 @@ void _setCss(Element elem, String name, String value) {
   */
   
   elem.style.setProperty(name, value);
-  elem.style.setProperty("${Device.cssPrefix}$name", value);
-  
+  //already handle by setProperty
+  //elem.style.setProperty("${Device.cssPrefix}$name", value);
 }
