@@ -9,3 +9,4 @@ environment:
 dependencies:
   intl: any
 dev_dependencies:
+  test: any
