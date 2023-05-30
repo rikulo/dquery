@@ -1,13 +1,13 @@
 part of dquery;
 
 void _cleanData(Element element) {
-  for (Element c in element.children) {
+  for (final c in element.children.toList()) {
     if (!_dataPriv.hasData(c))
       continue;
-    final Map space = _dataPriv.getSpace(c);
+    final space = _dataPriv.getSpace(c);
     // remove event handlers
     if (space.containsKey('events'))
-      for (String type in (space['events'] as Map).keys)
+      for (final type in (space['events'] as Map).keys)
         _EventUtil.remove(c, type, null, null);
     
     _dataPriv.discard(c);

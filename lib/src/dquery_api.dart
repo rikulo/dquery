@@ -278,7 +278,7 @@ abstract class ElementQuery extends DQuery<Element> {
    * + If [data] is true, also remove associtated data under all elements and 
    * decendants.
    */
-  void detach({String selector, bool data: true});
+  void detach({String selector, bool data = true});
   
   /** Remove all child nodes of the elements in this collection from the DOM.
    */

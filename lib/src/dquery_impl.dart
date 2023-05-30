@@ -373,7 +373,7 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
       pushStack(_elements.map((Element e) => _clone(e)).toList());
   
   @override
-  void detach({String? selector, bool data: true}) =>
+  void detach({String? selector, bool data = true}) =>
       (selector != null && !(selector = selector.trim()).isEmpty ? 
           _filter(selector, _elements) : List<Element>.from(_elements))
           .forEach((Element e) => _detach(e, data));

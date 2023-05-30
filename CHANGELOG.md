@@ -1,4 +1,6 @@
 # CHANGES
+**2.0.3**
+Fixed concurrent modification error when detach element
 
 **2.0.2**
 Remove dart:html_common package

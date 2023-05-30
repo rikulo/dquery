@@ -450,7 +450,7 @@ typedef bool TeardownSupplier(EventTarget? eventTarget);
 
 class _SpecialEventHandler {
 
-  _SpecialEventHandler({bool noBubble: false, String? delegateType,
+  _SpecialEventHandler({bool noBubble = false, String? delegateType,
     String? bindType, bool trigger(EventTarget t, data)?,
     SetupSupplier? setup, TeardownSupplier? teardown,
     QueryEventListener? handle}) :
