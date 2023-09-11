@@ -1,4 +1,7 @@
 # CHANGES
+**2.0.4**
+Add "key" and "code" getter for keyboard input
+
 **2.0.3**
 Fixed concurrent modification error when detach element
 

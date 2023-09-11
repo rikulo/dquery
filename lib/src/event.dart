@@ -718,6 +718,10 @@ class QueryEvent implements Event {
   }
   int? _which;
 
+  //Returns the key if it is a keyboard event, or null if not.
+  String get key => _safeOriginal((e) => e.key, false);
+  //Returns the code if it is a keyboard event, or null if not.
+  String get code => _safeOriginal((e) => e.code, false);
   ///Returns the key code if it is a keyboard event, or null if not.
   int get keyCode => _safeOriginal((e) => e.keyCode);
   ///Returns the key location if it is a keyboard event, or null if not.
