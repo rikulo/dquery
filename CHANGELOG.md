@@ -1,4 +1,7 @@
 # CHANGES
+**3.0.0**
+* Dart 3 required
+
 **2.0.4**
 Add "key" and "code" getter for keyboard input
 

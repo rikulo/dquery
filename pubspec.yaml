@@ -1,11 +1,11 @@
 name: dquery
-version: 2.0.2+2
+version: 3.0.0
 description: |
   DQuery is a porting of jQuery in Dart.
 homepage: https://github.com/rikulo/dquery
 documentation: https://pub.dev/documentation/dquery/latest/
 environment:
-  sdk: '>=2.14.0 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 dependencies:
   intl: any
 dev_dependencies:

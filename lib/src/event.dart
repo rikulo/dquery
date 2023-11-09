@@ -54,7 +54,7 @@ class _EventUtil {
       special = _getSpecial(type);
 
       // jQuery: handleObj is passed to all event handlers
-      final needsContext = hasSelector && _EventUtil._NEEDS_CONTEXT.hasMatch(selector!);
+      final needsContext = hasSelector && _EventUtil._needContext.hasMatch(selector);
       _HandleObject handleObj = _HandleObject(selector, type, origType,
           namespaces.join('.'), needsContext, handler);
 
@@ -169,7 +169,7 @@ class _EventUtil {
 
   }
 
-  static final _NEEDS_CONTEXT = RegExp(r'^[\x20\t\r\n\f]*[>+~]');
+  static final _needContext = RegExp(r'^[\x20\t\r\n\f]*[>+~]');
 
   static bool _subsetOf(List<String> a, List<String> b) {
     // assume a and b are sorted
