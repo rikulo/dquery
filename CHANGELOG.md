@@ -1,4 +1,8 @@
 # CHANGES
+
+**3.0.1**
+* Fixed ConcurrentModificationError when detach element
+
 **3.0.0**
 * Dart 3 required
 

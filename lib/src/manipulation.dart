@@ -7,7 +7,7 @@ void _cleanData(Element element) {
     final space = _dataPriv.getSpace(c);
     // remove event handlers
     if (space.containsKey('events'))
-      for (final type in (space['events'] as Map).keys)
+      for (final type in (space['events'] as Map).keys.toList())
         _EventUtil.remove(c, type, null, null);
     
     _dataPriv.discard(c);
