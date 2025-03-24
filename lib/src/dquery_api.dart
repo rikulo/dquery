@@ -131,9 +131,9 @@ abstract class DQuery<T> extends Query<T> {
 
 }
 
-/** A query object of a collection of [HTMLElement].
+/** A query object of a collection of [Element].
  */
-abstract class ElementQuery extends DQuery<HTMLElement> {
+abstract class ElementQuery extends DQuery<Element> {
   factory ElementQuery(List<HTMLElement> elements) => _ElementQuery(elements);
   
   // traversing //

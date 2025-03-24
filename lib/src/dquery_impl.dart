@@ -242,7 +242,7 @@ class _WindowQuery extends _Query<Window> with ListMixin<Window>
   
 }
 
-class _ElementQuery extends _Query<HTMLElement> with ListMixin<HTMLElement>
+class _ElementQuery extends _Query<Element> with ListMixin<Element>
     implements ElementQuery {
   
   final List<Element> _elements;
@@ -255,15 +255,15 @@ class _ElementQuery extends _Query<HTMLElement> with ListMixin<HTMLElement>
   
   // List //
   @override
-  HTMLElement operator [](int index) {
-      return _elements[index] as HTMLElement;
+  Element operator [](int index) {
+      return _elements[index];
   }
   
   @override
   int get length => _elements.length;
   
   @override
-  void operator []=(int index, HTMLElement value) {
+  void operator []=(int index, Element value) {
     _elements[index] = value;
   }
   
