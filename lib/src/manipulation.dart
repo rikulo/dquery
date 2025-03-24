@@ -1,7 +1,7 @@
 part of dquery;
 
 void _cleanData(Element element) {
-  for (final c in element.children.toList()) {
+  for (final c in JSImmutableListWrapper(element.children).toList().cast()) {
     if (!_dataPriv.hasData(c))
       continue;
     final space = _dataPriv.getSpace(c);
@@ -19,7 +19,7 @@ void _detach(Element elem, bool data) {
   if (data)
     _cleanData(elem);
   
-  if (elem.parent != null) {
+  if (elem.parentElement != null) {
     /*
     if ( keepData && jQuery.contains( elem.ownerDocument, elem ) ) {
       setGlobalEval( getAll( elem, "script" ) );
@@ -30,9 +30,9 @@ void _detach(Element elem, bool data) {
 }
 
 void _empty(Element elem) {
-  for (Element c in elem.children)
+  for (final c in JSImmutableListWrapper(elem.children).cast<Element>())
     _cleanData(c);
-  elem.nodes.clear();
+  elem.innerHTML = ''.toJS;
 }
 
 ElementQuery? _resolveManipTarget(target) =>
@@ -58,30 +58,42 @@ void _domManip(ElementQuery? refs, content, void f(Element ref, ElementQuery obj
   
 }
 
-void _appendFunc(Element ref, ElementQuery obj) =>
-    obj.forEach((Element elem) => ref.append(elem));
+void _appendFunc(Element ref, ElementQuery obj) {
+  for (final elem in obj.toList()) {
+    ref.append(elem);
+  }
+}
 
 void _prependFunc(Element ref, ElementQuery obj) {
-  final before = ref.hasChildNodes() ? ref.nodes.first : null;
-  obj.forEach((Element elem) => ref.insertBefore(elem, before));
+  final before = JSImmutableListWrapper(ref.childNodes).firstOrNull;
+  if (before is Node) {
+    for (final elem in obj.toList()) {
+      ref.insertBefore(elem, before);
+    }
+  } else
+    _appendFunc(ref, obj);
 }
 
 void _afterFunc(Element ref, ElementQuery obj) {
   final parent = ref.parentNode as Node,
-    before = ref.nextNode;
-  obj.forEach((Element elem) => parent.insertBefore(elem, before));
+    before = ref.nextSibling;
+  for (final elem in obj.toList()) {
+    parent.insertBefore(elem, before);
+  }
 }
 
 void _beforeFunc(Element ref, ElementQuery obj) {
   final parent = ref.parentNode as Node;
-  obj.forEach((Element elem) => parent.insertBefore(elem, ref));
+  for (final elem in obj.toList()) {
+    parent.insertBefore(elem, ref);
+  }
 }
 
 Element _clone(Element elem, [bool dataAndEvents = false, bool? deepDataAndEvents]) {
   if (deepDataAndEvents == null)
     deepDataAndEvents = dataAndEvents;
   
-  final clone = elem.clone(true) as Element; // deep
+  final clone = elem.cloneNode(true) as Element; // deep
   
   //inPage = jQuery.contains( elem.ownerDocument, elem );
   
@@ -145,8 +157,8 @@ void _cloneCopyEvent(Element src, Element dest, [bool deep = false]) {
   // unlike jQuery, we do deep clone by recursion
   if (deep) {
     int i = 0;
-    for (Element c in src.children)
-      _cloneCopyEvent(c, dest.children[i++], true);
+    for (final c in JSImmutableListWrapper(src.children).cast<Element>())
+      _cloneCopyEvent(c, dest.children.item(i++) as Element, true);
   }
   
 }
@@ -154,8 +166,8 @@ void _cloneCopyEvent(Element src, Element dest, [bool deep = false]) {
 
 
 void _setText(Element elem, String value) {
-  elem.children.clear();
-  elem.append(new Text(value));
+  elem.innerHTML = ''.toJS;
+  elem.append(Text(value));
 }
 
 // in strong type system, no way to get to text node or document fragment

@@ -216,13 +216,13 @@ jQuery.each({
 });
 */
 
-Element? _closest(Element? elem, String selector) =>
-    _closestWhere(elem, (Element e) => e.matches(selector));
+HTMLElement? _closest(Element? elem, String selector) =>
+    _closestWhere(elem, (e) => e.matches(selector));
 
-Element? _closestWhere(Element? elem, bool test(Element e)) {
+HTMLElement? _closestWhere(Element? elem, bool test(Element e)) {
   while (elem != null && !test(elem))
-    elem = elem.parent;
-  return elem;
+    elem = elem.parentElement;
+  return elem as HTMLElement?;
 }
 
 /*

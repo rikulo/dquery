@@ -1,10 +1,10 @@
-import 'dart:html';
+import 'package:web/web.dart';
 import 'package:dquery/dquery.dart';
 
 void main() {
   
-  final on = querySelector('#on') as ButtonElement;
-  final off = querySelector('#off') as ButtonElement;
+  final on = document.querySelector('#on') as HTMLButtonElement;
+  final off = document.querySelector('#off') as HTMLButtonElement;
   
   $(on).on('click', (_) {
     $('#btn').on('click', f);

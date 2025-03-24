@@ -1,9 +1,9 @@
-import 'dart:html';
+import 'package:web/web.dart';
 import 'package:dquery/dquery.dart';
 
 void main() {
   
-  final input = querySelector('#input') as InputElement;
+  final input = document.querySelector('#input') as HTMLInputElement;
   final $target = $('#target');
   
   $('#append').on('click', (QueryEvent event) => $target.append(input.value));

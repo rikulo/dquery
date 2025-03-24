@@ -5,8 +5,9 @@ description: |
 homepage: https://github.com/rikulo/dquery
 documentation: https://pub.dev/documentation/dquery/latest/
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.4.0 <4.0.0'
 dependencies:
   intl: any
+  web: '>=1.0.0'
 dev_dependencies:
   test: any

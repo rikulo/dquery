@@ -15,7 +15,7 @@ abstract class Query<T> implements List<T> {
   // static methods //
   /** Return a sorted List of elements with duplicated items removed.
    */
-  static List<Element> unique(List<Element> elements) => _unique(elements);
+  static List<HTMLElement> unique(List<HTMLElement> elements) => _unique(elements);
   
   // http://api.jquery.com/context/
   /** The DOM node context originally passed to Query; if none was passed 
@@ -42,7 +42,7 @@ abstract class Query<T> implements List<T> {
   // http://api.jquery.com/pushStack/
   /** Add a collection of DOM elements onto the Query stack.
    */
-  ElementQuery pushStack(List<Element> elems);
+  ElementQuery pushStack(List<HTMLElement> elems);
   
   /** Pops out the top [Query] object in the stack and retrieve the previous one. 
    * If there is no previous [Query], an empty [Query] will be returned.
@@ -131,10 +131,10 @@ abstract class DQuery<T> extends Query<T> {
 
 }
 
-/** A query object of a collection of [Element].
+/** A query object of a collection of [HTMLElement].
  */
-abstract class ElementQuery extends DQuery<Element> {
-  factory ElementQuery(List<Element> elements) => new _ElementQuery(elements);
+abstract class ElementQuery extends DQuery<HTMLElement> {
+  factory ElementQuery(List<HTMLElement> elements) => _ElementQuery(elements);
   
   // traversing //
   /** Retrieve the closest ancestor (including itself) of each element in this 
@@ -349,7 +349,7 @@ abstract class ElementQuery extends DQuery<Element> {
  * 
  * * See also [$document].
  */
-abstract class DocumentQuery extends DQuery<HtmlDocument> {
+abstract class DocumentQuery extends DQuery<Document> {
   /** Accesses the cookie.
    *
    * + [value] - the value to set.

@@ -9,7 +9,7 @@ part of dquery;
 // static helper class
 class _EventUtil {
 
-  //static Set<String> _global = new HashSet<String>();
+  //static Set<String> _global = HashSet<String>();
 
   static void add(EventTarget eventTarget, String types,
       QueryEventListener handler, String? selector) {
@@ -17,7 +17,7 @@ class _EventUtil {
     final hasSelector = selector != null && !selector.isEmpty;
 
     // jQuery: Don't attach events to noData or text/comment nodes (but allow plain objects)
-    if (eventTarget is CharacterData)
+    if (eventTarget.isA<CharacterData>())
       return;
 
     final space = _dataPriv.getSpace(eventTarget);
@@ -25,10 +25,10 @@ class _EventUtil {
 
     // jQuery: Init the element's event structure and main handler, if this is the first
     final events =
-        space.putIfAbsent('events', _createMap);
+        space.putIfAbsent('events', Map<String, _HandleObjectContext>.new) as Map;
     // the joint proxy handler
     final eventHandles =
-        space.putIfAbsent('handles', _createMap);
+        space.putIfAbsent('handles', Map<String, EventListener>.new) as Map;
 
     // jQuery: Handle multiple events separated by a space
     for (var type in _splitTypes(types)) {
@@ -59,19 +59,19 @@ class _EventUtil {
           namespaces.join('.'), needsContext, handler);
 
     final EventListener eventHandle = eventHandles.putIfAbsent(type, 
-      () => (e) {
+      () => (Event e) {
         // jQuery: Discard the second event of a jQuery.event.trigger() and
         //         when an event is called after a page has unloaded
-        if (e == null || _EventUtil._triggered != type)
+        if (_EventUtil._triggered != type)
           dispatch(eventTarget, QueryEvent.from(e), type: type);
-      });
+      }.toJS);
 
       // jQuery: Init the event handler queue if we're the first
       _HandleObjectContext handleObjCtx = events.putIfAbsent(type, () {
         // jQuery: Only use addEventListener/attachEvent if the special events handler returns false
         if (special.setup == null || !special.setup!(eventTarget))
-          eventTarget.addEventListener(type, eventHandle, false);
-        return new _HandleObjectContext();
+          eventTarget.addEventListener(type, eventHandle, false.toJS);
+        return _HandleObjectContext();
       });
 
       // special add: skipped for now
@@ -216,7 +216,7 @@ class _EventUtil {
       eventPath = <EventTarget>[elem];
 
     // jQuery: Don't do events on text and comment nodes
-    if (elem is CharacterData)
+    if (elem.isA<CharacterData>())
       return;
 
     // jQuery: focus/blur morphs to focusin/out; ensure we're not firing them right now
@@ -483,29 +483,29 @@ _SpecialEventHandler _getSpecial(String? type) =>
 
 final Map<String, _SpecialEventHandler> _SPECIAL_HANDLINGS = <String, _SpecialEventHandler> {
   // jQuery: Prevent triggered image.load events from bubbling to window.load
-  'load': new _SpecialEventHandler(noBubble: true),
+  'load': _SpecialEventHandler(noBubble: true),
 
-  'click': new _SpecialEventHandler(trigger: (EventTarget elem, data) {
+  'click': _SpecialEventHandler(trigger: (EventTarget elem, data) {
     // jQuery: For checkbox, fire native event so checked state will be right
-    if (elem is CheckboxInputElement) {
-      elem.click();
+    if (elem.isA<HTMLInputElement>()) {
+      (elem as HTMLInputElement).click();
       return false;
     }
     return true;
   }),
 
-  'focus': new _SpecialEventHandler(trigger: (EventTarget elem, data) {
+  'focus': _SpecialEventHandler(trigger: (EventTarget elem, data) {
     // jQuery: Fire native event if possible so blur/focus sequence is correct
-    if (elem != _activeElement() && elem is Element) {
+    if (elem != _activeElement() && elem is HTMLElement) {
       elem.focus();
       return false;
     }
     return true;
   }, delegateType: 'focusin'),
 
-  'blur': new _SpecialEventHandler(trigger: (EventTarget elem, data) {
+  'blur': _SpecialEventHandler(trigger: (EventTarget elem, data) {
     if (elem == _activeElement()) {
-      (elem as Element).blur();
+      (elem as HTMLElement).blur();
       return false;
     }
     return true;
@@ -549,16 +549,16 @@ _SpecialEventHandler _initNotSupportFocusinBubbles(String orig, String fix) {
       handler = (Event event) =>
         _EventUtil.simulate(fix, event.target, QueryEvent.from(event), true);
 
-  return new _SpecialEventHandler(
+  return _SpecialEventHandler(
     setup: (_) {
       if (attaches++ == 0)
-        document.addEventListener(orig, handler, true);
+        document.addEventListener(orig, handler.toJS, true.toJS);
      return true;
     },
 
     teardown: (_) {
       if (--attaches == 0)
-        document.removeEventListener(orig, handler, true);
+        document.removeEventListener(orig, handler.toJS, true.toJS);
       return true;
     });
 }
@@ -571,7 +571,7 @@ typedef void QueryEventListener(QueryEvent event);
 /** A wrapping of browser [Event], to attach more information such as custom
  * event data and name space, etc.
  */
-class QueryEvent implements Event {
+class QueryEvent {
 
   /** The original event, if any. If this [QueryEvent] was triggered by browser,
    * it will contain an original event; if triggered by API, this property will
@@ -582,11 +582,9 @@ class QueryEvent implements Event {
   /** The type of event. If the event is constructed from a native DOM [Event],
    * it uses the type of that event.
    */
-  @override
   String get type => _type ?? originalEvent!.type;
   String? _type;
 
-  @override
   List<EventTarget> composedPath()
     => _safeOriginal((e) => e.composedPath(), const <EventTarget>[]);
 
@@ -613,21 +611,19 @@ class QueryEvent implements Event {
 
   /** The current target of this event when bubbling up.
    */
-  @override
   EventTarget? get currentTarget => _currentTarget;
   EventTarget? _currentTarget;
 
   /** The original target of this event. i.e. The real event target where the
    * event occurs.
    */
-  @override
   EventTarget? get target {
     if (_target == null && originalEvent != null) {
       _target = originalEvent!.target;
 
     // jQuery: Support: Chrome 23+, Safari?
     //         Target should not be a text node (#504, #13143)
-      if (_target is Text)
+      if (_target.isA<Text>())
         _target = (_target as Text).parentNode;
     }
     return _target;
@@ -666,23 +662,22 @@ class QueryEvent implements Event {
 
     // jQuery: Calculate pageX/Y if missing and clientX/Y available
     final original = originalEvent as MouseEvent;
-    final client = original.client;
-    final eventDoc = target is Element ? (target as Element).ownerDocument:
-      target is Document ? target as Document: document;
+    final eventDoc = target.isA<Element>() ? (target as Element).ownerDocument:
+      target.isA<Document>() ? target as Document: document;
     final doc = eventDoc?.documentElement,
       body = document.body;
 
-    _pageX = client.x.toInt() + _left(doc, body);
-    _pageY = client.y.toInt() + _top(doc, body);
+    _pageX = original.clientX + _left(doc, body);
+    _pageY = original.clientY + _top(doc, body);
   }
 
   static int _left(Element? doc, Element? body)
-  => doc != null ? doc.scrollLeft - doc.clientLeft!:
-     body != null ? body.scrollLeft - body.clientLeft!: 0;
+  => doc != null ? (doc.scrollLeft - doc.clientLeft).toInt():
+     body != null ? (body.scrollLeft - body.clientLeft).toInt(): 0;
 
   static int _top(Element? doc, Element? body)
-  => doc != null ? doc.scrollTop - doc.clientTop!:
-     body != null ? body.scrollTop - body.clientTop!: 0;
+  => doc != null ? (doc.scrollTop - doc.clientTop).toInt():
+     body != null ? (body.scrollTop - body.clientTop).toInt(): 0;
 
   /** For key or mouse events, this property indicates the specific key
    * or button that was pressed.
@@ -698,20 +693,19 @@ class QueryEvent implements Event {
   int? get which {
     if (_which == null) {
       final event = originalEvent;
-      if (event is KeyboardEvent) { //including KeyEvent
+      if (event.isA<KeyboardEvent>() && event is KeyboardEvent) { //including KeyEvent
     //jQuery: Add which for key events
         _which = event.charCode;
 
-      } else if (event is MouseEvent) {
+      } else if (event.isA<MouseEvent>() && event is MouseEvent) {
     // jQuery: Add which for click: 1 === left; 2 === middle; 3 === right
     // jQuery: Note: button is not normalized, so don't use it
         final buttons = event.buttons;
         _which = 
-            buttons == null ? event.button + 1: //Safari: no buttons
             (buttons & 1) != 0 ? 1:
             (buttons & 2) != 0 ? 3: (buttons & 4) != 0 ? 2 : 0;
       } else if (event is QueryEvent) {
-        _which = event.which;
+        _which = (event as QueryEvent).which;
       }
     }
     return _which;
@@ -746,25 +740,23 @@ class QueryEvent implements Event {
   ///or null if not.
   int get button => _safeOriginal((e) => e.button);
 
-  @override
   bool get bubbles => _safeOriginal((e) => e.bubbles, false);
-  @override
+  
   bool get cancelable => _safeOriginal((e) => e.cancelable, false);
-  @override
+  
   bool get isTrusted => _safeOriginal((e) => e.isTrusted, false);
-  @override
+  
   bool get composed => _safeOriginal((e) => e.composed, false);
-  @override
+  
   int get eventPhase => _safeOriginal((e) => e.eventPhase, 0);
-  @override
-  Element get matchingTarget {
-    if (originalEvent != null) return originalEvent!.matchingTarget;
-    throw new UnsupportedError('Cannot call matchingTarget if this Event did'
-      ' not arise as a result of event delegation.'); //follow SDK spec
-  }
-  @override
+  // Element get matchingTarget {
+  //   if (originalEvent != null) return originalEvent!.matchingTarget;
+  //   throw UnsupportedError('Cannot call matchingTarget if this Event did'
+  //     ' not arise as a result of event delegation.'); //follow SDK spec
+  // }
+  
   List<Node> get path => _safeOriginal((e) => e.path, []);
-  @override
+  
   double get timeStamp => _safeOriginal((e) => e.timeStamp, 0.0);
 
   T? _safeOriginal<T>(T f(event), [T? defaultValue]) {
@@ -795,7 +787,6 @@ class QueryEvent implements Event {
   _type = type, _target = target, originalEvent = null;
 
   /// Return true if [preventDefault] was ever called in this event.
-  @override
   bool get defaultPrevented
   => _defaultPrevented ?? _safeOriginal((e) => e.defaultPrevented, false);
   bool? _defaultPrevented;
@@ -814,7 +805,6 @@ class QueryEvent implements Event {
 
   /** Prevent the default action of the event being triggered.
    */
-  @override
   void preventDefault() {
     _defaultPrevented = true;
     originalEvent?.preventDefault();
@@ -823,7 +813,6 @@ class QueryEvent implements Event {
   /** Prevent the event from bubbling up, and prevent any handlers on parent
    * elements from being called.
    */
-  @override
   void stopPropagation() {
     _propagationStopped = true;
     originalEvent?.stopPropagation();
@@ -832,7 +821,6 @@ class QueryEvent implements Event {
   /** Prevent the event from bubbling up, and prevent any succeeding handlers
    * from being called.
    */
-  @override
   void stopImmediatePropagation() {
     _immediatePropagationStopped = _propagationStopped = true;
     originalEvent?.stopImmediatePropagation();

@@ -1,11 +1,10 @@
-import 'dart:html';
-
+import 'package:web/web.dart';
 import 'package:dquery/dquery.dart';
 
 void main() {
   
   //blur
-  final blurSec = querySelector('.blur')!;
+  final blurSec = document.querySelector('.blur')!;
   
   $document().on('blur', (QueryEvent e) {
     printDoc(blurSec);
@@ -17,7 +16,7 @@ void main() {
   
   
   //focus
-  final focusSec = querySelector('.focus')!;
+  final focusSec = document.querySelector('.focus')!;
   
   $document().on('focus', (QueryEvent e) {
     printDoc(focusSec);
@@ -28,7 +27,7 @@ void main() {
   });
   
   //click
-  final clickSec = querySelector('.click')!;
+  final clickSec = document.querySelector('.click')!;
   
   $document().on('click', (QueryEvent e) {
     printDoc(clickSec);
@@ -39,7 +38,7 @@ void main() {
   });
   
   //click
-  final enterSec = querySelector('.mouseenter')!;
+  final enterSec = document.querySelector('.mouseenter')!;
   
   $document().on('mouseenter', (QueryEvent e) {
     printDoc(enterSec);
@@ -59,7 +58,7 @@ void printDoc(Element sec) {
     n = 0;
   
   $(sec).data.set(NUM_DOC, ++n);
-  sec.querySelector('.doc-result')!.text = 'doc: $n';
+  sec.querySelector('.doc-result')!.textContent = 'doc: $n';
 }
 
 void printElem(Element sec) {
@@ -68,5 +67,5 @@ var n = $(sec).data.get(NUM_ELEM);
     n = 0;
   
   $(sec).data.set(NUM_ELEM, ++n);
-  sec.querySelector('.elem-result')!.text = 'elem: $n';
+  sec.querySelector('.elem-result')!.textContent = 'elem: $n';
 }

@@ -1,5 +1,5 @@
 import 'package:dquery/dquery.dart';
-import 'dart:html';
+import 'package:web/web.dart';
 void main() {
   
   $document().on('click', (QueryEvent event) {
@@ -13,7 +13,7 @@ void main() {
   });
   $('#trigger').click((QueryEvent event) { print(event.type);});
   $('#input1').change((QueryEvent event) {
-    var value=(event.target as InputElement).value;
+    var value=(event.target as HTMLInputElement).value;
     print("${event.target}, value:${value}");
   });
 }

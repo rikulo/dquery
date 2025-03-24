@@ -24,12 +24,15 @@ Point<num>? _getOffset(Element? elem) {
   final r = elem.getBoundingClientRect();
   box = Point(r.left, r.top);
 
-  return box + Point(window.pageXOffset, window.pageYOffset) - docElem!.client.topLeft;
+  
+
+  return box + Point(window.scrollX, window.scrollY) 
+    - Point(docElem!.clientLeft, docElem.clientTop);
 }
 
 //setOffset: function( elem, options, i ) {
 void _setOffset(Element elem, {num? left, num? top}) {
-  if (left == null && top == null)
+  if ((left == null && top == null) || elem is! HTMLElement)
     return;
   
   final position = _getCss(elem, 'position');
@@ -76,7 +79,7 @@ void _setOffset(Element elem, {num? left, num? top}) {
 }
 
 Point<num>? _getPosition(Element? elem) {
-  if (elem == null)
+  if (elem is! HTMLElement)
     return null;
   
   Point offset;
@@ -84,20 +87,20 @@ Point<num>? _getPosition(Element? elem) {
   
   // jQuery: Fixed elements are offset from window (parentOffset = {top:0, left: 0}, because it is it's only offset parent
   if (_getCss(elem, 'position') == 'fixed') {
+    final rec = elem.getBoundingClientRect();
     // jQuery: We assume that getBoundingClientRect is available when computed position is fixed
-    offset = elem.getBoundingClientRect().topLeft;
-    
+    offset = Point(rec.left, rec.top);
   } else {
     // jQuery: Get *real* offsetParent
     final offsetParent = _getOffsetParent(elem);
     
     // jQuery: Get correct offsets
-    offset = elem.offset.topLeft;
-    if (offsetParent!.tagName != 'html')
-      parentOffset = offsetParent.offset.topLeft;
+    offset = Point(elem.offsetLeft, elem.offsetTop);
+    if (offsetParent is HTMLElement && offsetParent.tagName != 'html')
+      parentOffset = Point(offsetParent.offsetLeft, offsetParent.offsetTop);
     
     // jQuery: Add offsetParent borders
-    parentOffset += _parseCssPoint(offsetParent, 'borderLeftWidth', 'borderTopWidth', 0, 0);
+    parentOffset += _parseCssPoint(offsetParent!, 'borderLeftWidth', 'borderTopWidth', 0, 0);
   }
   
   // jQuery: Subtract parent offsets and element margins
@@ -105,7 +108,7 @@ Point<num>? _getPosition(Element? elem) {
 }
 
 Point _parseCssPoint(Element elem, String nameX, String nameY, num defaultX, num defaultY) =>
-    new Point(_parseCss(elem, nameX, defaultX), _parseCss(elem, nameY, defaultY));
+    Point(_parseCss(elem, nameX, defaultX), _parseCss(elem, nameY, defaultY));
 
 num _parseCss(Element elem, String name, num defaultValue) =>
     _parseDouble(_getCss(elem, name), defaultValue); // TODO: double.parse() is different from parseFloat()
@@ -118,13 +121,13 @@ String? _trimSuffix(String? src, String suffix) =>
     src.endsWith(suffix) ? src.substring(0, src.length - suffix.length): src;
 
 Element? _getOffsetParent(Element elem) {
-  var offsetParent = elem.offsetParent;
+  var offsetParent = (elem as HTMLElement).offsetParent;
   if (offsetParent == null)
     offsetParent = document.documentElement;
   
   while (offsetParent != null && (offsetParent.tagName != 'html') && 
       _getCss(offsetParent, "position") == 'static') {
-    offsetParent = offsetParent.offsetParent;
+    offsetParent = (offsetParent as HTMLElement).offsetParent;
   }
   
   if (offsetParent == null)

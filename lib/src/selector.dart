@@ -35,7 +35,7 @@ selector_sortOrder = function( a, b ) {
 };
 */
 
-List<Element> _unique(List<Element> elements) {
+List<HTMLElement> _unique(List<HTMLElement> elements) {
   // USE our own implementation
   // TODO: need to sort/preserve order
   return elements.toSet().toList(growable: true);

@@ -11,9 +11,6 @@ int? _max(List<int?> nums) {
   return m;
 }
 
-Map<K, V> _createMap<K, V>() => <K, V>{};
-
-
 
 // html //
 

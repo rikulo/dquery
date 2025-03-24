@@ -103,21 +103,21 @@ abstract class _Query<T extends EventTarget> implements Query<T> {
   }
 }
 
-class _DocumentQuery extends _Query<HtmlDocument> with ListMixin<HtmlDocument>
+class _DocumentQuery extends _Query<Document> with ListMixin<Document>
     implements DocumentQuery {
   
-  HtmlDocument _doc;
+  Document _doc;
   
-  _DocumentQuery([HtmlDocument? doc]) : this._doc = doc ?? document;
+  _DocumentQuery([Document? doc]) : this._doc = doc ?? document;
   
   // DQuery //
   @override
-  HtmlDocument operator [](int index) => _doc;
+  Document operator [](int index) => _doc;
   
   @override
-  void operator []=(int index, HtmlDocument? value) {
+  void operator []=(int index, Document? value) {
     if (index != 0 || value == null)
-      throw new ArgumentError("$index: $value");
+      throw ArgumentError("$index: $value");
     _doc = value;
   }
   
@@ -127,39 +127,45 @@ class _DocumentQuery extends _Query<HtmlDocument> with ListMixin<HtmlDocument>
   @override
   void set length(int length) {
     if (length != 1)
-      throw new UnsupportedError("fixed length");
+      throw UnsupportedError("fixed length");
   }
   
   @override
-  List<Element> _queryAll(String selector) => _doc.querySelectorAll(selector);
+  List<HTMLElement> _queryAll(String selector) 
+    => JSImmutableListWrapper(_doc.querySelectorAll(selector));
 
-  Window? get _win => _doc.window is Window ? _doc.window as Window: null;
+  Window? get _win => _doc.defaultView;
 
  @override
-  int? get scrollLeft => _win?.pageXOffset;
+  int? get scrollLeft => _win?.scrollX.toInt();
   
   @override
-  int? get scrollTop => _win?.pageYOffset;
+  int? get scrollTop => _win?.scrollY.toInt();
   
   @override
-  void set scrollLeft(int? value) =>
-      _win?.scrollTo(value, _win?.pageYOffset);
+  void set scrollLeft(int? value) {
+    if (value != null && scrollTop != null)
+      _win?.scrollTo(value.toJS, scrollTop!);
+  }
   
   @override
-  void set scrollTop(int? value) =>
-      _win?.scrollTo(_win?.pageXOffset, value);
+  void set scrollTop(int? value) {
+    if (value != null && scrollLeft != null)
+      _win?.scrollTo(scrollLeft!.toJS, value);
+  }
+      
   
   @override
   int? get width =>
-      _max([_doc.body?.scrollWidth, _doc.documentElement?.scrollWidth,
-            _doc.body?.offsetWidth, _doc.documentElement?.offsetWidth,
-            _doc.documentElement?.clientWidth]);
+    _max([_doc.body?.scrollWidth, _doc.documentElement?.scrollWidth,
+          _doc.body?.offsetWidth,  (_doc.documentElement as HTMLElement?)?.offsetWidth,
+          _doc.documentElement?.clientWidth]);
   
   @override
   int? get height =>
-      _max([_doc.body?.scrollHeight, _doc.documentElement?.scrollHeight,
-            _doc.body?.offsetHeight, _doc.documentElement?.offsetHeight,
-            _doc.documentElement?.clientHeight]);
+    _max([_doc.body?.scrollHeight, _doc.documentElement?.scrollHeight,
+          _doc.body?.offsetHeight, (_doc.documentElement as HTMLElement?)?.offsetHeight,
+          _doc.documentElement?.clientHeight]);
 
   @override
   String? cookie(String name, {String? value, Duration? expires, String? path, bool? secure}) {
@@ -191,7 +197,7 @@ class _WindowQuery extends _Query<Window> with ListMixin<Window>
   @override
   void operator []=(int index, Window? value) {
     if (index != 0 || value == null)
-      throw new ArgumentError("$index: $value");
+      throw ArgumentError("$index: $value");
     _win = value;
   }
   
@@ -201,26 +207,30 @@ class _WindowQuery extends _Query<Window> with ListMixin<Window>
   @override
   void set length(int length) {
     if (length != 1)
-      throw new UnsupportedError("fixed length");
+      throw UnsupportedError("fixed length");
   }
 
   @override
-  List<Element> _queryAll(String selector) => [];
+  List<HTMLElement> _queryAll(String selector) => [];
 
   @override
-  int get scrollLeft => _win.pageXOffset;
+  int get scrollLeft => _win.scrollX.toInt();
   
   @override
-  int get scrollTop => _win.pageYOffset;
+  int get scrollTop => _win.scrollY.toInt();
   
   @override
-  void set scrollLeft(int? value) =>
-      _win.scrollTo(value, _win.pageYOffset);
-  
+  void set scrollLeft(int? value) {
+    if (value != null)
+      _win.scrollTo(value.toJS, scrollTop);
+  }
+
   @override
-  void set scrollTop(int? value) =>
-      _win.scrollTo(_win.pageXOffset, value);
-  
+  void set scrollTop(int? value) {
+    if (value != null)
+      _win.scrollTo(scrollLeft.toJS, value);
+  }
+
   // jQuery: As of 5/8/2012 this will yield incorrect results for Mobile Safari, but there
   //         isn't a whole lot we can do. See pull request at this URL for discussion:
   //         https://github.com/jquery/jquery/pull/764
@@ -232,7 +242,7 @@ class _WindowQuery extends _Query<Window> with ListMixin<Window>
   
 }
 
-class _ElementQuery extends _Query<Element> with ListMixin<Element>
+class _ElementQuery extends _Query<HTMLElement> with ListMixin<HTMLElement>
     implements ElementQuery {
   
   final List<Element> _elements;
@@ -245,15 +255,15 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   
   // List //
   @override
-  Element operator [](int index) {
-      return _elements[index];
+  HTMLElement operator [](int index) {
+      return _elements[index] as HTMLElement;
   }
   
   @override
   int get length => _elements.length;
   
   @override
-  void operator []=(int index, Element value) {
+  void operator []=(int index, HTMLElement value) {
     _elements[index] = value;
   }
   
@@ -269,11 +279,11 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
       case 0:
         return [];
       case 1:
-        return first.querySelectorAll(selector);
+        return JSImmutableListWrapper(first.querySelectorAll(selector));
       default:
-        final matched = <Element>[];
+        final matched = <HTMLElement>[];
         for (final elem in _elements)
-          matched.addAll(elem.querySelectorAll(selector));
+          matched.addAll(JSImmutableListWrapper(elem.querySelectorAll(selector)));
         return Query.unique(matched);
     }
   }
@@ -281,8 +291,8 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   // ElementQuery //
   @override
   ElementQuery closest(String selector) {
-    final results = LinkedHashSet<Element>();
-    Element? c;
+    final results = LinkedHashSet<HTMLElement>();
+    HTMLElement? c;
     for (final e in _elements)
       if ((c = _closest(e, selector)) != null)
         results.add(c!);
@@ -294,7 +304,7 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
     final results = LinkedHashSet<Element>();
     Element? p;
     for (final e in _elements)
-      if ((p = e.parent) != null && (selector == null || p!.matches(selector)))
+      if ((p = e.parentElement) != null && (selector == null || p!.matches(selector)))
         results.add(p!);
     return pushStack(results.toList(growable: true));
   }
@@ -303,7 +313,7 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   ElementQuery children([String? selector]) {
     final results = <Element>[];
     for (final e in _elements)
-      for (final c in e.children)
+      for (final c in JSImmutableListWrapper(e.children).cast<HTMLElement>())
         if (selector == null || c.matches(selector))
           results.add(c);
     return pushStack(results);
@@ -328,24 +338,24 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   
   @override
   bool hasClass(String name) =>
-      _elements.any((final e) => e.classes.contains(name));
+      _elements.any((final e) => e.classList.contains(name));
   
   @override
   void addClass(String name) {
     for (final elem in _elements)
-      elem.classes.add(name);
+      elem.classList.add(name);
   }
 
   @override
   void removeClass(String name) {
     for (final elem in _elements)
-      elem.classes.remove(name);
+      elem.classList.remove(name);
   }
   
   @override
   void toggleClass(String name) {
     for (final elem in _elements)
-      elem.classes.toggle(name);
+      elem.classList.toggle(name);
   }
 
   @override
@@ -370,7 +380,7 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   
   @override
   ElementQuery clone([bool? withDataAndEvents, bool? deepWithDataAndEvents]) =>
-      pushStack(_elements.map((Element e) => _clone(e)).toList());
+      pushStack(_elements.map((e) => _clone(e)).toList());
   
   @override
   void detach({String? selector, bool data = true}) =>
@@ -383,7 +393,7 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   
   @override
   String get text =>
-      (new StringBuffer()..writeAll(_elements.map((Element elem) => elem.text)))
+      (StringBuffer()..writeAll(_elements.map((elem) => elem.textContent)))
       .toString();
   
   @override
@@ -392,11 +402,15 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   
   @override
   String? get html =>
-      isEmpty ? null : _elements.first.innerHtml;
+    ((_elements.firstOrNull as HTMLElement?)?.innerHTML as JSString?)?.toDart;
   
   @override
-  void set html(String? value) =>
-      _elements.forEach((Element e) => e.innerHtml = value);
+  void set html(String? value) {
+    if (value == null) return;
+
+    _elements.forEach((e) 
+      => (e as HTMLElement).innerHTML = value.toJS);
+  }
   
   @override
   Point? get offset => isEmpty ? null : _getOffset(_elements.first);
@@ -429,10 +443,10 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   }
   
   @override
-  int? get scrollLeft => isEmpty ? null : _elements.first.scrollLeft;
+  int? get scrollLeft => _elements.firstOrNull?.scrollLeft.toInt();
   
   @override
-  int? get scrollTop => isEmpty ? null : _elements.first.scrollTop;
+  int? get scrollTop => _elements.firstOrNull?.scrollTop.toInt();
   
   @override
   void set scrollLeft(int? value) {
@@ -480,7 +494,7 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
 
 void _reflow(Element? e) {
   //TODO: If Issue 17366 fixed, we don't need it.
-  if (e?.offsetWidth != null) //avoid being optimized
+  if ((e as HTMLElement?)?.offsetWidth != null) //avoid being optimized
     _reflow(null);
 }
 
@@ -497,7 +511,7 @@ class _ShadowRootQuery extends _Query<ShadowRoot> with ListMixin<ShadowRoot> {
   @override
   void operator []=(int index, ShadowRoot? value) {
     if (index != 0 || value == null)
-      throw new ArgumentError("$index: $value");
+      throw ArgumentError("$index: $value");
     _shadowRoot = value;
   }
   
@@ -507,11 +521,12 @@ class _ShadowRootQuery extends _Query<ShadowRoot> with ListMixin<ShadowRoot> {
   @override
   void set length(int length) {
     if (length != 1)
-      throw new UnsupportedError("fixed length");
+      throw UnsupportedError("fixed length");
   }
   
   @override
-  List<Element> _queryAll(String selector) => _shadowRoot.querySelectorAll(selector);
+  List<Element> _queryAll(String selector) 
+    => JSImmutableListWrapper(_shadowRoot.querySelectorAll(selector));
 }
 
 // All DQuery objects should point back to these

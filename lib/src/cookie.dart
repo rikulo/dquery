@@ -10,21 +10,19 @@ String _decode(String s) => Uri.decodeComponent(s);
 
 _getCookie(Document doc, [String? key]) {
   final cookies = key != null ? null: <String, String>{};
-  var value = doc.cookie;
-  if (value != null) {
-    for (final cookie in value.split('; ')) {
-      final i = cookie.indexOf('=');
-      if (i < 0) continue; //just in case
+  String? value = doc.cookie;
+  for (final cookie in value.split('; ')) {
+    final i = cookie.indexOf('=');
+    if (i < 0) continue; //just in case
 
-      final name = _decode(cookie.substring(0, i));
-      value = _parseCookieValue(cookie.substring(i + 1));
+    final name = _decode(cookie.substring(0, i));
+    value = _parseCookieValue(cookie.substring(i + 1));
 
-      if (key == null) {
-        if (value != null)
-          cookies![name] = value;
-      } else if (key == name) {
-        return value;
-      }
+    if (key == null) {
+      if (value != null)
+        cookies![name] = value;
+    } else if (key == name) {
+      return value;
     }
   }
   return cookies;

@@ -5,15 +5,15 @@ final Map<String, String> _elemDisplay = {
 };
 
 bool _isHidden(Element elem) =>
-    elem.style.display == 'none' || 
-    elem.getComputedStyle().display == 'none' ||
+    (elem as HTMLElement).style.display == 'none' || 
+    window.getComputedStyle(elem).display == 'none' ||
         elem.ownerDocument?.contains(elem) != true; // TODO: do experiment
 
 void _showHide(List<Element> elements, bool show) {
   
   final values = <Element, String>{};
   
-  for (final elem in elements) {
+  for (final elem in elements.cast<HTMLElement>()) {
     final oldDisplay = _dataPriv.get(elem, 'olddisplay');
     if (oldDisplay != null)
       values[elem] = oldDisplay;
@@ -42,7 +42,7 @@ void _showHide(List<Element> elements, bool show) {
   
   // Set the display of most of the elements in a second loop
   // to avoid the constant reflow
-  for (final elem in elements) {
+  for (final elem in elements.cast<HTMLElement>()) {
     final String display = elem.style.display;
     if (!show || display == 'none' || display == '')
       elem.style.display = show ? (values[elem] ?? '') : 'none';
@@ -83,23 +83,23 @@ String _cssDefaultDisplay(String nodeName) {
 }
 
 // jQuery: Called ONLY from within css_defaultDisplay
-String _actualDisplay(String name, HtmlDocument doc) {
-  Element e = Element.tag(name);
+String _actualDisplay(String name, Document doc) {
+  final e = document.createElement(name);
   doc.body?.append(e);
-  final display = e.getComputedStyle().display;
+  final display = window.getComputedStyle(e).display;
   e.remove();
   return display;
 }
 
-String? _getCurCss(Element elem, String name, CssStyleDeclaration? computed) {
-  computed = computed ?? elem.getComputedStyle();
+String? _getCurCss(Element elem, String name, CSSStyleDeclaration? computed) {
+  computed = computed ?? window.getComputedStyle(elem);
   
   // Support: IE9
   // getPropertyValue is only needed for .css('filter') in IE9, see #12537
   // TODO: skipped, trust Dart handling for now but need to test against it
   // ret = computed ? computed.getPropertyValue( name ) || computed[ name ] : undefined,
-  String? value = getProperty(computed, name);
-  if (value?.isNotEmpty ?? false)
+  final value = computed.getPropertyValue(name);
+  if (value.isNotEmpty)
     return value;
 
   //already handle by getPropertyValue
@@ -123,7 +123,7 @@ String? _getCurCss(Element elem, String name, CssStyleDeclaration? computed) {
   //}
 }
 
-String? _getCss(Element elem, String name, [CssStyleDeclaration? computed]) {
+String? _getCss(Element elem, String name, [CSSStyleDeclaration? computed]) {
   // jQuery: Make sure that we're working with the right name
   // skipped, for there is no easy way to check property name in Dart
   // name = jQuery.cssProps[ origName ] || ( jQuery.cssProps[ origName ] = vendorPropName( elem.style, origName ) );
@@ -206,7 +206,7 @@ void _setCss(Element elem, String name, String value) {
   }
   */
   
-  elem.style.setProperty(name, value);
+  (elem as HTMLElement).style.setProperty(name, value);
   //already handle by setProperty
   //elem.style.setProperty("${Device.cssPrefix}$name", value);
 }

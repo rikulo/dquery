@@ -1,10 +1,11 @@
 library dquery;
 
 import 'dart:math';
-import 'dart:html';
+import 'package:web/web.dart';
+
 import 'dart:collection';
 
-import 'dart:js_util';
+import 'dart:js_interop';
 import "package:intl/intl.dart" show DateFormat;
 
 part 'src/util/util.dart';
@@ -23,7 +24,6 @@ part 'src/cookie.dart';
 /** Return an [ElementQuery] based on given [selector] and [context].
  */
 ElementQuery $(selector, [context]) {
-  
   if (selector is String)
     selector = selector.trim();
   
@@ -33,7 +33,9 @@ ElementQuery $(selector, [context]) {
   if (selector is String) {
     // html
     if (selector.startsWith('<')) {
-      return ElementQuery([Element.html(selector)]);
+      final cnt = HTMLDivElement();
+      cnt.innerHTML = selector.toJS;
+      return ElementQuery(JSImmutableListWrapper(cnt.childNodes));
     }
     
     if (context == null) {
@@ -42,36 +44,36 @@ ElementQuery $(selector, [context]) {
     } else if (context is DQuery) {
       return context.find(selector);
       
-    } else if (context is HtmlDocument) {
+    } else if (context is Document && context.isA<Document>()) {
       return $document(context).find(selector);
       
-    } else if (context is Element) {
-      return new ElementQuery([context]).find(selector);
+    } else if (context is HTMLElement && context.isA<HTMLElement>()) {
+      return ElementQuery([context]).find(selector);
     }
     
-    throw new ArgumentError("Context type should be Document, Element, or DQuery: $context");
+    throw ArgumentError("Context type should be Document, Element, or DQuery: $context");
   }
   
-  if (selector is Element)
+  if (selector is HTMLElement)
     return ElementQuery([selector]);
   
-  if (selector is List<Element>)
+  if (selector is List<HTMLElement>)
     return ElementQuery(selector);
   
-  throw new ArgumentError("Selector type should be String, Element, or List<Element>: $selector");  
+  throw ArgumentError("Selector type should be String, Element, or List<Element>: $selector");  
 }
 
 /** Return a [DocumentQuery] wrapping the given [document]. If [document] is 
  * omitted, the default document instance is assumed.
  */
-DocumentQuery $document([HtmlDocument? document]) => _DocumentQuery(document);
+DocumentQuery $document([Document? document]) => _DocumentQuery(document);
 
 /** Return a [WindowQuery] wrapping the given [window]. If [window] is omitted,
  * the default window instance is used.
  */
-DQuery $window([Window? window]) => new _WindowQuery(window);
+DQuery $window([Window? window]) => _WindowQuery(window);
 
 /** Return a [WindowQuery] wrapping the given [window]. If [window] is omitted,
  * the default window instance is used.
  */
-Query $shadowRoot(ShadowRoot shadowRoot) => new _ShadowRootQuery(shadowRoot);
+Query $shadowRoot(ShadowRoot shadowRoot) => _ShadowRootQuery(shadowRoot);
