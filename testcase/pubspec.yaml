@@ -2,7 +2,7 @@ name: dquery_example_app
 description: A web app example for dquery.
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.7.0 <4.0.0'
 
 dependencies:
   dquery:
