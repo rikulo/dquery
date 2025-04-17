@@ -1,4 +1,6 @@
 # CHANGES
+**4.0.0**
+* Dart 3.7 required
 
 **3.0.1**
 * Fixed ConcurrentModificationError when detach element
