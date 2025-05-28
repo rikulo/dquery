@@ -17,7 +17,10 @@ void main() {
     off.disabled = true;
     on.disabled = false;
   });
-  
+
+  $('#one').one('click', (_) {
+    window.alert('one');
+  });
 }
 
 void f(QueryEvent event) {

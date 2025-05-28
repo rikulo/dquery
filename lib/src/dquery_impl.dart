@@ -353,9 +353,13 @@ class _ElementQuery extends _Query<Element> with ListMixin<Element>
   }
   
   @override
-  void toggleClass(String name) {
-    for (final elem in _elements)
-      elem.classList.toggle(name);
+  void toggleClass(String name, [bool? force]) {
+    if (force != null)
+      for (final elem in _elements)
+        elem.classList.toggle(name, force);
+    else
+      for (final elem in _elements)
+        elem.classList.toggle(name);
   }
 
   @override
@@ -533,7 +537,8 @@ class _ShadowRootQuery extends _Query<ShadowRoot> with ListMixin<ShadowRoot> {
 final DQuery _rootDQuery = $document();
 
 bool _nodeName(elem, String name) =>
-    elem is Element && elem.tagName.toLowerCase() == name.toLowerCase();
+    elem is Element && !elem.isA<Document>()
+    && elem.tagName.toLowerCase() == name.toLowerCase();
 
 /*
 List _grep(List list, bool test(obj, index), [bool invert = false]) {

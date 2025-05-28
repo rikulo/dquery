@@ -134,7 +134,7 @@ abstract class DQuery<T> extends Query<T> {
 /** A query object of a collection of [Element].
  */
 abstract class ElementQuery extends DQuery<Element> {
-  factory ElementQuery(List<HTMLElement> elements) => _ElementQuery(elements);
+  factory ElementQuery(List<Element> elements) => _ElementQuery(elements);
   
   // traversing //
   /** Retrieve the closest ancestor (including itself) of each element in this 
@@ -195,7 +195,7 @@ abstract class ElementQuery extends DQuery<Element> {
   
   /** Toggle the CSS class of given [name] in all the elements in this collection.
    */
-  void toggleClass(String name);
+  void toggleClass(String name, [bool? force]);
   
   // DOM element manipulation //
   /** Insert every element in this collection to the end of the [target]. 

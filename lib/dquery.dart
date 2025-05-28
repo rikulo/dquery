@@ -33,31 +33,38 @@ ElementQuery $(selector, [context]) {
   if (selector is String) {
     // html
     if (selector.startsWith('<')) {
-      final cnt = HTMLDivElement();
-      cnt.innerHTML = selector.toJS;
-      return ElementQuery(JSImmutableListWrapper(cnt.childNodes));
+      final template = HTMLTemplateElement();
+      template.innerHTML = selector.toJS;
+      return ElementQuery(JSImmutableListWrapper(
+        template.content.childNodes).toList().cast());
     }
     
-    if (context == null) {
+    if (context == null)
       return _rootDQuery.find(selector);
-      
-    } else if (context is DQuery) {
+    
+    if (context is DQuery) 
       return context.find(selector);
-      
-    } else if (context is Document && context.isA<Document>()) {
-      return $document(context).find(selector);
-      
-    } else if (context is HTMLElement && context.isA<HTMLElement>()) {
-      return ElementQuery([context]).find(selector);
+
+    if (context is JSObject) {
+      if (context.isA<Document>())
+        return $document(context as Document).find(selector);
+
+      if (context.isA<HTMLElement>())
+        return ElementQuery([context as HTMLElement]).find(selector);
     }
     
     throw ArgumentError("Context type should be Document, Element, or DQuery: $context");
   }
-  
-  if (selector is HTMLElement)
-    return ElementQuery([selector]);
-  
-  if (selector is List<HTMLElement>)
+
+  if (selector is JSObject) {
+    if (selector.isA<Element>())
+      return ElementQuery([selector as Element]);  
+
+    if (selector.isA<NodeList>() || selector.isA<HTMLCollection>())
+      return ElementQuery(JSImmutableListWrapper(selector));  
+  }
+
+  if (selector is List<Element>)
     return ElementQuery(selector);
   
   throw ArgumentError("Selector type should be String, Element, or List<Element>: $selector");  

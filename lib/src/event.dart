@@ -28,7 +28,7 @@ class _EventUtil {
         space.putIfAbsent('events', Map<String, _HandleObjectContext>.new) as Map;
     // the joint proxy handler
     final eventHandles =
-        space.putIfAbsent('handles', Map<String, EventListener>.new) as Map;
+        space.putIfAbsent('handles', Map<String, JSFunction>.new) as Map;
 
     // jQuery: Handle multiple events separated by a space
     for (var type in _splitTypes(types)) {
@@ -58,7 +58,7 @@ class _EventUtil {
       _HandleObject handleObj = _HandleObject(selector, type, origType,
           namespaces.join('.'), needsContext, handler);
 
-    final EventListener eventHandle = eventHandles.putIfAbsent(type, 
+    final eventHandle = eventHandles.putIfAbsent(type, 
       () => (Event e) {
         // jQuery: Discard the second event of a jQuery.event.trigger() and
         //         when an event is called after a page has unloaded
