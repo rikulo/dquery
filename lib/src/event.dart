@@ -585,8 +585,9 @@ class QueryEvent {
   String get type => _type ?? originalEvent!.type;
   String? _type;
 
-  List<EventTarget> composedPath()
-    => _safeOriginal((e) => e.composedPath(), const <EventTarget>[]);
+  List<EventTarget> composedPath() {
+    return originalEvent?.composedPath().toDart ?? const <EventTarget>[];
+  }
 
   /** Custom event data. If user calls trigger method with data, it will show
    * up here.
@@ -632,7 +633,7 @@ class QueryEvent {
 
   /** The other DOM element involved in the event, if any.
    */
-  EventTarget? get relatedTarget => _safeOriginal((e) => e.relatedTarget);
+  EventTarget? get relatedTarget => _safeOriginal('relatedTarget');
 
   /** The namespace of this event. For example, if the event is triggered by
    * API with name `click.a.b.c`, it will have type `click` with namespace `a.b.c`
@@ -657,7 +658,7 @@ class QueryEvent {
   int? _pageY;
 
   void _initPageXY() {
-    if (_pageX != null || originalEvent is! MouseEvent)
+    if (_pageX != null || !originalEvent.isA<MouseEvent>())
       return;
 
     // jQuery: Calculate pageX/Y if missing and clientX/Y available
@@ -713,56 +714,56 @@ class QueryEvent {
   int? _which;
 
   //Returns the key if it is a keyboard event, or null if not.
-  String get key => _safeOriginal((e) => e.key, false);
+  String get key => _safeOriginal('key')!;
   //Returns the code if it is a keyboard event, or null if not.
-  String get code => _safeOriginal((e) => e.code, false);
+  String get code => _safeOriginal('code')!;
   ///Returns the key code if it is a keyboard event, or null if not.
-  int get keyCode => _safeOriginal((e) => e.keyCode);
+  int get keyCode => _safeOriginal('keyCode');
   ///Returns the key location if it is a keyboard event, or null if not.
-  int get location => _safeOriginal((e) => e.location);
+  int get location => _safeOriginal('location');
   @deprecated
   int get keyLocation => location;
   ///Returns the character code if it is a keyboard event, or null if not.
-  int get charCode => _safeOriginal((e) => e.charCode);
+  int get charCode => _safeOriginal('charCode');
 
   ///Returns whether the alt key is pressed.
-  bool get altKey => _safeOriginal((e) => e.altKey, false);
+  bool get altKey => _safeOriginal('altKey', false)!;
   ///Returns whether the alt-graph key is pressed.
-  bool get altGraphKey => _safeOriginal((e) => e.altGraphKey, false);
+  bool get altGraphKey => _safeOriginal('altGraphKey', false)!;
   ///Returns whether the ctrl key is pressed.
-  bool get ctrlKey => _safeOriginal((e) => e.ctrlKey, false);
+  bool get ctrlKey => _safeOriginal('ctrlKey', false)!;
   ///Returns whether the meta key is pressed.
-  bool get metaKey => _safeOriginal((e) => e.metaKey, false);
+  bool get metaKey => _safeOriginal('metaKey', false)!;
   ///Returns whether the shift key is pressed.
-  bool get shiftKey => _safeOriginal((e) => e.shiftKey, false);
+  bool get shiftKey => _safeOriginal('shiftKey', false)!;
 
   ///Returns the button being clicked if it is a mouse event,
   ///or null if not.
-  int get button => _safeOriginal((e) => e.button);
+  int get button => _safeOriginal('button');
 
-  bool get bubbles => _safeOriginal((e) => e.bubbles, false);
+  bool get bubbles => _safeOriginal('bubbles', false)!;
   
-  bool get cancelable => _safeOriginal((e) => e.cancelable, false);
+  bool get cancelable => _safeOriginal('cancelable', false)!;
   
-  bool get isTrusted => _safeOriginal((e) => e.isTrusted, false);
+  bool get isTrusted => _safeOriginal('isTrusted', false)!;
   
-  bool get composed => _safeOriginal((e) => e.composed, false);
+  bool get composed => _safeOriginal('composed', false)!;
   
-  int get eventPhase => _safeOriginal((e) => e.eventPhase, 0);
+  int get eventPhase => _safeOriginal('eventPhase', 0)!;
   // Element get matchingTarget {
   //   if (originalEvent != null) return originalEvent!.matchingTarget;
   //   throw UnsupportedError('Cannot call matchingTarget if this Event did'
   //     ' not arise as a result of event delegation.'); //follow SDK spec
   // }
   
-  List<Node> get path => _safeOriginal((e) => e.path, []);
+  List<Node> get path => _safeOriginal('path', [])!;
   
-  double get timeStamp => _safeOriginal((e) => e.timeStamp, 0.0);
+  double get timeStamp => _safeOriginal('timeStamp', 0.0)!;
 
-  T? _safeOriginal<T>(T f(event), [T? defaultValue]) {
+  T? _safeOriginal<T>(String name, [T? defaultValue]) {
     if (originalEvent != null)
       try {
-        return f(originalEvent);
+        return reflectGet(originalEvent, name.toJS)?.dartify() as T? ?? defaultValue;
       } catch (_) {
       }
     return defaultValue;
@@ -788,7 +789,7 @@ class QueryEvent {
 
   /// Return true if [preventDefault] was ever called in this event.
   bool get defaultPrevented
-  => _defaultPrevented ?? _safeOriginal((e) => e.defaultPrevented, false);
+  => _defaultPrevented ?? _safeOriginal('defaultPrevented', false)!;
   bool? _defaultPrevented;
 
   /// Return true if [stopPropagation] was ever called in this event.
@@ -826,3 +827,6 @@ class QueryEvent {
     originalEvent?.stopImmediatePropagation();
   }
 }
+
+@JS('Reflect.get')
+external JSAny? reflectGet(JSObject? object, JSString name);
